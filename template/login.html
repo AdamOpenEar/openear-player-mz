@@ -1,0 +1,19 @@
+<div class="login-form">
+	<img src="assets/img/logo-login.png">
+	<form ng-submit="processLogin()" role="form" novalidate>
+	
+		<div class="form-group">
+			<label for="user">Username</label>
+			<input type="text" class="form-control" name="username" id="username" placeholder="Username" ng-model="formData.username">
+		</div>
+
+		<div class="form-group">
+			<label for="password">Password</label>
+			<input type="password" class="form-control" name="password" id="password" placeholder="Password" ng-model="formData.password">
+		</div>
+		<div class="form-group">{{message}}</div>
+
+		<button type="submit" class="btn btn-primary btn-block">Login</button>
+
+	</form>
+</div>

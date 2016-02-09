@@ -1,0 +1,58 @@
+ <div ng-controller="OverlayScheduleCalendarCtrl">
+
+	<div class="overlay-btn-group btn-group-2 clearfix">
+		<a ng-click="calBack()">
+			<i class="fi-arrow-left"></i>
+		</a>
+		<a ng-click="calForward()">
+			<i class="fi-arrow-right"></i>
+		</a>
+	</div>
+	<div id="schedule-table" class="schedule-table-calendar">
+		<div class="schedule-header schedule-header-calendar clearfix" sticky-headers-schedule>
+			<div>&nbsp;</div>
+			<div ng-repeat="day in schedules" ng-class="{active:day.active}">{{day.active?'*':''}}{{day.date | amDateFormat:'ddd Do MMM YYYY'}}
+			</div>
+		</div>
+		<div class="schedule-overlay schedule-overlay-calendar">
+			<div class="schedule-col-box clearfix" ng-repeat="(dayIndex,day) in scheduleTemplate">
+				<schedule-box-inactive 
+				ng-repeat="schedule in day.schedule"
+				day-index="dayIndex"
+				schedule-index="$index"
+				schedule="schedule"
+				schedules="schedules">
+				</schedule-box-inactive>
+			</div>
+		</div>
+		<div class="schedule-body">
+			<div class="schedule-row-time clearfix" ng-repeat="(indexTime,time) in times track by $index">
+				<div>{{time | makeTime}}</div>
+				<span ng-if="$index > 0">
+					<div 
+					class="day-box" 
+					ng-init="hover"
+					ng-class="{active: hover}" 
+    				ng-mouseenter="hover = true"
+    				ng-mouseleave="hover = false"
+    				ng-click="openModalGrid(time,$index,day.date)"
+    				ng-repeat="day in schedules">
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>				
+					</div>
+				</span>
+			</div>
+		</div>
+		<div class="schedule-overlay">
+			<div class="schedule-col-box clearfix" ng-repeat="(dayIndex,day) in schedules">
+				<schedule-box 
+				ng-repeat="schedule in day.schedule"
+				day-index="dayIndex"
+				schedule-index="$index"
+				schedule="schedule"
+				schedules="schedules"
+				type="'calendar'">
+				</schedule-box>
+			</div>
+		</div>
+	</div>
+</div>

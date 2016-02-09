@@ -1,0 +1,44 @@
+ <div ng-controller="OverlayScheduleTemplateCtrl">
+	<div id="schedule-table">
+		<div class="schedule-header clearfix">
+			<div>&nbsp;</div>
+			<div>Monday</div>
+			<div>Tuesday</div>
+			<div>Wednesday</div>
+			<div>Thursday</div>
+			<div>Friday</div>
+			<div>Saturday</div>
+			<div>Sunday</div>
+		</div>
+		<div class="schedule-body">
+			<div class="schedule-row-time clearfix" ng-repeat="(indexTime,time) in times track by $index">
+				<div>{{time | makeTime}}</div>
+				<span ng-if="$index > 0">
+					<div 
+					class="day-box" 
+					ng-init="hover"
+					ng-class="{active: hover}" 
+    				ng-mouseenter="hover = true"
+    				ng-mouseleave="hover = false"
+    				ng-click="openModalGrid(time,$index)"
+    				ng-repeat="i in [0,1,2,3,4,5,6]">
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>				
+					</div>
+				</span>
+			</div>
+		</div>
+		<div class="schedule-overlay">
+			<div class="schedule-col-box clearfix" ng-repeat="(dayIndex,day) in schedules">
+				<schedule-box 
+				ng-repeat="schedule in day.schedule"
+				day-index="dayIndex"
+				schedule-index="$index"
+				schedule="schedule"
+				schedules="schedules"
+				type="'template'"
+				class="animated fadeIn">
+				</schedule-box>
+			</div>
+		</div>
+	</div>
+</div>

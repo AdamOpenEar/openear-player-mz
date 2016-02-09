@@ -1,0 +1,16 @@
+<div class="schedule-wrapper clearfix" ng-controller="OverlayScheduleCtrl">
+
+	<div class="overlay-header">
+		<h1>
+			Schedule<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
+		</h1>
+	</div>
+
+	<div class="overlay-btn-group btn-group-2 clearfix">
+		<a ng-click="selectView('template','schedule-template.html')" ng-class="{active:selectedView.name == 'template'}">Week Template</a>
+		<a ng-click="selectView('calendar','schedule-calendar.html')" ng-class="{active:selectedView.name == 'calendar'}">Calendar</a>
+	</div>
+
+	<div ng-include src="selectedView.url"></div>
+
+</div>
