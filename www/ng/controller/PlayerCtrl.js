@@ -83,16 +83,16 @@ angular.module('OEPlayer')
 			$scope.player.venueName = data.name;
 			if(data.playlists.length > 0){
 				//delete local file and replace
-				FileFactory.deleteFile('','playlists.json')
-					.then(function(){
+				//FileFactory.deleteFile('','playlists.json')
+				//	.then(function(){
 						FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
 							.then(function(){
 								LogSrvc.logSystem('got playlists');
 								getTracksOnline();
 						});
-					},function(){
-						StatusSrvc.setStatus('Playlist creation error. Please go to settings and delete stored data.');
-					});
+				//	},function(){
+				//		StatusSrvc.setStatus('Playlist creation error. Please go to settings and delete stored data.');
+				//	});
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
 			}
