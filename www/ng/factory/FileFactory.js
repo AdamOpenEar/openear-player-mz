@@ -14,7 +14,8 @@ angular.module('OEPlayer')
 		},
 		writeTrack: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
-			FileSystem.writeFile(dir,filename.toString(),data,blnReplace)
+			var blob = new Blob([data], {type: 'audio/mpeg'});
+			FileSystem.writeFile(dir,filename.toString(),blob,blnReplace)
 				.then(function(result){
 					deferred.resolve(result);
 				},function(error){
@@ -24,8 +25,9 @@ angular.module('OEPlayer')
 		},
 		writeJSON: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
-			var json = new Blob([JSON.stringify(data)], {type: 'text/plain'});
-			FileSystem.writeFile(dir,filename.toString(),json,blnReplace)
+			var json = JSON.stringify(data);
+			var blob = new Blob([json], {type: 'text/plain'});
+			FileSystem.writeFile(dir,filename.toString(),blob,blnReplace)
 				.then(function(result){
 					deferred.resolve(result);
 				},function(error){
@@ -57,7 +59,7 @@ angular.module('OEPlayer')
 			var deferred = $q.defer();
 			FileSystem.readAsArrayBuffer(dir,filename.toString())
 				.then(function(result){
-					var blob = new Blob([new Uint8Array(result)], {type: 'audio/mpeg'});
+					var blob = new Blob([(result)], {type: 'audio/mpeg'});
 					deferred.resolve(blob);
 				},function(error){
 					deferred.reject(error);

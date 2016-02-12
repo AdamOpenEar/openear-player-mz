@@ -27,7 +27,8 @@ angular.module('OEPlayer')
             return $http({
                 type:'GET',
                 url:src,
-                responseType: "arraybuffer"
+                responseType: "arraybuffer",
+                headers:{'Authentication':undefined}
             });
         },
         getScheduleTemplate:function(){

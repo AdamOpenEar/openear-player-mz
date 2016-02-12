@@ -1,13 +1,15 @@
 /*jshint -W083 */
 angular.module('OEPlayer')
 
-.controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http){
+.controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http','MediaFactory','LangFactory',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http,MediaFactory,LangFactory){
 	
+	$scope.lang = LangFactory;
+
 	$scope.menu = [
-		{name:'playlists',icon:'folder'},
-		{name:'queue',icon:'list-thumbnails'},
-		{name:'schedule',icon:'calendar'},
-		{name:'settings',icon:'widget'}
+		{name:'playlists',display:$scope.lang.menu.playlists,icon:'folder'},
+		{name:'queue',display:$scope.lang.menu.queue,icon:'list-thumbnails'},
+		{name:'schedule',display:$scope.lang.menu.schedule,icon:'calendar'},
+		{name:'settings',display:$scope.lang.menu.settings,icon:'widget'}
 	];
 
 	var player = {};
@@ -80,14 +82,20 @@ angular.module('OEPlayer')
 		HTTPFactory.getPlaylists().success(function(data){
 			$scope.player.venueName = data.name;
 			if(data.playlists.length > 0){
-				FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
+				//delete local file and replace
+				FileFactory.deleteFile('','playlists.json')
 					.then(function(){
-						LogSrvc.logSystem('got playlists');
-						getTracksOnline();
+						FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
+							.then(function(){
+								LogSrvc.logSystem('got playlists');
+								getTracksOnline();
+						});
+					},function(){
+						StatusSrvc.setStatus('Playlist creation error. Please go to settings and delete stored data.');
 					});
-				} else {
-					StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
-				}
+			} else {
+				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
+			}
 		});
 	};
 
@@ -221,8 +229,14 @@ angular.module('OEPlayer')
 	};
 
 	var downloadTrack = function(track){
-		HTTPFactory.getTrackFile(track.file_ios.filename.src,track.id).then(function(data){
-			getNextTrack(track);
+		HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
+			FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
+				.then(function(res){
+					LogSrvc.logSystem(res);
+					getNextTrack(track);
+				},function(error){
+					LogSrvc.logError(error);
+				});
 		},function(err){
 			LogSrvc.logError(err);
 		});
@@ -310,42 +324,50 @@ angular.module('OEPlayer')
 				LogSrvc.logSystem('getting current playlist');
 				try{
 				    var schedule = JSON.parse( data );
-					foundPlaylist = false;
-					for (var i = 0; i < schedule.playlists.length; i++) {
-						if(checkPlaylistStart(schedule.playlists[i])){
-							//set playlist
-							foundPlaylist = i;							
-							break;
-						}
-					}
-					$rootScope.ready = true;
-					//found a scheduled playlist
-					if(foundPlaylist !== false){
-						LogSrvc.logSystem('got playlist');
-						getPlaylistTracks(schedule.playlists[foundPlaylist])
-							.then(function(data){
-								$scope.playlist = schedule.playlists[i].playlist;
-								$scope.playlist.tracks = data;
-								shuffleArray($scope.playlist.tracks);
-								StatusSrvc.clearStatus();
-								LogSrvc.logSystem('before load track 1');
-								loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
-							},function(error){
-								LogSrvc.logError(error);
-							});
-					//if we didn't find a playlist, go to library
-					} else {
+					if(schedule.code === 0){
+						$rootScope.ready = true;
 						LogSrvc.logSystem('no playlist - music library');
 						$scope.playlist.name = 'Music Library';
 						$scope.playlist.tracks = $scope.availableTracks;
 						shuffleArray($scope.playlist.tracks);
 						StatusSrvc.clearStatus();
-						LogSrvc.logSystem('before load track 2');
 						loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+					} else {
+						foundPlaylist = false;
+						for (var i = 0; i < schedule.playlists.length; i++) {
+							if(checkPlaylistStart(schedule.playlists[i])){
+								//set playlist
+								foundPlaylist = i;							
+								break;
+							}
+						}
+						$rootScope.ready = true;
+						//found a scheduled playlist
+						if(foundPlaylist !== false){
+							LogSrvc.logSystem('got playlist');
+							getPlaylistTracks(schedule.playlists[foundPlaylist])
+								.then(function(data){
+									$scope.playlist = schedule.playlists[i].playlist;
+									$scope.playlist.tracks = data;
+									shuffleArray($scope.playlist.tracks);
+									StatusSrvc.clearStatus();
+									loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+								},function(error){
+									LogSrvc.logError(error);
+								});
+						//if we didn't find a playlist, go to library
+						} else {
+							LogSrvc.logSystem('no playlist - music library');
+							$scope.playlist.name = 'Music Library';
+							$scope.playlist.tracks = $scope.availableTracks;
+							shuffleArray($scope.playlist.tracks);
+							StatusSrvc.clearStatus();
+							loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+						}
 					}
 				}catch(e){
 					FileFactory.deleteFile('schedule.json');
-					LogSrvc.logSystem('Try catch '+e);
+					LogSrvc.logError(e);
 					//init();
 					return;
 				}
@@ -427,76 +449,52 @@ angular.module('OEPlayer')
 		var duration;
 		$scope.timer = {elapsed:'0:00',duration:'0:00'};
 
-		var src = config.local_path+track.id+config.file_extention;
-		player[playerName] = new Media(
-			src,
-			function(){
-				LogSrvc.logSystem('end');
-				player[playerName].release();
-				//check next track is playing
-				var np = getNextPlayerName(playerName);
-				if(!$scope.initialising){
-					var checkTimeout = $timeout(function(){
-						var checkPlaying = function(){
-							if(typeof player[np].status === 'undefined' || player[np].status !== 2){
-								LogSrvc.logSystem('next track playback error');
-								prepareNextTrack(playerName);
-							} else {
-								LogSrvc.logSystem('track playing');
-							}
-							$timeout.cancel(checkTimeout);
-						};
-						checkPlaying();
-					},5000);
-				}
-			},function(err){
-				LogSrvc.logSystem(err);
-	            prepareNextTrack(playerName);
-			},function(status){
-				LogSrvc.logSystem(status);
-				player[playerName].status = status;
-				if (status == 2) {
-					//get duration
-					$scope.timer.durationSec = parseInt(player[playerName].getDuration());
-					$scope.timer.duration = getSecMin(
-						parseInt($scope.timer.durationSec % 60),
-						parseInt(($scope.timer.durationSec / 60) % 60)
-					);
-				}
-			});
-		//set status to undefined for capture if track not started
-		player[playerName].setVolume(0);
-		player[playerName].play();
-		//crossfade in
-		crossfade(playerName,SettingsSrvc.crossfadeIn,'in',true)
+		var src = track.id+config.file_extention;
+		player[playerName] = new MediaFactory(playerName);
+		player[playerName].init(src)
 			.then(function(){
-				$scope.swappingTracks = false;
+				player[playerName].setVolume(0,playerName);
+				player[playerName].play();
+				crossfade(playerName,SettingsSrvc.crossfadeIn,'in',true)
+					.then(function(){
+						$scope.swappingTracks = false;
+					});
+				startTimer(playerName);
+			},function(error){
+				LogSrvc.logError(error);
+				prepareNextTrack(playerName);
 			});
-		startTimer(playerName);
 	};
 	var startTimer = function(playerName){
 		player[playerName].timer = $interval(function(){
 			//just a timer
 			var getElapsed = function(){
-				player[playerName].getCurrentPosition(function(position){
-					if (position > -1) {
-						$scope.timer.elapsedSec = parseInt(position);
-						$scope.timer.elapsed = getSecMin(
-							parseInt(position % 60),
-							parseInt((position / 60) % 60)
-						);
-						if(parseInt(position) + 10 > $scope.timer.durationSec && $scope.timer.durationSec > 0){
-							$interval.cancel(player[playerName].timer);
-							player[playerName].timer = undefined;
-							LogSrvc.logSystem('next track');
-							$scope.swappingTracks = true;
-							crossfade(playerName,SettingsSrvc.crossfadeOut,'out');
-							addToLastPlayed($scope.currentTrack);
-							logTrack($scope.currentTrack);
-							prepareNextTrack(playerName);
-						}
+				var position = player[playerName].getCurrentPosition(playerName);
+				if (position > -1) {
+					$scope.timer.durationSec = parseInt(player[playerName].getDuration(playerName));
+					$scope.timer.duration = getSecMin(
+						parseInt($scope.timer.durationSec % 60),
+						parseInt(($scope.timer.durationSec / 60) % 60)
+					);
+					$scope.timer.elapsedSec = parseInt(position);
+					$scope.timer.elapsed = getSecMin(
+						parseInt(position % 60),
+						parseInt((position / 60) % 60)
+					);
+					if(parseInt(position) + 10 > $scope.timer.durationSec && $scope.timer.durationSec > 0){
+						$interval.cancel(player[playerName].timer);
+						player[playerName].timer = undefined;
+						LogSrvc.logSystem('next track');
+						$scope.swappingTracks = true;
+						crossfade(playerName,SettingsSrvc.crossfadeOut,'out',false)
+							.then(function(){
+								addToLastPlayed($scope.currentTrack);
+								logTrack($scope.currentTrack);
+								console.log('prepare name='+playerName);
+								prepareNextTrack(playerName);
+							});
 					}
-				});
+				}
 			};
 			//closure
 			getElapsed();
@@ -510,20 +508,23 @@ angular.module('OEPlayer')
 		if(!wait){
 			deferred.resolve();
 		}
+
+		console.log('timer for '+playerName);
+
 		var cfTimer = $interval(function(){
 			//set direction
 			var cfFunc = function(){
 				if(direction === 'out'){
 					vol = vol - 0.1;
 					if(vol > 0){
-						player[playerName].setVolume(vol.toFixed(1));
+						player[playerName].setVolume(vol.toFixed(1),playerName);
 					} else {
 						$interval.cancel(cfTimer);
 						cfTimer = undefined;
 						$scope.swappingTracks = false;
-						player[playerName].setVolume(0);
+						player[playerName].setVolume(0,playerName);
 						if(!pause){
-							player[playerName].stop();
+							player[playerName].stop(playerName);
 						}
 						if(wait){
 							deferred.resolve();
@@ -532,11 +533,11 @@ angular.module('OEPlayer')
 				} else {
 					vol = vol + 0.1;
 					if(vol < 1){
-						player[playerName].setVolume(vol.toFixed(1));
+						player[playerName].setVolume(vol.toFixed(1),playerName);
 					} else {
 						$interval.cancel(cfTimer);
 						cfTimer = undefined;
-						player[playerName].setVolume(1);
+						player[playerName].setVolume(1,playerName);
 						if(wait){
 							deferred.resolve();
 						}
@@ -633,14 +634,14 @@ angular.module('OEPlayer')
 
 	$scope.playPause = function(){
 		if($scope.currentTrack.isPaused){
-			player[$scope.currentTrack.playerName].play();
+			player[$scope.currentTrack.playerName].play($scope.currentTrack.playerName);
 			crossfade($scope.currentTrack.playerName,50,'in',true).then(function(){
 				$scope.currentTrack.isPaused = !$scope.currentTrack.isPaused;
 				$scope.swappingTracks = false;
 			});
 		} else {
 			crossfade($scope.currentTrack.playerName,50,'out',true,true).then(function(){
-				player[$scope.currentTrack.playerName].pause();
+				player[$scope.currentTrack.playerName].pause($scope.currentTrack.playerName);
 				$scope.currentTrack.isPaused = !$scope.currentTrack.isPaused;
 				$scope.swappingTracks = false;
 			});
@@ -784,7 +785,7 @@ angular.module('OEPlayer')
 	};
 	//logoff
 	$scope.logOff = function(){
-		var c = confirm('Are you sure you want to logoff?');
+		var c = confirm($scope.lang.menu.conflogout);
 		if(c){
 			$scope.playPause();
 			$http.defaults.headers.common.Authentication = '';

@@ -8,7 +8,8 @@ angular.module('OEPlayer')
 		onlineCheck:parseInt(localStorage.getItem('onlineCheck'))|| 1,
 		animations:localStorage.getItem('animations')|| 1,
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
-		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50
+		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
+		lang:localStorage.getItem('languages') || 'English'
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

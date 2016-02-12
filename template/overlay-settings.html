@@ -1,40 +1,48 @@
 <div ng-controller="OverlaySettingsCtrl">
 	<div class="overlay-header">
 		<h1>
-			Settings<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
+			{{lang.settings.title}}<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
 		</h1>
 	</div>
 	<div class="settings-wrapper">
 		<div class="settings-group">
-			<label>Fade in time (seconds)</label>
+			<label>{{lang.settings.language}}</label>
+			<select ng-model="settings.languages" ng-options="language for language in languages" ng-change="changeSetting('languages')"></select>
+		</div>
+		<div class="settings-group">
+			<label>{{lang.settings.fadein}}</label>
 			<select ng-model="settings.crossfadeIn" ng-options="time for time in cfTimes" ng-change="changeSetting('crossfadeIn')"></select>
 		</div>
 		<div class="settings-group">
-			<label>Fade out time (seconds)</label>
+			<label>{{lang.settings.fadeout}}</label>
 			<select ng-model="settings.crossfadeOut" ng-options="time for time in cfTimes" ng-change="changeSetting('crossfadeOut')"></select>
 		</div>
 		<div class="settings-group">
-			<label>Skip fade out time (seconds)</label>
+			<label>{{lang.settings.skip}}</label>
 			<select ng-model="settings.skipCrossfadeOut" ng-options="time for time in cfTimes" ng-change="changeSetting('skipCrossfadeOut')"></select>
 		</div>
 		<div class="settings-group">
-			<label>Online check type</label>
+			<label>{{lang.settings.online}}</label>
 			<select ng-model="settings.onlineCheck" ng-options="check.type as check.name for check in onlineCheck" ng-change="changeSetting('onlineCheck')"></select>
 		</div>
 		<div class="settings-group">
-			<label>Animations</label>
+			<label>{{lang.settings.animations}}</label>
 			<input type="checkbox" ng-model="settings.animations" ng-true-value="1" ng-false-value="2" ng-change="changeSetting('animations')">
 		</div>
 		<div class="settings-group">
-			<label>Push to play time (hours)</label>
+			<label>{{lang.settings.pushtoplay}}</label>
 			<select ng-model="settings.pushToPlayTime" ng-options="time for time in pushPlayLengths" ng-change="changeSetting('pushToPlayTime')"></select>
 		</div>
 		<div class="settings-group">
-			<label>Energy slider minimum playlist length</label>
+			<label>{{lang.settings.energy}}</label>
 			<select ng-model="settings.minEnergyPlaylist" ng-options="length for length in minEnergyPlaylist" ng-change="changeSetting('minEnergyPlaylist')"></select>
 		</div>
 		<div class="settings-group">
-			<label>Delete Library</label>
+			<label>{{lang.settings.delstored}}</label>
+			<button ng-click="deleteJson()">Go!</button>
+		</div>
+		<div class="settings-group">
+			<label>{{lang.settings.dellib}}</label>
 			<button ng-click="deleteLibrary()">Go!</button>
 		</div>
 	</div>

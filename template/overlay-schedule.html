@@ -2,13 +2,13 @@
 
 	<div class="overlay-header">
 		<h1>
-			Schedule<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
+			{{lang.schedule.title}}<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
 		</h1>
 	</div>
 
 	<div class="overlay-btn-group btn-group-2 clearfix">
-		<a ng-click="selectView('template','schedule-template.html')" ng-class="{active:selectedView.name == 'template'}">Week Template</a>
-		<a ng-click="selectView('calendar','schedule-calendar.html')" ng-class="{active:selectedView.name == 'calendar'}">Calendar</a>
+		<a ng-click="selectView('template','schedule-template.html')" ng-class="{active:selectedView.name == 'template'}">{{lang.schedule.sub.template}}</a>
+		<a ng-click="selectView('calendar','schedule-calendar.html')" ng-class="{active:selectedView.name == 'calendar'}">{{lang.schedule.sub.cal}}</a>
 	</div>
 
 	<div ng-include src="selectedView.url"></div>

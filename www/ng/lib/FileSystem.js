@@ -254,6 +254,7 @@ angular.module('OEPlayer')
                         writer.onwriteend = function (evt) {
                             if (this.error) {
                                 q.reject(this.error);
+                                LogSrvc.logError(this.error);
                             } else {
                                 q.resolve(evt);
                             }

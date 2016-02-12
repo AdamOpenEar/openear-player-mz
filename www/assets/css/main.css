@@ -153,8 +153,8 @@ body > div > div{
 }
 #menu span{
     font-size: 12px;
-    white-space: nowrap;
-    line-height: 0;
+    white-space: normal;
+    line-height: 1.4;
     display: block;
     padding:10px 0 0 0;
     font-style: normal;

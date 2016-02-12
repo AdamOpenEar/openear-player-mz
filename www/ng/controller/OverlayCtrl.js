@@ -28,9 +28,9 @@ angular.module('OEPlayer')
     $scope.tracks = OverlaySrvc.data;
 
 }])
-.controller('OverlayBlockedCtrl',['FileFactoryNgCdv','$scope','config',function(FileFactoryNgCdv,$scope,config){
+.controller('OverlayBlockedCtrl',['FileFactory','$scope','config',function(FileFactory,$scope,config){
 
-    FileFactoryNgCdv.readJSON(config.local_path,'blocked.json')
+    FileFactory.readJSON(config.local_path,'blocked.json')
         .then(function(data){
             $scope.tracks = JSON.parse(data);
         });
@@ -50,7 +50,7 @@ angular.module('OEPlayer')
     	};
     };
 }])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactoryNgCdv','LogSrvc',function($scope,SettingsSrvc,FileFactoryNgCdv,LogSrvc){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc',function($scope,SettingsSrvc,FileFactory,LogSrvc){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -60,6 +60,7 @@ angular.module('OEPlayer')
     $scope.settings.animations = SettingsSrvc.animations;
     $scope.settings.pushToPlayTime = SettingsSrvc.pushToPlayTime;
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
+    $scope.settings.languages = SettingsSrvc.lang;
 
     $scope.cfTimes = [1,2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -68,18 +69,24 @@ angular.module('OEPlayer')
         {type:2,name:'Alternative'}
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
+    $scope.languages = ['English','Spanish','Portuguese'];
 
     $scope.changeSetting = function(setting){
-        SettingsSrvc.setSetting(setting,$scope.settings[setting]);
+        if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
+            SettingsSrvc.setSetting(setting,$scope.settings[setting]*100);
+        } else {
+            SettingsSrvc.setSetting(setting,$scope.settings[setting]);
+        }
+        
     };
 
     $scope.deleteLibrary = function(){
-        var c = confirm('Are you sure you want to delete the library?');
+        var c = confirm($scope.lang.settings.conflibdel);
         if(c){
-            FileFactoryNgCdv.readDirectory(cordova.file.dataDirectory)
+            FileFactory.readDirectory('')
                 .then(function(data){
                     for (var i = data.length - 1; i >= 0; i--) {
-                        FileFactoryNgCdv.deleteFile(cordova.file.dataDirectory,data[i].name)
+                        FileFactory.deleteFile('',data[i].name)
                             .then(function(res){
                                 LogSrvc.logSystem(res);
                             });
@@ -88,13 +95,30 @@ angular.module('OEPlayer')
                 });
         }
     };
+    $scope.deleteJson = function(){
+        var c = confirm($scope.lang.settings.confstored);
+        if(c){
+            FileFactory.readDirectory('')
+                .then(function(data){
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        if(data[i].name.indexOf('.json') !== -1){
+                            FileFactory.deleteFile('',data[i].name)
+                                .then(function(res){
+                                    LogSrvc.logSystem(res);
+                                });
+                        }
+                    }
+                    $scope.restart();
+                });
+        }
+    };
 
 
 }])
-.controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactoryNgCdv','config','PlayerSrvc','$rootScope',function($scope,FileFactoryNgCdv,config,PlayerSrvc,$rootScope){
+.controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope',function($scope,FileFactory,config,PlayerSrvc,$rootScope){
 
     $scope.init = function(){
-        FileFactoryNgCdv.readJSON(config.local_path,'playlists.json')
+        FileFactory.readJSON(config.local_path,'playlists.json')
             .then(function(data){
                 $scope.venue = JSON.parse(data);
             });
@@ -107,21 +131,21 @@ angular.module('OEPlayer')
     };
 
 }])
-.controller('OverlayScheduleTemplateCtrl',['HTTPFactory','$scope','LogSrvc','FileFactoryNgCdv','config',function(HTTPFactory,$scope,LogSrvc,FileFactoryNgCdv,config){
+.controller('OverlayScheduleTemplateCtrl',['HTTPFactory','$scope','LogSrvc','FileFactory','config',function(HTTPFactory,$scope,LogSrvc,FileFactory,config){
 
 	$scope.init = function(){
 
         $scope.schedules = [
-            {day:'Monday',schedule:[]},
-            {day:'Tuesday',schedule:[]},
-            {day:'Wednesday',schedule:[]},
-            {day:'Thursday',schedule:[]},
-            {day:'Friday',schedule:[]},
-            {day:'Saturday',schedule:[]},
-            {day:'Sunday',schedule:[]}
+            {day:$scope.lang.schedule.days.mon,schedule:[]},
+            {day:$scope.lang.schedule.days.tue,schedule:[]},
+            {day:$scope.lang.schedule.days.wed,schedule:[]},
+            {day:$scope.lang.schedule.days.thur,schedule:[]},
+            {day:$scope.lang.schedule.days.fri,schedule:[]},
+            {day:$scope.lang.schedule.days.sat,schedule:[]},
+            {day:$scope.lang.schedule.days.sun,schedule:[]}
         ];
 
-        FileFactoryNgCdv.readJSON(config.local_path,'template.json')
+        FileFactory.readJSON(config.local_path,'template.json')
             .then(function(data){
     	
                 $scope.venue = JSON.parse( data );

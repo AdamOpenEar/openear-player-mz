@@ -1,9 +1,9 @@
 <div ng-controller="PlayerCtrl" id="player-wrapper">
     <div id="menu">
         <img src="assets/img/logo.png">
-        <i ng-repeat="item in menu track by $index" ng-click="openOverlay(item.name)" class="fi-{{item.icon}}" ng-class="{active:item.active}"><span>{{item.name}}</span></i>
-        <i ng-click="swappingTracks || restart()" ng-disabled="swappingTracks" class="fi-loop"><span>restart</span></i>
-        <i ng-click="logOff()" class="fi-power"><span>logout</span></i>
+        <i ng-repeat="item in menu track by $index" ng-click="openOverlay(item.name)" class="fi-{{item.icon}}" ng-class="{active:item.active}"><span>{{item.display}}</span></i>
+        <i ng-click="swappingTracks || restart()" ng-disabled="swappingTracks" class="fi-loop"><span>{{lang.menu.restart}}</span></i>
+        <i ng-click="logOff()" class="fi-power"><span>{{lang.menu.logout}}</span></i>
     </div>
     <div id="main">
         <div id="blur-wrapper">
@@ -50,8 +50,8 @@
                 </div>
             </div>
             <div id="online-status">
-                <span ng-disabled="!player.online">online</span>
-                <span ng-disabled="player.online">offline</span>
+                <span ng-disabled="!player.online">{{lang.player.online}}</span>
+                <span ng-disabled="player.online">{{lang.player.offline}}</span>
             </div>
 
             <div id="player-controls" ng-class="{display:ready}">
@@ -71,15 +71,15 @@
         <div class="track-timer" id="track-elapsed">{{timer.elapsed}}</div>
         <div id="last-played">
             <i id="open-last-played" class="fi-play" ng-click="openLastTracks()"></i>
-            <h2>Last played</h2>
+            <h2>{{lang.player.lastplayed.title}}</h2>
             <table class="oeplayer-table" ng-if="player.lastPlayed.length > 0">
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Album</th>
-                        <th>Artist</th>
-                        <th>Played at</th>
-                        <th>Block</th>
+                        <th>{{lang.player.lastplayed.table.title}}</th>
+                        <th>{{lang.player.lastplayed.table.album}}</th>
+                        <th>{{lang.player.lastplayed.table.artist}}</th>
+                        <th>{{lang.player.lastplayed.table.played}}</th>
+                        <th>{{lang.player.lastplayed.table.block}}</th>
                     </tr>
                 </thead>
                 <tbody>

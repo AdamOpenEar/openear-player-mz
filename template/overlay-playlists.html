@@ -1,7 +1,7 @@
 <div ng-controller="OverlayLibraryPlaylistsCtrl">
   <div class="overlay-header">
     <h1>
-      Playlists<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
+      {{lang.playlists.title}}<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
     </h1>
   </div>
     <div ng-repeat="playlist in venue.playlists">
@@ -13,10 +13,10 @@
         <table class="oeplayer-table" ng-if="playlist.showTracks">
             <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Album</th>
-                    <th>Artist</th>
-                    <th>Block</th>
+                    <th>{{lang.playlists.table.title}}</th>
+                    <th>{{lang.playlists.table.album}}</th>
+                    <th>{{lang.playlists.table.artist}}</th>
+                    <th>{{lang.playlists.table.block}}</th>
                 </tr>
             </thead>
             <tbody>

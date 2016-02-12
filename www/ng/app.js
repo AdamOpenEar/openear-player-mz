@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'api_url':'http://www.openearmusic.com/api/ios/',
     'module_dir':'ng',
     'music_library_url':'http://www.openearmusic.com/system/uploads/',
-    'local_path':'filesystem:file:///persistent/',
+    'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'http://www.openearmusic.com/api/ios/log-track'
 });

@@ -1,17 +1,17 @@
 <div ng-controller="OverlayQueueCtrl">
     <div class="overlay-header">
         <h1>
-            Queue<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
+            {{lang.queue.title}}<a id="close-overlay" class="overlay-btn" ng-click="closeOverlay()"><i class="fi-x"></i></a>
         </h1>
     </div>
     <table class="oeplayer-table">
         <thead>
             <tr>
-                <th>Title</th>
-                <th>Album</th>
-                <th>Artist</th>
-                <th>Energy</th>
-                <th>Block</th>
+                <th>{{lang.queue.table.title}}</th>
+                <th>{{lang.queue.table.album}}</th>
+                <th>{{lang.queue.table.artist}}</th>
+                <th>{{lang.queue.table.energy}}</th>
+                <th>{{lang.queue.table.block}}</th>
             </tr>
         </thead>
         <tbody>
