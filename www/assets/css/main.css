@@ -893,6 +893,10 @@ input.cmn-toggle-round-flat:checked + label:after {
     width:50%;
     display: inline-block;
 }
+.settings-group button{
+    color: #000;
+    
+}
 /* ===== login =====*/
 .login-form{
     position: fixed;

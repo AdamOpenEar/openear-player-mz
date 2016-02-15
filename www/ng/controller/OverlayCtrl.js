@@ -74,10 +74,15 @@ angular.module('OEPlayer')
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
             SettingsSrvc.setSetting(setting,$scope.settings[setting]*100);
+        } else if(setting == 'languages'){
+            var c = confirm($scope.lang.settings.changeLang);
+            if(c){
+                SettingsSrvc.setSetting(setting,$scope.settings[setting]);
+                location.reload();
+            }
         } else {
             SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         }
-        
     };
 
     $scope.deleteLibrary = function(){

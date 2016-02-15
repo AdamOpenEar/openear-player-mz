@@ -15,11 +15,11 @@
                 <div id="track-artist">{{currentTrack.artist}}</div>
                 <div id="track-playlist">{{player.venueName}} - {{playlist.name}}</div>
             </div>
-            <!--<div id="download-progress" class="progress-circle" ng-if="!$root.ready">
+            <div id="download-progress" class="progress-circle" ng-class="{display:!ready}">
                 <div
                     round-progress
                     max="tracksNeeded"
-                    current="availableTracks.length"
+                    current="unavailableTracks.length"
                     color="#26cd7d"
                     bgcolor="#1c1d25"
                     radius="100"
@@ -31,7 +31,7 @@
                     duration="800"
                     animation="easeInOutQuart">
                 </div>
-            </div>-->
+            </div>
             <div id="track-progress" class="progress-circle" ng-class="{display:ready}">
                 <div
                     round-progress

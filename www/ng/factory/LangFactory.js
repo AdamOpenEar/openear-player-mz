@@ -74,7 +74,8 @@ angular.module('OEPlayer')
 				delstored:'Delete Stored Data',
 				dellib:'Delete Library',
 				conflibdel:'Are you sure you want to delete the library?',
-				confstored:'Are you sure you want to delete stored data?'
+				confstored:'Are you sure you want to delete stored data?',
+				changeLang:'Changing language will require a restart. Are you sure?'
 			}
 		},
 		Portuguese:{
@@ -150,7 +151,8 @@ angular.module('OEPlayer')
 				delstored:'Excluir os dados armazenados',
 				dellib:'excluir Biblioteca',
 				conflibdel:'Tem certeza de que deseja excluir a biblioteca ?',
-				confstored:'Tem certeza de que quer apagar os dados armazenados ?'
+				confstored:'Tem certeza de que quer apagar os dados armazenados ?',
+				changeLang:'Changing language will require a restart. Are you sure?'
 			}
 		},
 		Spanish:{
@@ -226,7 +228,8 @@ angular.module('OEPlayer')
 				delstored:'Borrar Datos Almacenados',
 				dellib:'Borrar Biblioteca',
 				conflibdel:'¿Está usted seguro que desea borrar la biblioteca?',
-				confstored:'¿Está usted seguro que desea borrar los datos almacenados?'
+				confstored:'¿Está usted seguro que desea borrar los datos almacenados?',
+				changeLang:'Changing language will require a restart. Are you sure?'
 			}
 		}
 	};

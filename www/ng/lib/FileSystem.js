@@ -79,15 +79,10 @@ angular.module('OEPlayer')
 
             try {
                 var directory = path + file;
-                $window.resolveLocalFileSystemURL(directory, function (fileSystem) {
-                    if ($window.fs.root.isFile === true) {
-                        q.resolve(fileSystem);
-                    } else {
-                        q.reject({code: 13, message: 'input is not a file'});
-                    }
-                }, function (error) {
-                    error.message = cordovaFileError[error.code];
-                    q.reject(error);
+                $window.fs.root.getFile(directory, {create:false},function() {
+                    q.resolve(true);
+                }, function () {
+                    q.reject(false);
                 });
             } catch (err) {
                 err.message = cordovaFileError[err.code];
