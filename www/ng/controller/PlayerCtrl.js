@@ -520,8 +520,6 @@ angular.module('OEPlayer')
 			deferred.resolve();
 		}
 
-		console.log('timer for '+playerName);
-
 		var cfTimer = $interval(function(){
 			//set direction
 			var cfFunc = function(){
@@ -736,23 +734,25 @@ angular.module('OEPlayer')
 		//cancel running timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out').then(function(){
-			$scope.pushToPlay = true;
-			$scope.playlist = PlayerSrvc.playlist;
-			$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
-			shuffleArray($scope.playlist.tracks);
-			$scope.player.currentIndex = -1;
-			prepareNextTrack($scope.currentTrack.playerName);
-			//set timeout for push to play
-			var pushToPlayTimer = $timeout(function(){
-				$scope.pushToPlay = false;
-				crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out').then(function(){
-					preparePlaylist();
-					$timeout.cancel(pushToPlayTimer);
-					pushToPlayTimer = undefined;
-				});
-			},SettingsSrvc.pushToPlayTime*60*60*100);
-		});//hours to milliseconds, cancel push to play
+		//wait
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out',true)
+			.then(function(){
+				$scope.pushToPlay = true;
+				$scope.playlist = PlayerSrvc.playlist;
+				$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
+				shuffleArray($scope.playlist.tracks);
+				$scope.player.currentIndex = 0;
+				loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+				//set timeout for push to play
+				var pushToPlayTimer = $timeout(function(){
+					$scope.pushToPlay = false;
+					crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out').then(function(){
+						preparePlaylist();
+						$timeout.cancel(pushToPlayTimer);
+						pushToPlayTimer = undefined;
+					});
+				},SettingsSrvc.pushToPlayTime*60*60*100);
+			});//hours to milliseconds, cancel push to play
 	});
 	$scope.$on('$destroy', unbindPushToPlay);
 
