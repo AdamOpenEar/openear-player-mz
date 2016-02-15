@@ -79,29 +79,33 @@ angular.module('OEPlayer')
 		}
 	};
 
+	var writeJSONFiles = function(file,data,callback){
+		FileFactory.checkFile('',file+'.json')
+			.then(function(success){
+				FileFactory.deleteFile('',file+'.json')
+					.then(function(){
+						FileFactory.writeJSON(config.local_path,file+'.json',data,true)
+							.then(function(){
+								LogSrvc.logSystem('got '+file);
+								callback();
+						});
+					},function(){
+						StatusSrvc.setStatus(file+' creation error. Please go to settings and delete stored data.');
+					});
+			},function(err){
+				FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
+					.then(function(){
+						LogSrvc.logSystem('got '+file);
+						callback();
+					});
+			});
+	}
+
 	var getPlaylists = function(){
 		HTTPFactory.getPlaylists().success(function(data){
 			$scope.player.venueName = data.name;
 			if(data.playlists.length > 0){
-				FileFactory.checkFile('','playlists.json')
-					.then(function(success){
-						FileFactory.deleteFile('','playlists.json')
-							.then(function(){
-								FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
-									.then(function(){
-										LogSrvc.logSystem('got playlists');
-										getTracksOnline();
-								});
-							},function(){
-								StatusSrvc.setStatus('Playlist creation error. Please go to settings and delete stored data.');
-							});
-					},function(err){
-						FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
-							.then(function(){
-								LogSrvc.logSystem('got playlists');
-								getTracksOnline();
-							});
-					});
+				writeJSONFiles('playlists',data,getTracksOnline);
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
 			}
@@ -111,11 +115,7 @@ angular.module('OEPlayer')
 	var getTracksOnline = function(){
 		HTTPFactory.getTracks().success(function(data){
 			if(data.tracks.length > 0){
-				FileFactory.writeJSON(config.local_path,'tracks.json',data,true)
-					.then(function(){
-						LogSrvc.logSystem('got tracks');
-						getScheduleTemplate();
-					});
+				writeJSONFiles('tracks',data,getScheduleTemplate);
 			} else {
 				StatusSrvc.setStatus('No tracks associated with playlists. Please add music to your playlists.');
 			}
@@ -123,32 +123,20 @@ angular.module('OEPlayer')
 	};
 
 	var getScheduleTemplate = function(){
-		HTTPFactory.getScheduleTemplate().success(function(data){				
-			FileFactory.writeJSON(config.local_path,'template.json',data,true)
-				.then(function(){
-					LogSrvc.logSystem('got template');
-					getSchedule();
-				});					
+		HTTPFactory.getScheduleTemplate().success(function(data){
+			writeJSONFiles('template',data,getSchedule);			
 		});
 	};
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
-			FileFactory.writeJSON(config.local_path,'schedule.json',data,true)
-				.then(function(){
-					LogSrvc.logSystem('got schedule');
-					getBlocked();
-				});
+			writeJSONFiles('schedule',data,getBlocked);
 		});
 	};
 
 	var getBlocked = function(){
 		HTTPFactory.getBlocked().success(function(data){
-			FileFactory.writeJSON(config.local_path,'blocked.json',data,true)
-				.then(function(){
-					LogSrvc.logSystem('got blocked');
-					getTracks();
-				});
+			writeJSONFiles('blocked',data,getTracks);
 		});
 	};
 
@@ -751,8 +739,9 @@ angular.module('OEPlayer')
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out').then(function(){
 			$scope.pushToPlay = true;
 			$scope.playlist = PlayerSrvc.playlist;
+			$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
 			shuffleArray($scope.playlist.tracks);
-			$scope.player.currentIndex = 0;
+			$scope.player.currentIndex = -1;
 			prepareNextTrack($scope.currentTrack.playerName);
 			//set timeout for push to play
 			var pushToPlayTimer = $timeout(function(){
@@ -766,6 +755,10 @@ angular.module('OEPlayer')
 		});//hours to milliseconds, cancel push to play
 	});
 	$scope.$on('$destroy', unbindPushToPlay);
+
+	var getEndTime = function(hours){
+		return moment().add(hours,'h').format('HH:mm:ss');
+	}
 
 	//energise
 	$scope.energise = function(){

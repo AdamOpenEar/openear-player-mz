@@ -592,25 +592,25 @@ angular.module('OEPlayer')
             //    q.reject('directory cannot start with \/');
             //}
             try {
-                    $window.fs.root.getDirectory('/',{create:false,exclusive:false},function(dirEntry){
-                        var dirReader = dirEntry.createReader();
-                        var entries = [];
-                        var readEntries = function(){
-                            dirReader.readEntries(function (results) {
-                                if (!results.length) {
-                                    q.resolve(entries);
-                                } else {
-                                    entries = entries.concat(Array.prototype.slice.call(results || [], 0));
-                                    readEntries();
-                                }
-                            }, function (error) {
-                                q.reject(cordovaFileError[error.code]);
-                            });
-                        };
-                        readEntries();
-                    },function(error){
-                      q.reject(cordovaFileError[error.code]);
-                    });
+                $window.fs.root.getDirectory('/',{create:false,exclusive:false},function(dirEntry){
+                    var dirReader = dirEntry.createReader();
+                    var entries = [];
+                    var readEntries = function(){
+                        dirReader.readEntries(function (results) {
+                            if (!results.length) {
+                                q.resolve(entries);
+                            } else {
+                                entries = entries.concat(Array.prototype.slice.call(results || [], 0));
+                                readEntries();
+                            }
+                        }, function (error) {
+                            q.reject(cordovaFileError[error.code]);
+                        });
+                    };
+                    readEntries();
+                },function(error){
+                  q.reject(cordovaFileError[error.code]);
+                });
             } catch (e) {
                 q.reject(cordovaFileError[e.code]);
             }
@@ -633,9 +633,6 @@ angular.module('OEPlayer')
                 q.reject(cordovaFileError[e.code]);
             }
             return q.promise;
-        },
-        hardReset:function(){
-          
         }
     };
 }]);

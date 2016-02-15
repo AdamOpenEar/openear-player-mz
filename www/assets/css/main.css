@@ -140,6 +140,11 @@ body > div > div{
     float: left;
     position: relative;
     z-index: 999;
+    -webkit-transform: translate3d(-100%,0,0);
+    transition:0.2s;
+}
+#menu.display{
+    -webkit-transform: translate3d(0,0,0);
 }
 #menu i{
     display: block;
@@ -227,6 +232,7 @@ body > div > div{
     top:44%;
     left:50%;
     display: none;
+    transition: 0.2s;
 }
 #player-controls.display{
     display: initial;
@@ -242,6 +248,10 @@ body > div > div{
     position: absolute;
     font-size: 20px;
     top:29%;
+    display: none;
+}
+.track-timer.display{
+    display: initial;
 }
 #track-duration{
     left:28%;
@@ -895,7 +905,6 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 .settings-group button{
     color: #000;
-    
 }
 /* ===== login =====*/
 .login-form{
