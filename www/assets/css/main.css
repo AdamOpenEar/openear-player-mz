@@ -116,7 +116,7 @@ html {
 }
 body {
     height: 100%;
-    background-color: #21242c;
+    background-color: #1c1d25;
     font-family: "montserratlight",sans-serif;
     overflow: hidden;
     position: relative;
@@ -346,6 +346,11 @@ body > div > div{
     float: left;
     position: relative;
     padding:50px;
+    -webkit-transform: translate3d(200%,0,0) !important;
+    transition:0.2s;
+}
+#energy-slider.display{
+    -webkit-transform: translate3d(0,0,0) !important;
 }
 #energy-slider h2{
     position: absolute;
@@ -455,7 +460,7 @@ input.cmn-toggle-round-flat:checked + label:after {
 #overlay{
     width:93%;
     height:100%;
-    background-color: #30343F;
+    background-color: #1c1d25;
     z-index:99;
     position: fixed;
     left:7%;
@@ -466,7 +471,6 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 #player-wrapper.animations #overlay{
     transition:0.3s;
-    background-color:rgba(48, 52, 63,0.5);
 }
 #player-wrapper.animations #overlay.active{
     background-color:rgba(48, 52, 63,0.5);
