@@ -260,7 +260,7 @@ angular.module('OEPlayer')
 		$scope.availableTracks.push(track);
 		var index = $scope.unavailableTracks.indexOf(track);
 		$scope.unavailableTracks.splice(index,1);
-		StatusSrvc.setStatus('Getting track '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
+		StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
 		//check here for proportion of available to play from
 		if($scope.unavailableTracks.length > 0){
 			downloadTrack($scope.unavailableTracks[0]);
@@ -701,13 +701,6 @@ angular.module('OEPlayer')
 	//OVERLAY CONTROLS
 	$scope.openOverlay = function(template){
 
-		for (var i = $scope.menu.length - 1; i >= 0; i--) {
-			if($scope.menu[i].name == template){
-				$scope.menu[i].active = true;
-			} else {
-				$scope.menu[i].active = false;
-			}
-		}
 		var data;
 
 		switch(template){
@@ -715,7 +708,18 @@ angular.module('OEPlayer')
 				data = $scope.playlist.tracks;
 				break;
 		}
-		OverlaySrvc.open(template,data);
+		
+		for (var i = $scope.menu.length - 1; i >= 0; i--) {
+			if($scope.menu[i].name == template && !$scope.menu[i].active){
+				$scope.menu[i].active = true;
+				OverlaySrvc.open(template,data);
+			} else if($scope.menu[i].name == template && $scope.menu[i].active){
+				$scope.menu[i].active = false;
+				OverlaySrvc.close();
+			} else {
+				$scope.menu[i].active = false;
+			}
+		}
 	};
 
 	var unbindOpen = $rootScope.$on('open-overlay',function(){

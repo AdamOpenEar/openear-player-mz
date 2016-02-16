@@ -458,7 +458,7 @@ input.cmn-toggle-round-flat:checked + label:after {
     height: 100%;
 }
 #overlay{
-    width:93%;
+    width:82%;
     height:100%;
     background-color: #1c1d25;
     z-index:99;
@@ -489,7 +489,6 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 #player-wrapper.animations.overlay-active #blur-wrapper,
 #player-wrapper.animations.overlay-active #last-played,
-#player-wrapper.animations.overlay-active #energy-slider,
 #player-wrapper.animations.overlay-active .track-timer{
     -webkit-filter: blur(10px);
 }
@@ -516,7 +515,6 @@ input.cmn-toggle-round-flat:checked + label:after {
     z-index: 999;
     color: #f7f7f7;
     font-size: 21px;
-    padding: 5px 16px 5px 15px;
     border-bottom-right-radius: 6px;
     background-color:#9aa0b2;
     width: 5%;
@@ -526,6 +524,8 @@ input.cmn-toggle-round-flat:checked + label:after {
     margin-top: -6px;
     margin-right: -1px;
     border: 1px solid #9aa0b2;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
 }
 .overlay-btn-group{
     border:1px solid #9aa0b2;

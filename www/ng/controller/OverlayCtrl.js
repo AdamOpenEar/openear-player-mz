@@ -16,7 +16,7 @@ angular.module('OEPlayer')
 	$scope.closeOverlay = function(){
 		$scope.overlayTemplate = null;
 		$element.removeClass('active');
-		$rootScope.$emit('close-overlay');	
+		$rootScope.$emit('close-overlay');
 	};
 
 	$scope.$on('$destroy', unbindOpen);
