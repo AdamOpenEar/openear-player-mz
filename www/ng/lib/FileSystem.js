@@ -15,6 +15,8 @@ angular.module('OEPlayer')
 })
 .factory('FileSystem',['LogSrvc','$q','$window','config','cordovaFileError',function(LogSrvc,$q,$window,config,cordovaFileError){
 
+    var $fs;
+
     return {
 
         init: function(){
@@ -28,7 +30,7 @@ angular.module('OEPlayer')
                         window.PERSISTENT, 
                         grantedBytes,
                         function(fs){
-                            $window.fs = fs;
+                            $fs = fs;
                             q.resolve('File system ready');
                         },
                         function(error){
@@ -54,7 +56,7 @@ angular.module('OEPlayer')
             try {
                 var directory = path + dir;
                 $window.resolveLocalFileSystemURL(directory, function (fileSystem) {
-                    if ($window.fs.root.isDirectory === true) {
+                    if ($fs.root.isDirectory === true) {
                         q.resolve(fileSystem);
                     } else {
                         q.reject({code: 13, message: 'input is not a directory'});
@@ -79,7 +81,7 @@ angular.module('OEPlayer')
 
             try {
                 var directory = path + file;
-                $window.fs.root.getFile(directory, {create:false},function() {
+                $fs.root.getFile(directory, {create:false},function() {
                     q.resolve(true);
                 }, function () {
                     q.reject(false);
@@ -106,7 +108,7 @@ angular.module('OEPlayer')
             };
 
             try {
-                $window.fs.root.getDirectory(dirName, options, function (result) {
+                $fs.root.getDirectory(dirName, options, function (result) {
                     q.resolve(result);
                 }, function (error) {
                     error.message = cordovaFileError[error.code];
@@ -134,7 +136,7 @@ angular.module('OEPlayer')
             };
 
             try {
-                $window.fs.root.getFile(fileName, options, function (result) {
+                $fs.root.getFile(fileName, options, function (result) {
                     q.resolve(result);
                 }, function (error) {
                     error.message = cordovaFileError[error.code];
@@ -154,7 +156,7 @@ angular.module('OEPlayer')
             }
 
             try {
-                $window.fs.root.getDirectory(dirName, {create: false}, function (dirEntry) {
+                $fs.root.getDirectory(dirName, {create: false}, function (dirEntry) {
                     dirEntry.remove(function () {
                     q.resolve({success: true, fileRemoved: dirEntry});
                 }, function (error) {
@@ -179,7 +181,7 @@ angular.module('OEPlayer')
             }
 
             try {
-                $window.fs.root.getFile(fileName, {create: false}, function (fileEntry) {
+                $fs.root.getFile(fileName, {create: false}, function (fileEntry) {
                     fileEntry.remove(function () {
                         q.resolve({success: true, fileRemoved: fileEntry});
                     }, function (error) {
@@ -204,7 +206,7 @@ angular.module('OEPlayer')
           }
 
           try {
-                $window.fs.root.getDirectory(dirName, {create: false}, function (dirEntry) {
+                $fs.root.getDirectory(dirName, {create: false}, function (dirEntry) {
                     dirEntry.removeRecursively(function () {
                         q.resolve({success: true, fileRemoved: dirEntry});
                     }, function (error) {
@@ -236,7 +238,7 @@ angular.module('OEPlayer')
             };
 
             try {
-                $window.fs.root.getFile(fileName, options, function (fileEntry) {
+                $fs.root.getFile(fileName, options, function (fileEntry) {
                     fileEntry.createWriter(function (writer) {
                         if (options.append === true) {
                             writer.seek(writer.length);
@@ -281,7 +283,7 @@ angular.module('OEPlayer')
 
             try {
 
-                $window.fs.root.getFile(fileName, {create: false}, function (fileEntry) {
+                $fs.root.getFile(fileName, {create: false}, function (fileEntry) {
                     fileEntry.createWriter(function (writer) {
                         writer.seek(writer.length);
 
@@ -319,7 +321,7 @@ angular.module('OEPlayer')
 
             try {
             
-                $window.fs.root.getFile(file, {create: false}, function (fileEntry) {
+                $fs.root.getFile(file, {create: false}, function (fileEntry) {
                     fileEntry.file(function (fileData) {
                         var reader = new FileReader();
 
@@ -336,7 +338,7 @@ angular.module('OEPlayer')
                         reader.readAsText(fileData);
                     });
                 }, function (error) {
-                    error.message = cordovaFileError[error.code];
+                    LogSrvc.logError(error.message);
                     q.reject(error);
                 });
             } catch (e) {
@@ -355,7 +357,7 @@ angular.module('OEPlayer')
 
             try {
             
-                $window.fs.root.getFile(file, {create: false}, function (fileEntry) {
+                $fs.root.getFile(file, {create: false}, function (fileEntry) {
                     fileEntry.file(function (fileData) {
                         var reader = new FileReader();
                         reader.onloadend = function (evt) {
@@ -389,7 +391,7 @@ angular.module('OEPlayer')
 
             try {
             
-                $window.fs.root.getFile(file, {create: false}, function (fileEntry) {
+                $fs.root.getFile(file, {create: false}, function (fileEntry) {
                     fileEntry.file(function (fileData) {
                         var reader = new FileReader();
                         reader.onloadend = function (evt) {
@@ -422,7 +424,7 @@ angular.module('OEPlayer')
           }
 
           try {
-              $window.fs.root.getFile(file, {create: false}, function (fileEntry) {
+              $fs.root.getFile(file, {create: false}, function (fileEntry) {
                 fileEntry.file(function (fileData) {
                   var reader = new FileReader();
                   reader.onloadend = function (evt) {
@@ -458,7 +460,7 @@ angular.module('OEPlayer')
 
           try {
 
-              $window.fs.root.getFile(fileName, {create: false}, function (fileEntry) {
+              $fs.root.getFile(fileName, {create: false}, function (fileEntry) {
                 $window.resolveLocalFileSystemURL(newPath, function (newFileEntry) {
                   fileEntry.moveTo(newFileEntry, newFileName, function (result) {
                     q.resolve(result);
@@ -487,7 +489,7 @@ angular.module('OEPlayer')
 
           try {
             $window.resolveLocalFileSystemURL(path, function (fileSystem) {
-              $window.fs.root.getDirectory(dirName, {create: false}, function (dirEntry) {
+              $fs.root.getDirectory(dirName, {create: false}, function (dirEntry) {
                 $window.resolveLocalFileSystemURL(newPath, function (newDirEntry) {
                   dirEntry.moveTo(newDirEntry, newDirName, function (result) {
                     q.resolve(result);
@@ -519,7 +521,7 @@ angular.module('OEPlayer')
 
           try {
             $window.resolveLocalFileSystemURL(path, function (fileSystem) {
-              $window.fs.root.getDirectory(dirName, {create: false, exclusive: false}, function (dirEntry) {
+              $fs.root.getDirectory(dirName, {create: false, exclusive: false}, function (dirEntry) {
 
                 $window.resolveLocalFileSystemURL(newPath, function (newDirEntry) {
                   dirEntry.copyTo(newDirEntry, newDirName, function (result) {
@@ -557,7 +559,7 @@ angular.module('OEPlayer')
 
           try {
             $window.resolveLocalFileSystemURL(path, function (fileSystem) {
-              $window.fs.root.getFile(fileName, {create: false, exclusive: false}, function (fileEntry) {
+              $fs.root.getFile(fileName, {create: false, exclusive: false}, function (fileEntry) {
 
                 $window.resolveLocalFileSystemURL(newPath, function (newFileEntry) {
                   fileEntry.copyTo(newFileEntry, newFileName, function (result) {
@@ -592,7 +594,7 @@ angular.module('OEPlayer')
             //    q.reject('directory cannot start with \/');
             //}
             try {
-                $window.fs.root.getDirectory('/',{create:false,exclusive:false},function(dirEntry){
+                $fs.root.getDirectory('/',{create:false,exclusive:false},function(dirEntry){
                     var dirReader = dirEntry.createReader();
                     var entries = [];
                     var readEntries = function(){
@@ -623,7 +625,7 @@ angular.module('OEPlayer')
                 q.reject('file-name cannot start with \/');
             }
             try {
-                  $window.fs.root.getFile( file , {create: false}, function(fileEntry) {
+                  $fs.root.getFile( file , {create: false}, function(fileEntry) {
                       fileEntry.remove(function() {
                           LogSrvc.logSystem('file '+file+' deleted');
                           q.resolve('file '+file+' deleted');

@@ -93,9 +93,9 @@ angular.module('OEPlayer')
 						StatusSrvc.setStatus(file+' creation error. Please go to settings and delete stored data.');
 					});
 			},function(err){
-				FileFactory.writeJSON(config.local_path,'playlists.json',data,true)
+				FileFactory.writeJSON(config.local_path,file+'.json',data,true)
 					.then(function(){
-						LogSrvc.logSystem('got '+file);
+						LogSrvc.logSystem('got '+file+' no delete');
 						callback();
 					});
 			});
@@ -319,6 +319,8 @@ angular.module('OEPlayer')
 		StatusSrvc.setStatus('Getting playlist...');
 		//reset index
 		$scope.player.currentIndex = 0;
+		//reset playlist
+		$scope.playlist = {};
 		//remove processing files
 		if($scope.processingTracks.length > 0){
 			for (var i = $scope.availableTracks.length - 1; i >= 0; i--) {
@@ -480,6 +482,7 @@ angular.module('OEPlayer')
 		player[playerName].timer = $interval(function(){
 			//just a timer
 			var getElapsed = function(){
+				console.log(playerName+' timer');
 				var position = player[playerName].getCurrentPosition(playerName);
 				if (position > -1) {
 					$scope.timer.durationSec = parseInt(player[playerName].getDuration(playerName));
@@ -742,18 +745,23 @@ angular.module('OEPlayer')
 				$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
 				shuffleArray($scope.playlist.tracks);
 				$scope.player.currentIndex = 0;
-				loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
-				//set timeout for push to play
-				var pushToPlayTimer = $timeout(function(){
-					$scope.pushToPlay = false;
-					crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out').then(function(){
-						preparePlaylist();
-						$timeout.cancel(pushToPlayTimer);
-						pushToPlayTimer = undefined;
-					});
-				},SettingsSrvc.pushToPlayTime*60*60*100);
+				prepareNextTrack($scope.currentTrack.playerName);
+				startPtpTimer();
 			});//hours to milliseconds, cancel push to play
 	});
+	var startPtpTimer = function(){
+		var time = SettingsSrvc.pushToPlayTime*3600000;
+		//set timeout for push to play
+		var startTimer = function(){
+			var pushToPlayTimer = $timeout(function(){
+				$scope.pushToPlay = false;
+				$timeout.cancel(pushToPlayTimer);
+				pushToPlayTimer = undefined;
+				console.log('push-to-play timer');
+			},time);
+		}
+		startTimer();
+	}
 	$scope.$on('$destroy', unbindPushToPlay);
 
 	var getEndTime = function(hours){
