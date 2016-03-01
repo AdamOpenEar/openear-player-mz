@@ -254,10 +254,10 @@ body > div > div{
     display: initial;
 }
 #track-duration{
-    left:28%;
+    left:30.5%;
 }
 #track-elapsed{
-    left:67%;
+    left:65.5%;
 }
 .skip-btn{
     position: absolute;
@@ -356,7 +356,7 @@ body > div > div{
     position: absolute;
     top:0;
     left:0;
-    font-size: 12px;
+    font-size: 1.7vh;
     width:100%;
     text-align: center;
     text-transform: uppercase;
@@ -365,20 +365,20 @@ body > div > div{
 #energy-slider-wrapper{
     width:10px;
     height:100%;
-    position: absolute;
-    top:54%;
+    position:absolute;
     left:44%;
+    top:54%;
 }
 #energy-slider-wrapper input{
     -webkit-transform:rotateZ(270deg);
     -webkit-appearance: none;
     position: absolute;
-    width:640px;
-    left:-3120%;
     background-color: #1c1d25;
     border-radius: 10px;
     height:10px;
     transition:0.2s;
+    left:-3120%;
+    width:640px;
 }
 #energy-slider-wrapper input::-webkit-slider-thumb{
     -webkit-appearance: none;
@@ -399,10 +399,10 @@ body > div > div{
 /*===== toggle ======*/
 .switch{
     height:29px;
-    position: absolute;
-    top:6%;
+    top:7%;
     left:0%;
     width:100%;
+    position:absolute;
 }
 .cmn-toggle {
     position: absolute;
@@ -923,7 +923,7 @@ input.cmn-toggle-round-flat:checked + label:after {
 .login-form img{
     width:20%;
     margin:0 auto;
-    top:25%;
+    top:18%;
     position:fixed;
     left:40%;
 }
@@ -931,7 +931,7 @@ input.cmn-toggle-round-flat:checked + label:after {
     width:50%;
     margin:0 auto;
     position:fixed;
-    top:33%;
+    top:24%;
     left:25%;
     background:#30343f;
     padding:20px;

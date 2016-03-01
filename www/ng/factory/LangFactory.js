@@ -169,13 +169,13 @@ angular.module('OEPlayer')
 				online:'en línea',
 				offline:'sin conexión',
 				lastplayed:{
-					title:'Ultima Reproducción (última reproducción)',
+					title:'Ultima Reproducción',
 					table:{
 						title:'Título',
-						album:'Album/álbum',
+						album:'Album',
 						artist:'Artista',
 						block:'Bloquear',
-						played:'Reproducida en'
+						played:'Reproducida a las'
 					}
 				}
 
@@ -184,7 +184,7 @@ angular.module('OEPlayer')
 				title:'Listas de reproducción',
 				table:{
 					title:'Título',
-					album:'Album/álbum',
+					album:'Album',
 					artist:'Artista',
 					block:'Bloquear',
 				}
@@ -193,7 +193,7 @@ angular.module('OEPlayer')
 				title:'En espera',
 				table:{
 					title:'Título',
-					album:'Album/álbum',
+					album:'Album',
 					artist:'Artista',
 					block:'Bloquear',
 					energy:'Energía'
@@ -217,7 +217,7 @@ angular.module('OEPlayer')
 			},
 			settings:{
 				title:'Preferencias',
-				language:'El idioma',
+				language:'Idioma',
 				fadein:'Tiempo de inicio gradual (segundos)',
 				fadeout:'Tiempo de terminación gradual (segundos)',
 				skip:'Saltar tiempo de terminación gradual (segundos)',
@@ -229,7 +229,7 @@ angular.module('OEPlayer')
 				dellib:'Borrar Biblioteca',
 				conflibdel:'¿Está usted seguro que desea borrar la biblioteca?',
 				confstored:'¿Está usted seguro que desea borrar los datos almacenados?',
-				changeLang:'Changing language will require a restart. Are you sure?'
+				changeLang:'Cambiar idioma requerirá reinicio. ¿Está seguro?'
 			}
 		}
 	};

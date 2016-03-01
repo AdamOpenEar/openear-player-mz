@@ -40,6 +40,9 @@ angular.module('OEPlayer')
 			level:5
 		};
 		$scope.player.online = $rootScope.online;
+
+		$scope.player.venueName = localStorage.getItem('venue');
+		
 		FileFactory.init()
 			.then(function(){
 				getSetttings();
@@ -103,7 +106,6 @@ angular.module('OEPlayer')
 
 	var getPlaylists = function(){
 		HTTPFactory.getPlaylists().success(function(data){
-			$scope.player.venueName = data.name;
 			if(data.playlists.length > 0){
 				writeJSONFiles('playlists',data,getTracksOnline);
 			} else {
@@ -339,7 +341,7 @@ angular.module('OEPlayer')
 			    var schedule = JSON.parse(data);
 				if(schedule.code === 0){
 					$rootScope.ready = true;
-					LogSrvc.logSystem('no playlist - music library');
+					LogSrvc.logSystem('no schedule - music library');
 					$scope.playlist.name = 'Music Library';
 					$scope.playlist.tracks = $scope.availableTracks;
 					shuffleArray($scope.playlist.tracks);
@@ -482,7 +484,6 @@ angular.module('OEPlayer')
 		player[playerName].timer = $interval(function(){
 			//just a timer
 			var getElapsed = function(){
-				console.log(playerName+' timer');
 				var position = player[playerName].getCurrentPosition(playerName);
 				if (position > -1) {
 					$scope.timer.durationSec = parseInt(player[playerName].getDuration(playerName));
