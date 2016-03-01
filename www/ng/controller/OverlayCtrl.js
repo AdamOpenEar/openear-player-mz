@@ -16,7 +16,7 @@ angular.module('OEPlayer')
 	$scope.closeOverlay = function(){
 		$scope.overlayTemplate = null;
 		$element.removeClass('active');
-		$rootScope.$emit('close-overlay');	
+		$rootScope.$emit('close-overlay');
 	};
 
 	$scope.$on('$destroy', unbindOpen);
@@ -74,10 +74,15 @@ angular.module('OEPlayer')
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
             SettingsSrvc.setSetting(setting,$scope.settings[setting]*100);
+        } else if(setting == 'languages'){
+            var c = confirm($scope.lang.settings.changeLang);
+            if(c){
+                SettingsSrvc.setSetting(setting,$scope.settings[setting]);
+                location.reload();
+            }
         } else {
             SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         }
-        
     };
 
     $scope.deleteLibrary = function(){

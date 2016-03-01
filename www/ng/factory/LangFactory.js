@@ -74,7 +74,8 @@ angular.module('OEPlayer')
 				delstored:'Delete Stored Data',
 				dellib:'Delete Library',
 				conflibdel:'Are you sure you want to delete the library?',
-				confstored:'Are you sure you want to delete stored data?'
+				confstored:'Are you sure you want to delete stored data?',
+				changeLang:'Changing language will require a restart. Are you sure?'
 			}
 		},
 		Portuguese:{
@@ -150,7 +151,8 @@ angular.module('OEPlayer')
 				delstored:'Excluir os dados armazenados',
 				dellib:'excluir Biblioteca',
 				conflibdel:'Tem certeza de que deseja excluir a biblioteca ?',
-				confstored:'Tem certeza de que quer apagar os dados armazenados ?'
+				confstored:'Tem certeza de que quer apagar os dados armazenados ?',
+				changeLang:'Changing language will require a restart. Are you sure?'
 			}
 		},
 		Spanish:{
@@ -167,13 +169,13 @@ angular.module('OEPlayer')
 				online:'en línea',
 				offline:'sin conexión',
 				lastplayed:{
-					title:'Ultima Reproducción (última reproducción)',
+					title:'Ultima Reproducción',
 					table:{
 						title:'Título',
-						album:'Album/álbum',
+						album:'Album',
 						artist:'Artista',
 						block:'Bloquear',
-						played:'Reproducida en'
+						played:'Reproducida a las'
 					}
 				}
 
@@ -182,7 +184,7 @@ angular.module('OEPlayer')
 				title:'Listas de reproducción',
 				table:{
 					title:'Título',
-					album:'Album/álbum',
+					album:'Album',
 					artist:'Artista',
 					block:'Bloquear',
 				}
@@ -191,7 +193,7 @@ angular.module('OEPlayer')
 				title:'En espera',
 				table:{
 					title:'Título',
-					album:'Album/álbum',
+					album:'Album',
 					artist:'Artista',
 					block:'Bloquear',
 					energy:'Energía'
@@ -215,7 +217,7 @@ angular.module('OEPlayer')
 			},
 			settings:{
 				title:'Preferencias',
-				language:'El idioma',
+				language:'Idioma',
 				fadein:'Tiempo de inicio gradual (segundos)',
 				fadeout:'Tiempo de terminación gradual (segundos)',
 				skip:'Saltar tiempo de terminación gradual (segundos)',
@@ -226,7 +228,8 @@ angular.module('OEPlayer')
 				delstored:'Borrar Datos Almacenados',
 				dellib:'Borrar Biblioteca',
 				conflibdel:'¿Está usted seguro que desea borrar la biblioteca?',
-				confstored:'¿Está usted seguro que desea borrar los datos almacenados?'
+				confstored:'¿Está usted seguro que desea borrar los datos almacenados?',
+				changeLang:'Cambiar idioma requerirá reinicio. ¿Está seguro?'
 			}
 		}
 	};

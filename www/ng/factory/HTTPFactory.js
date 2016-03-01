@@ -39,6 +39,9 @@ angular.module('OEPlayer')
         },
         checkOnline:function(){
         	return $http.head(config.api_url+'playlists');
+        },
+        reprocessFile:function(track){
+        	return $http.post(config.api_url+'reprocess-file',track);
         }
 	};
 }])

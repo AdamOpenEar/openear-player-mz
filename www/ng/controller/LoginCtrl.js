@@ -12,7 +12,9 @@ angular.module('OEPlayer')
 
             if(data.authToken){
             	$http.defaults.headers.common.Authentication = data.authToken;
-            	localStorage.setItem('Authentication',data.authToken);
+                localStorage.setItem('Authentication',data.authToken);
+                localStorage.setItem('lastLogin',new Date());
+            	localStorage.setItem('venue',data.venue.name);
         		$location.path( '/player' );
             } else {
                 $scope.message = data.error;

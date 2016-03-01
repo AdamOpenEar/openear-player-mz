@@ -116,7 +116,7 @@ html {
 }
 body {
     height: 100%;
-    background-color: #21242c;
+    background-color: #1c1d25;
     font-family: "montserratlight",sans-serif;
     overflow: hidden;
     position: relative;
@@ -140,6 +140,11 @@ body > div > div{
     float: left;
     position: relative;
     z-index: 999;
+    -webkit-transform: translate3d(-100%,0,0);
+    transition:0.2s;
+}
+#menu.display{
+    -webkit-transform: translate3d(0,0,0);
 }
 #menu i{
     display: block;
@@ -227,6 +232,7 @@ body > div > div{
     top:44%;
     left:50%;
     display: none;
+    transition: 0.2s;
 }
 #player-controls.display{
     display: initial;
@@ -242,12 +248,16 @@ body > div > div{
     position: absolute;
     font-size: 20px;
     top:29%;
+    display: none;
+}
+.track-timer.display{
+    display: initial;
 }
 #track-duration{
-    left:28%;
+    left:30.5%;
 }
 #track-elapsed{
-    left:67%;
+    left:65.5%;
 }
 .skip-btn{
     position: absolute;
@@ -281,7 +291,7 @@ body > div > div{
     width: 100%;
     left: 0;
     text-align: center;
-    top: 21%;
+    top: 18.5%;
 }
 #online-status span[disabled=disabled]{
     color: #30343f;
@@ -336,12 +346,17 @@ body > div > div{
     float: left;
     position: relative;
     padding:50px;
+    -webkit-transform: translate3d(200%,0,0) !important;
+    transition:0.2s;
+}
+#energy-slider.display{
+    -webkit-transform: translate3d(0,0,0) !important;
 }
 #energy-slider h2{
     position: absolute;
     top:0;
     left:0;
-    font-size: 12px;
+    font-size: 1.7vh;
     width:100%;
     text-align: center;
     text-transform: uppercase;
@@ -350,20 +365,20 @@ body > div > div{
 #energy-slider-wrapper{
     width:10px;
     height:100%;
-    position: absolute;
-    top:54%;
+    position:absolute;
     left:44%;
+    top:54%;
 }
 #energy-slider-wrapper input{
     -webkit-transform:rotateZ(270deg);
     -webkit-appearance: none;
     position: absolute;
-    width:640px;
-    left:-3120%;
     background-color: #1c1d25;
     border-radius: 10px;
     height:10px;
     transition:0.2s;
+    left:-3120%;
+    width:640px;
 }
 #energy-slider-wrapper input::-webkit-slider-thumb{
     -webkit-appearance: none;
@@ -384,10 +399,10 @@ body > div > div{
 /*===== toggle ======*/
 .switch{
     height:29px;
-    position: absolute;
-    top:6%;
+    top:7%;
     left:0%;
     width:100%;
+    position:absolute;
 }
 .cmn-toggle {
     position: absolute;
@@ -443,9 +458,9 @@ input.cmn-toggle-round-flat:checked + label:after {
     height: 100%;
 }
 #overlay{
-    width:93%;
+    width:82%;
     height:100%;
-    background-color: #30343F;
+    background-color: #1c1d25;
     z-index:99;
     position: fixed;
     left:7%;
@@ -456,7 +471,6 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 #player-wrapper.animations #overlay{
     transition:0.3s;
-    background-color:rgba(48, 52, 63,0.5);
 }
 #player-wrapper.animations #overlay.active{
     background-color:rgba(48, 52, 63,0.5);
@@ -475,7 +489,6 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 #player-wrapper.animations.overlay-active #blur-wrapper,
 #player-wrapper.animations.overlay-active #last-played,
-#player-wrapper.animations.overlay-active #energy-slider,
 #player-wrapper.animations.overlay-active .track-timer{
     -webkit-filter: blur(10px);
 }
@@ -502,7 +515,6 @@ input.cmn-toggle-round-flat:checked + label:after {
     z-index: 999;
     color: #f7f7f7;
     font-size: 21px;
-    padding: 5px 16px 5px 15px;
     border-bottom-right-radius: 6px;
     background-color:#9aa0b2;
     width: 5%;
@@ -512,6 +524,8 @@ input.cmn-toggle-round-flat:checked + label:after {
     margin-top: -6px;
     margin-right: -1px;
     border: 1px solid #9aa0b2;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
 }
 .overlay-btn-group{
     border:1px solid #9aa0b2;
@@ -893,6 +907,9 @@ input.cmn-toggle-round-flat:checked + label:after {
     width:50%;
     display: inline-block;
 }
+.settings-group button{
+    color: #000;
+}
 /* ===== login =====*/
 .login-form{
     position: fixed;
@@ -906,7 +923,7 @@ input.cmn-toggle-round-flat:checked + label:after {
 .login-form img{
     width:20%;
     margin:0 auto;
-    top:25%;
+    top:18%;
     position:fixed;
     left:40%;
 }
@@ -914,7 +931,7 @@ input.cmn-toggle-round-flat:checked + label:after {
     width:50%;
     margin:0 auto;
     position:fixed;
-    top:33%;
+    top:24%;
     left:25%;
     background:#30343f;
     padding:20px;
