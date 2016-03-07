@@ -8,8 +8,8 @@
         <thead>
             <tr>
                 <th>{{lang.queue.table.title}}</th>
-                <th>{{lang.queue.table.album}}</th>
                 <th>{{lang.queue.table.artist}}</th>
+                <th>{{lang.queue.table.album}}</th>
                 <th>{{lang.queue.table.energy}}</th>
                 <th>{{lang.queue.table.block}}</th>
             </tr>
@@ -17,8 +17,8 @@
         <tbody>
             <tr ng-repeat="track in tracks track by $index">
                 <td>{{track.title}}</td>
-                <td>{{track.album}}</td>
                 <td>{{track.artist}}</td>
+                <td>{{track.album}}</td>
                 <td>{{track.energy}}</td>
                 <td class="icon"><a ng-click="blockTrack(track)"><i class="fi-prohibited" ng-disabled="track.blocked"></i></a></td>
             </tr>

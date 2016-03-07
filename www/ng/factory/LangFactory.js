@@ -3,7 +3,7 @@ angular.module('OEPlayer')
 	var dictionary = {
 		English:{
 			menu:{
-				playlists:'playlists',
+				playlists:'push to play',
 				queue:'queue',
 				schedule:'schedule',
 				settings:'settings',
@@ -27,7 +27,7 @@ angular.module('OEPlayer')
 
 			},
 			playlists:{
-				title:'Playlists',
+				title:'Push to Play',
 				table:{
 					title:'Title',
 					album:'Album',

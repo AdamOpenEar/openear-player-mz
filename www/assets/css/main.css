@@ -101,7 +101,21 @@ html {
 *, *:before, *:after {
     box-sizing: inherit;
 }
-
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background-color: rgba(0,0,0,0); 
+}
+::-webkit-scrollbar-track-piece{
+    background-color: rgba(0,0,0,0);   
+}
+::-webkit-scrollbar-thumb {
+    background:#3498db;
+}
+::-webkit-scrollbar-corner {
+    display: none;  
+}
 @font-face {
     font-family: 'montserratlight';
     src: url('fonts/Montserrat-Light-webfont.eot');
@@ -247,17 +261,19 @@ body > div > div{
 .track-timer{
     position: absolute;
     font-size: 20px;
-    top:29%;
+    top:25%;
     display: none;
 }
 .track-timer.display{
     display: initial;
 }
 #track-duration{
-    left:30.5%;
+    right: 50%;
+    margin-right: 100px;
 }
 #track-elapsed{
-    left:65.5%;
+    left:50%;
+    margin-left:100px;
 }
 .skip-btn{
     position: absolute;
@@ -289,9 +305,9 @@ body > div > div{
     font-size: 12px;
     color: #26cd7d;
     width: 100%;
-    left: 0;
+    left: 1px;
     text-align: center;
-    top: 18.5%;
+    top: 17.5%;
 }
 #online-status span[disabled=disabled]{
     color: #30343f;
@@ -301,9 +317,9 @@ body > div > div{
     position: absolute;
     width:100%;
     top:50%;
-    padding:20px;
-    overflow: scroll;
+    padding:20px 20px 0px 20px;
     -webkit-overflow-scrolling: touch;
+    overflow: auto;
 }
 #player-wrapper.animations #last-played{
     transition: 0.3s !important;
@@ -319,7 +335,7 @@ body > div > div{
     text-align: center;
     display: block;
     font-size: 30px;
-    width: 70px;
+    width: 20px;
     margin: 0 auto;
 }
 #open-last-played:before{
@@ -424,6 +440,7 @@ input.cmn-toggle-round-flat + label {
   position:relative;
   width:80%;
   background-color:#000;
+  max-width: 100px;
 }
 input.cmn-toggle-round-flat + label:before,
 input.cmn-toggle-round-flat + label:after {

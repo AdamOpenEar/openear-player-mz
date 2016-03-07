@@ -14,16 +14,16 @@
             <thead>
                 <tr>
                     <th>{{lang.playlists.table.title}}</th>
-                    <th>{{lang.playlists.table.album}}</th>
                     <th>{{lang.playlists.table.artist}}</th>
+                    <th>{{lang.playlists.table.album}}</th>
                     <th>{{lang.playlists.table.block}}</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="track in playlist.tracks">
                     <td>{{track.title}}</td>
-                    <td>{{track.album}}</td>
                     <td>{{track.artist}}</td>
+                    <td>{{track.album}}</td>
                     <td class="icon"><a ng-click="blockTrack(track)"><i class="fi-prohibited" ng-disabled="track.blocked"></i></a></td>
                 </tr>
             </tbody>

@@ -62,7 +62,7 @@ angular.module('OEPlayer')
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
     $scope.settings.languages = SettingsSrvc.lang;
 
-    $scope.cfTimes = [1,2,3,4,5,6,7,8,9,10];
+    $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
     $scope.onlineCheck = [
         {type:1,name:'Standard'},

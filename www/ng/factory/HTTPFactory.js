@@ -5,6 +5,9 @@ angular.module('OEPlayer')
 		login:function(data){
 			return $http.post(config.api_url+'login',data);
 		},
+        loginHash:function(data){
+            return $http.post(config.api_url+'login-hash',data);
+        },
 		getPlaylists:function(){
 			return $http.get(config.api_url+'playlists');
 		},

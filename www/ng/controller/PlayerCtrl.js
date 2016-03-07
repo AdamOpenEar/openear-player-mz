@@ -17,6 +17,8 @@ angular.module('OEPlayer')
 	var init = function(){
 		StatusSrvc.setStatus('Loading...');
 		LogSrvc.logSystem('init called');
+		//set last restart time
+		localStorage.setItem('lastRestart',new Date());
 		$scope.status = StatusSrvc;
 		$rootScope.ready = false;
 

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#Version 3.0.03
+#Version 3.0.05
 
 NETWORK:
 *
@@ -14,6 +14,7 @@ bower_components/moment/min/moment.min.js
 bower_components/angular-moment/angular-moment.min.js
 bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
 
+ng/init.js
 ng/app.js
 ng/templates.js
 ng/controller/PlayerCtrl.js
@@ -35,6 +36,7 @@ ng/directive/ScheduleDirective.js
 #CSS
 assets/css/normalize.css
 assets/css/main.css
+assets/css/responsive.css
 assets/css/fonts/foundation-icons.css
 
 #Images
