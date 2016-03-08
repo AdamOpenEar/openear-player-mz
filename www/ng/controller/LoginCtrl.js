@@ -8,7 +8,7 @@ angular.module('OEPlayer')
 
     var query = $location.search();
 
-    if(typeof query !== 'undefined'){
+    if(Object.keys(query).length !== 0 && JSON.stringify(query) !== JSON.stringify({})){
         HTTPFactory.loginHash({loginHash:query.hash}).success(function(data){
             if(data.authToken){
                 $http.defaults.headers.common.Authentication = data.authToken;
