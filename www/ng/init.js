@@ -1,5 +1,5 @@
 // Check if a new cache is available on page load.
-window.addEventListener('load', function(e) {
+/*window.addEventListener('load', function(e) {
 
   window.applicationCache.addEventListener('updateready', function(e) {
     if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
@@ -10,7 +10,7 @@ window.addEventListener('load', function(e) {
     }
   }, false);
 
-}, false);
+}, false);*/
 document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 	var el = document.querySelector('body');
     angular.bootstrap(el, ['OEPlayer']);
