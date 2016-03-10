@@ -55,13 +55,11 @@ angular.module('OEPlayer')
 		    		mtTimer = undefined;
 		    		$scope.restart();
 		    	},millisTillFourAM);
-		    }
+		    };
 	    	mtTimerStart();
 		};
 		//start restart timer
 		mtStart();
-
-
 		
 		FileFactory.init()
 			.then(function(){
