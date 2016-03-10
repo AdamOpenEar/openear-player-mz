@@ -85,6 +85,16 @@ angular.module('OEPlayer')
 					deferred.reject(error);
 				});
 			return deferred.promise;	
+		},
+		getMetadata:function(path,file){
+			var deferred = $q.defer();
+			FileSystem.getMetadata(path,file)
+				.then(function(results){
+					deferred.resolve(results);
+				},function(error){
+					deferred.reject(error);
+				});
+			return deferred.promise;	
 		}
 	};
 }]);

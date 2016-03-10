@@ -21,6 +21,9 @@ angular.module('OEPlayer')
                 $scope.message = data.error;
             }
         });
+    } else if(localStorage.getItem('Authentication')){
+        $http.defaults.headers.common.Authentication = localStorage.getItem('Authentication');
+        $location.path( '/player' );
     } 
 
     $scope.processLogin = function(){
@@ -39,11 +42,11 @@ angular.module('OEPlayer')
 
             HTTPFactory.login($scope.formData).success(function(data){
                 if(data.authToken){
-                	$http.defaults.headers.common.Authentication = data.authToken;
+                    $http.defaults.headers.common.Authentication = data.authToken;
                     localStorage.setItem('Authentication',data.authToken);
                     localStorage.setItem('lastLogin',new Date());
-                	localStorage.setItem('venue',data.venue[0].name);
-            		$location.path( '/player' );
+                    localStorage.setItem('venue',data.venue[0].name);
+                    $location.path( '/player' );
                 } else {
                     $scope.message = data.error;
                 }
@@ -57,7 +60,7 @@ angular.module('OEPlayer')
         var today = new Date();
         var timeDiff = Math.abs(today.getTime() - lastLogin.getTime());
         var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        return diffDays > 90 ? false : true;
+        return diffDays > 30 ? false : true;
     };
 
 }]);

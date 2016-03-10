@@ -1,7 +1,7 @@
 /*jshint -W083 */
 angular.module('OEPlayer')
 
-.controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http','MediaFactory','LangFactory',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http,MediaFactory,LangFactory){
+.controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http','MediaFactory','LangFactory','socket',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http,MediaFactory,LangFactory,socket){
 	
 	$scope.lang = LangFactory;
 
@@ -15,7 +15,6 @@ angular.module('OEPlayer')
 	var player = {};
 
 	var init = function(){
-		StatusSrvc.setStatus('Loading...');
 		LogSrvc.logSystem('init called');
 		//set last restart time
 		localStorage.setItem('lastRestart',new Date());
@@ -25,8 +24,10 @@ angular.module('OEPlayer')
 		$scope.player = {
 			lastPlayed:[],
 			currentIndex:0,
-			online:true
+			online:true,
+			venueName:localStorage.getItem('venue')
 		};
+		StatusSrvc.setStatus('Loading '+$scope.player.venueName+'...');
 		
 		$scope.unavailableTracks = [];
 		$scope.availableTracks = [];
@@ -42,8 +43,25 @@ angular.module('OEPlayer')
 			level:5
 		};
 		$scope.player.online = $rootScope.online;
+	    var mtStart = function(){
+			var nowToday = new Date();
+	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, 4, 0, 0, 0) - nowToday;
+	    	if (millisTillFourAM < 0) {
+	    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
+	    	}
+		    var mtTimerStart = function(){
+		    	var mtTimer = $timeout(function(){
+		    		$timeout.cancel(mtTimer);
+		    		mtTimer = undefined;
+		    		$scope.restart();
+		    	},millisTillFourAM);
+		    }
+	    	mtTimerStart();
+		};
+		//start restart timer
+		mtStart();
 
-		$scope.player.venueName = localStorage.getItem('venue');
+
 		
 		FileFactory.init()
 			.then(function(){
@@ -53,20 +71,6 @@ angular.module('OEPlayer')
 			});
 	};
 
-    var mtStart = function(){
-		var nowToday = new Date();
-    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, 4, 0, 0, 0) - nowToday;
-    	if (millisTillFourAM < 0) {
-    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
-    	}
-	    var mtTimerStart = function(){
-	    	var mtTimer = $timeout(function(){
-	    		$timeout.cancel(mtTimer);
-	    		mtTimer = undefined;
-	    		$scope.restart();
-	    	},millisTillFourAM);
-	    }
-    	mtTimerStart();
 	};
 	//start restart timer
 	mtStart();
@@ -188,10 +192,20 @@ angular.module('OEPlayer')
 						//remove duff files
 						if(tracksLocal[j].indexOf('.mp3') == -1){
 							FileFactory.deleteFile('',tracksLocal[j])
-							.then(function(res){
-								LogSrvc.logSystem(res);
-							});
+								.then(function(res){
+									LogSrvc.logSystem(res);
+								});
 						}else if(tracksLocal[j].replace('.mp3','') == tracksServer[i].id){
+							//check file metadata
+							FileFactory.getMetadata('',tracksLocal[j])
+								.then(function(res){
+									if(res.size < 2000){
+										FileFactory.deleteFile('',tracksLocal[j])
+											.then(function(res){
+												LogSrvc.logSystem(res);
+											});
+									}
+								});
 							//we have the file so no need to get
 							$scope.availableTracks.push(tracksServer[i]);
 							tracksLocal.splice(j,1);
@@ -222,7 +236,7 @@ angular.module('OEPlayer')
 				//set status
 				if($scope.unavailableTracks.length > 0){
 					StatusSrvc.setStatus('Dowloading track '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
-					downloadTrack($scope.unavailableTracks[0]);
+					downloadTracks($scope.unavailableTracks);
 				} else {
 					//disable controls until fadein finished
 					$scope.swappingTracks = true;
@@ -247,20 +261,37 @@ angular.module('OEPlayer')
 			});
 	};
 
+	var downloadTracks = function(tracks){
+		for (var i = tracks.length - 1; i >= 0; i--) {
+			downloadTrack(tracks[i]);
+		}
+	}
+
 	var downloadTrack = function(track){
 		HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
 			FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 				.then(function(res){
 					LogSrvc.logSystem(res);
-					getNextTrack(track);
+					$scope.availableTracks.push(track);
+					var index = $scope.unavailableTracks.indexOf(track);
+					$scope.unavailableTracks.splice(index,1);
+					StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
+					//if all downloaded
+					if($scope.unavailableTracks.length == 0){
+						$scope.swappingTracks = true;
+						StatusSrvc.clearStatus();
+						preparePlaylist();
+					}
+					//getNextTrack(track);
 				},function(error){
 					LogSrvc.logError(error);
+					window.location.reload();
 				});
 		}).error(function(err){
 			LogSrvc.logError(err);
 			HTTPFactory.reprocessFile(track).success(function(){
 				$scope.processingTracks.push(track);
-				getNextTrack(track);
+				//getNextTrack(track);
 			});
 		});
 	};
@@ -276,22 +307,6 @@ angular.module('OEPlayer')
 				LogSrvc.logSystem(error);
 				downloadTrack(track);
 			});
-	};
-
-	var getNextTrack = function(track){
-		$scope.availableTracks.push(track);
-		var index = $scope.unavailableTracks.indexOf(track);
-		$scope.unavailableTracks.splice(index,1);
-		StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
-		//check here for proportion of available to play from
-		if($scope.unavailableTracks.length > 0){
-			downloadTrack($scope.unavailableTracks[0]);
-		} else {
-			//disable controls until fadein finished
-			$scope.swappingTracks = true;
-			StatusSrvc.clearStatus();
-			preparePlaylist();
-		}
 	};
 
 	var checkPlaylistStart = function(playlist){
@@ -477,28 +492,34 @@ angular.module('OEPlayer')
 
 	var loadTrack = function(playerName,track){
 
-		$scope.initialising = false;
-		LogSrvc.logSystem('playing '+track.id+' player name '+playerName);
-		$scope.currentTrack = track;
-		$scope.currentTrack.playerName = playerName;
-		var duration;
-		$scope.timer = {elapsed:'0:00',duration:'0:00'};
+		try{
+			$scope.initialising = false;
+			LogSrvc.logSystem('playing '+track.id+' player name '+playerName);
+			$scope.currentTrack = track;
+			$scope.currentTrack.playerName = playerName;
+			var duration;
+			$scope.timer = {elapsed:'0:00',duration:'0:00'};
 
-		var src = track.id+config.file_extention;
-		player[playerName] = new MediaFactory(playerName);
-		player[playerName].init(src)
-			.then(function(){
-				player[playerName].setVolume(0,playerName);
-				player[playerName].play();
-				crossfade(playerName,SettingsSrvc.crossfadeIn,'in',true)
-					.then(function(){
-						$scope.swappingTracks = false;
-					});
-				startTimer(playerName);
-			},function(error){
-				LogSrvc.logError(error);
-				prepareNextTrack(playerName);
-			});
+			var src = track.id+config.file_extention;
+			player[playerName] = new MediaFactory(playerName);
+			player[playerName].init(src)
+				.then(function(){
+					player[playerName].setVolume(0,playerName);
+					player[playerName].play();
+					crossfade(playerName,SettingsSrvc.crossfadeIn,'in',true)
+						.then(function(){
+							$scope.swappingTracks = false;
+						});
+					startTimer(playerName);
+				},function(error){
+					LogSrvc.logError(error);
+					prepareNextTrack(playerName);
+				});
+		}
+		catch(e){
+			LogSrvc.logError(e);
+			window.location.reload();
+		}
 	};
 	var startTimer = function(playerName){
 		player[playerName].timer = $interval(function(){

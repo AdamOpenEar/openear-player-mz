@@ -635,6 +635,22 @@ angular.module('OEPlayer')
                 q.reject(cordovaFileError[e.code]);
             }
             return q.promise;
+        },
+        getMetadata:function(path,file){
+            var q = $q.defer();
+            if ((/^\//.test(file))) {
+                q.reject('file-name cannot start with \/');
+            }
+            try {
+                  $fs.root.getFile( file , {}, function(fileEntry) {
+                      fileEntry.getMetadata(function(metadata) {
+                          q.resolve(metadata);
+                      });
+                });
+            } catch(e){
+                q.reject(cordovaFileError[e.code]);
+            }
+            return q.promise;
         }
     };
 }]);
