@@ -43,24 +43,7 @@ angular.module('OEPlayer')
 			level:5
 		};
 		$scope.player.online = $rootScope.online;
-	    var mtStart = function(){
-			var nowToday = new Date();
-	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, 4, 0, 0, 0) - nowToday;
-	    	if (millisTillFourAM < 0) {
-	    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
-	    	}
-		    var mtTimerStart = function(){
-		    	var mtTimer = $timeout(function(){
-		    		$timeout.cancel(mtTimer);
-		    		mtTimer = undefined;
-		    		$scope.restart();
-		    	},millisTillFourAM);
-		    };
-	    	mtTimerStart();
-		};
-		//start restart timer
-		mtStart();
-		
+
 		FileFactory.init()
 			.then(function(){
 				getSetttings();
