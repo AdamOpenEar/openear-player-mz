@@ -71,7 +71,6 @@ angular.module('OEPlayer')
 			});
 	};
 
-	};
 
 	//watch online status
 	$scope.$watch('online', function(newStatus) {
