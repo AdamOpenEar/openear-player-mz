@@ -72,8 +72,6 @@ angular.module('OEPlayer')
 	};
 
 	};
-	//start restart timer
-	mtStart();
 
 	//watch online status
 	$scope.$watch('online', function(newStatus) {
