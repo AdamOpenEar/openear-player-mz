@@ -3,7 +3,7 @@
         <img src="assets/img/logo.png">
         <i ng-repeat="item in menu track by $index" ng-click="swappingTracks || openOverlay(item.name)" class="fi-{{item.icon}}" ng-class="{active:item.active}" ng-disabled="swappingTracks"><span>{{item.display}}</span></i>
         <i ng-click="swappingTracks || restart()" ng-disabled="swappingTracks" class="fi-loop"><span>{{lang.menu.restart}}</span></i>
-        <i ng-click="logOff()" class="fi-power"><span>{{lang.menu.logout}}</span></i>
+        <i ng-click="swappingTracks || logOff()" ng-disabled="swappingTracks" class="fi-power"><span>{{lang.menu.logout}}</span></i>
     </div>
     <div id="main">
         <div id="blur-wrapper">
@@ -13,7 +13,7 @@
             <div id="track-info" ng-class="{display:ready}">
                 <div id="track-title">{{currentTrack.title}}</div>
                 <div id="track-artist">{{currentTrack.artist}}</div>
-                <div id="track-playlist">{{player.venueName}} - {{playlist.name}} {{pushToPlay ? ' - Push to play ' : ''}} {{playlist.end ? ' - ends '+playlist.end : ''}}</div>
+                <div id="track-playlist">{{player.venueName}} - {{playlist.name}} {{pushToPlay.status ? ' - Push to play ' : ''}} {{playlist.end ? ' - ends '+playlist.end : ''}}</div>
             </div>
             <div id="download-progress" class="progress-circle" ng-class="{display:!ready}">
                 <div

@@ -25,6 +25,9 @@ angular.module('OEPlayer')
 		play: function(){
 			self[self.playerName].createdMedia.play();
 		},
+		isPlaying:function(playerName){
+			return !self[self.playerName].createdMedia.paused;
+		},
 		setVolume:function(vol,playerName){
 			self[playerName].createdMedia.volume = vol;
 		},

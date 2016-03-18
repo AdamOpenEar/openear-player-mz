@@ -50,7 +50,7 @@ angular.module('OEPlayer')
     	};
     };
 }])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc',function($scope,SettingsSrvc,FileFactory,LogSrvc){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config',function($scope,SettingsSrvc,FileFactory,LogSrvc,config){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -70,6 +70,7 @@ angular.module('OEPlayer')
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
+    $scope.version = config.version;
 
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
