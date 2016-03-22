@@ -15,7 +15,10 @@ angular.module('OEPlayer')
 })
 .factory('FileSystem',['LogSrvc','$q','$window','config','cordovaFileError',function(LogSrvc,$q,$window,config,cordovaFileError){
 
-    var oefs = {};
+    var oefs = {
+        fs:{},
+        c:0
+    };
 
     return {
 
@@ -47,6 +50,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         checkDir: function (path, dir) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(dir))) {
@@ -73,6 +77,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         checkFile: function (path, file) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(file))) {
@@ -94,6 +99,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         createDir: function (path, dirName, replaceBool) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(dirName))) {
@@ -122,6 +128,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         createFile: function (path, fileName, replaceBool) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(fileName))) {
@@ -149,6 +156,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         removeDir: function (path, dirName) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(dirName))) {
@@ -174,6 +182,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         removeFile: function (path, fileName) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(fileName))) {
@@ -199,6 +208,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         removeRecursively: function (path, dirName) {
+            oefs.c++;
           var q = $q.defer();
 
           if ((/^\//.test(dirName))) {
@@ -224,6 +234,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         writeFile: function (path, fileName, text, replaceBool) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(fileName))) {
@@ -275,6 +286,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         writeExistingFile: function (path, fileName, text) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(fileName))) {
@@ -313,6 +325,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         readAsText: function (path, file) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(file))) {
@@ -349,6 +362,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         readAsDataURL: function (path, file) {
+            oefs.c++;
           var q = $q.defer();
 
           if ((/^\//.test(file))) {
@@ -383,6 +397,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         readAsBinaryString: function (path, file) {
+            oefs.c++;
             var q = $q.defer();
 
             if ((/^\//.test(file))) {
@@ -417,6 +432,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         readAsArrayBuffer: function (path, file) {
+            oefs.c++;
           var q = $q.defer();
 
           if ((/^\//.test(file))) {
@@ -450,6 +466,7 @@ angular.module('OEPlayer')
           return q.promise;
         },
         moveFile: function (path, fileName, newPath, newFileName) {
+            oefs.c++;
           var q = $q.defer();
 
           newFileName = newFileName || fileName;
@@ -479,6 +496,7 @@ angular.module('OEPlayer')
           return q.promise;
         },
         moveDir: function (path, dirName, newPath, newDirName) {
+            oefs.c++;
           var q = $q.defer();
 
           newDirName = newDirName || dirName;
@@ -511,6 +529,7 @@ angular.module('OEPlayer')
           return q.promise;
         },
         copyDir: function (path, dirName, newPath, newDirName) {
+            oefs.c++;
           var q = $q.defer();
 
           newDirName = newDirName || dirName;
@@ -549,6 +568,7 @@ angular.module('OEPlayer')
           return q.promise;
         },
         copyFile: function (path, fileName, newPath, newFileName) {
+            oefs.c++;
           var q = $q.defer();
 
           newFileName = newFileName || fileName;
@@ -587,7 +607,7 @@ angular.module('OEPlayer')
           return q.promise;
         },
         readDirectory:function(path){
-
+            oefs.c++;
             var q = $q.defer();
 
             //if ((/^\//.test(path))) {
@@ -620,6 +640,7 @@ angular.module('OEPlayer')
             return q.promise;
         },        
         deleteFile:function(path,file){
+            oefs.c++;
             var q = $q.defer();
             if ((/^\//.test(file))) {
                 q.reject('file-name cannot start with \/');
@@ -637,6 +658,7 @@ angular.module('OEPlayer')
             return q.promise;
         },
         getMetadata:function(path,file){
+            oefs.c++;
             var q = $q.defer();
             if ((/^\//.test(file))) {
                 q.reject('file-name cannot start with \/');
