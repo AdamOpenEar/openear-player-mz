@@ -97,7 +97,7 @@ angular.module('OEPlayer')
                                 LogSrvc.logSystem(res);
                             });
                     }
-                    $scope.restart();
+                    window.location.reload();
                 });
         }
     };
@@ -114,7 +114,7 @@ angular.module('OEPlayer')
                                 });
                         }
                     }
-                    $scope.restart();
+                    window.location.reload();
                 });
         }
     };
