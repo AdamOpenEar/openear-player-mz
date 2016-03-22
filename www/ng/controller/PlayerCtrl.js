@@ -585,9 +585,10 @@ angular.module('OEPlayer')
 							var checkPlaying = function(){
 								if(isNaN(player[playerName].getDuration(playerName))){
 									LogSrvc.logSystem('next track playback error');
-									$interval.cancel(player[playerName].timer);
-									player[playerName].timer = undefined;
-									prepareNextTrack(playerName);
+									//$interval.cancel(player[playerName].timer);
+									//player[playerName].timer = undefined;
+									//prepareNextTrack(playerName);
+									window.location.reload();
 								} else {
 									LogSrvc.logSystem('track playing');
 								}
