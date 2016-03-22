@@ -311,15 +311,17 @@ angular.module('OEPlayer')
 								var currentPlaylist = data;
 								var unavailableTracks = angular.copy($scope.unavailableTracks);
 								$scope.unavailableTracks = [];
+								
+								
 								//order download by playing playlist
-								for (var i = unavailableTracks.length - 1; i >= 0; i--) {
-									for (var j = currentPlaylist.length - 1; j >= 0; j--) {
-										if(unavailableTracks[i].id == currentPlaylist[j].id){
-											$scope.unavailableTracks.push(currentPlaylist[j]);
-											unavailableTracks.splice(i,1);
+								angular.forEach(unavailableTracks,function(unavailable,index){
+									angular.forEach(currentPlaylist,function(current){
+										if(unavailable.id == current.id){
+											$scope.unavailableTracks.push(current);
+											unavailableTracks.splice(index,1);
 										}
-									}
-								}
+									})
+								});
 								$scope.unavailableTracks.push.apply($scope.unavailableTracks,unavailableTracks);
 								$scope.unavailableTracks.reverse();
 								downloadTracks();
@@ -630,7 +632,6 @@ angular.module('OEPlayer')
 							.then(function(){
 								addToLastPlayed($scope.currentTrack);
 								logTrack($scope.currentTrack);
-								console.log('prepare name ='+playerName);
 								prepareNextTrack(playerName);
 							});
 					}
