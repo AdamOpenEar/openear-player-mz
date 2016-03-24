@@ -52,7 +52,7 @@ angular.module('OEPlayer')
 	return {
         'responseError': function(rejection) {
             // do something on error
-            if(rejection.status === 401 || rejection.status === 500){
+            if(rejection.status === 401){
             	$rootScope.$emit('global-pause');
                 $location.path('/login');
             }
