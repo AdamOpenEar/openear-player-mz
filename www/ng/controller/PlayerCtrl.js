@@ -66,7 +66,7 @@ angular.module('OEPlayer')
 		//start restart timer
 		mtStart();
 		//sockets
-		socket = new SocketFactory('wss://rocky-woodland-21152.herokuapp.com');
+		socket = new SocketFactory('wss://openear-ws.herokuapp.com');
 		//socket = new SocketFactory('ws://localhost:5000');
 		$scope.$on('socket:open',function(event,data){
 			socket.send('playerInit',null);
