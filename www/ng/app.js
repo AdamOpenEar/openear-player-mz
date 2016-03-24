@@ -41,7 +41,7 @@ angular.module('OEPlayer',[
   	//FastClick.attach(document.body);
 }])
 .constant('config',{
-    'api_url':'http://www.openearmusic.com/api/ios/',
+    'api_url':'https://www.openearmusic.com/api/ios/',
     'module_dir':'ng',
     'music_library_url':'http://www.openearmusic.com/system/uploads/',
     'local_path':'/',
