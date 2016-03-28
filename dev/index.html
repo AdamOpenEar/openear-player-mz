@@ -1,0 +1,47 @@
+<!doctype html>
+<!--<html class="no-js" lang="" manifest="cache.manifest">-->
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>OpenEar Player | vundefined</title>
+        <meta name="description" content="">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+        <script src="bower_components/angular/angular.js"></script>
+        <script src="bower_components/angular-route/angular-route.min.js"></script>
+        <script src="bower_components/moment/min/moment.min.js"></script>
+        <script src="bower_components/angular-moment/angular-moment.min.js"></script>
+        <script src="bower_components/angular-svg-round-progressbar/build/roundProgress.min.js"></script>
+
+        <script src="ng/init.js"></script>
+        <link rel="stylesheet" href="assets/css/normalize.css">
+        <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="assets/css/responsive.css">
+        <link rel="stylesheet" href="assets/css/fonts/foundation-icons.css">
+
+    </head>
+    <body>
+
+        <div ng-view></div>
+        <script src="ng/app.js"></script>
+        <script src="assets/js/templates.js"></script>
+        <script src="ng/controller/PlayerCtrl.js"></script>
+        <script src="ng/controller/LogCtrl.js"></script>
+        <script src="ng/controller/LoginCtrl.js"></script>
+        <script src="ng/controller/OverlayCtrl.js"></script>
+        <script src="ng/factory/FileFactory.js"></script>
+        <script src="ng/factory/HTTPFactory.js"></script>
+        <script src="ng/factory/MediaFactory.js"></script>
+        <script src="ng/factory/LangFactory.js"></script>
+        <script src="ng/factory/SocketFactory.js"></script>
+        <script src="ng/lib/FileSystem.js"></script>
+        <script src="ng/service/LogSrvc.js"></script>
+        <script src="ng/service/StatusSrvc.js"></script>
+        <script src="ng/service/PlayerSrvc.js"></script>
+        <script src="ng/service/OverlaySrvc.js"></script>
+        <script src="ng/service/SettingsSrvc.js"></script>
+        <script src="ng/directive/ScheduleDirective.js"></script>
+    </body>
+</html>

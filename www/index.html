@@ -1,46 +1,26 @@
 <!doctype html>
-<!--<html class="no-js" lang="" manifest="cache.manifest">-->
-<html class="no-js" lang="">
+<html class="no-js" lang="" manifest="cache.manifest">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>OpenEar Player | v3.1.1</title>
+        <title>OpenEar Player | v3.1.1-0.1.1</title>
         <meta name="description" content="">
 
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
         <!-- Place favicon.ico in the root directory -->
+
+
+        <link rel="stylesheet" href="assets/css/openear-player-v3.min.css?v=1459186677130">
+    </head>
+    <body>
+
+        <div ng-view></div>
         <script src="bower_components/angular/angular.min.js"></script>
         <script src="bower_components/angular-route/angular-route.min.js"></script>
         <script src="bower_components/moment/min/moment.min.js"></script>
         <script src="bower_components/angular-moment/angular-moment.min.js"></script>
         <script src="bower_components/angular-svg-round-progressbar/build/roundProgress.min.js"></script>
-
-        <script src="ng/init.js"></script>
-        <link rel="stylesheet" href="assets/css/normalize.css">
-        <link rel="stylesheet" href="assets/css/main.css">
-        <link rel="stylesheet" href="assets/css/responsive.css">
-        <link rel="stylesheet" href="assets/css/fonts/foundation-icons.css">
-    </head>
-    <body>
-
-        <div ng-view></div>
-        <script src="ng/app.js"></script>
-        <script src="ng/templates.js"></script>
-        <script src="ng/controller/PlayerCtrl.js"></script>
-        <script src="ng/controller/LogCtrl.js"></script>
-        <script src="ng/controller/LoginCtrl.js"></script>
-        <script src="ng/controller/OverlayCtrl.js"></script>
-        <script src="ng/factory/FileFactory.js"></script>
-        <script src="ng/factory/HTTPFactory.js"></script>
-        <script src="ng/factory/MediaFactory.js"></script>
-        <script src="ng/factory/LangFactory.js"></script>
-        <script src="ng/factory/SocketFactory.js"></script>
-        <script src="ng/lib/FileSystem.js"></script>
-        <script src="ng/service/LogSrvc.js"></script>
-        <script src="ng/service/StatusSrvc.js"></script>
-        <script src="ng/service/PlayerSrvc.js"></script>
-        <script src="ng/service/OverlaySrvc.js"></script>
-        <script src="ng/service/SettingsSrvc.js"></script>
-        <script src="ng/directive/ScheduleDirective.js"></script>
+        <script src="assets/js/openear-player-v3.min.js?v=1459186677130"></script>
+        <script src="assets/js/templates.js?v=1459186677130"></script>
     </body>
 </html>
