@@ -20,13 +20,14 @@ angular.module('OEPlayer')
                     self.socket.send(JSON.stringify(data));
                 };
                 pingStart();
-            },30000);
+            },10000);
             $rootScope.$broadcast('socket:open');
         },
         close:function(){
             $rootScope.$broadcast('socket:closed');
         },
         receive:function(data){
+            console.log(JSON.parse(data.data));
             $rootScope.$broadcast('socket:message',JSON.parse(data.data));
         },
         send:function(event,dt){

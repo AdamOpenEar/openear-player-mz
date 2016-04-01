@@ -66,8 +66,8 @@ angular.module('OEPlayer')
 		//start restart timer
 		mtStart();
 		//sockets
-		socket = new SocketFactory('wss://openear-ws.herokuapp.com');
-		//socket = new SocketFactory('ws://localhost:5000');
+		//socket = new SocketFactory('wss://openear-ws.herokuapp.com');
+		socket = new SocketFactory('ws://localhost:5000');
 		$scope.$on('socket:open',function(event,data){
 			socket.send('playerInit',null);
 		});
@@ -75,22 +75,37 @@ angular.module('OEPlayer')
 			console.log('closed');
 		});
 		$scope.$on('socket:message',function(event,data){
-			switch(data.event){
-				case 'manReady':
-					if(!$scope.swappingTracks && $rootScope.ready){
-						socket.send('ready',null);
-					}
-					break;
-				case 'skipForward':
-					if(!$scope.swappingTracks){
-						$scope.skipForward();
-					}
-					break;
-				case 'skipBack':
-					if(!$scope.swappingTracks){
-						$scope.skipBack();
-					}
-					break;
+			var auth = localStorage.getItem('Authentication');
+			if(data.token === auth){
+				switch(data.event){
+					case 'manReady':
+						if(!$scope.swappingTracks && $rootScope.ready){
+							socket.send('ready',null);
+						}
+						break;
+					case 'skipForward':
+						if(!$scope.swappingTracks){
+							$scope.skipForward();
+						}
+						break;
+					case 'skipBack':
+						if(!$scope.swappingTracks){
+							$scope.skipBack();
+						}
+						break;
+					case 'playPause':
+						if(!$scope.swappingTracks){
+							$scope.playPause();
+						}
+						break;
+					case 'restartPlayer':
+						if(!$scope.swappingTracks){
+							$scope.restart();
+						}
+						break;
+				}
+			} else {
+				LogSrvc.logSystem('Not authenticated');
 			}
 		});
 		
@@ -586,19 +601,19 @@ angular.module('OEPlayer')
 					if(!$scope.initialising){
 						var checkTimeout = $timeout(function(){
 							var checkPlaying = function(){
-								if(isNaN(player[playerName].getDuration(playerName))){
+								var position = player[playerName].getCurrentPosition(playerName);
+								if(position < 1){
 									LogSrvc.logSystem('next track playback error');
-									//$interval.cancel(player[playerName].timer);
-									//player[playerName].timer = undefined;
-									//prepareNextTrack(playerName);
-									window.location.reload();
+									$interval.cancel(player[playerName].timer);
+									player[playerName].timer = undefined;
+									prepareNextTrack(playerName);
 								} else {
 									LogSrvc.logSystem('track playing');
 								}
 								$timeout.cancel(checkTimeout);
 							};
 							checkPlaying();
-						},5000);
+						},10000);
 					}
 					startTimer(playerName);
 				},function(error){
@@ -696,6 +711,7 @@ angular.module('OEPlayer')
 
 	var addToLastPlayed = function(track){
 		track.time = getTime();
+		socket.send('lastPlayed',track);
 		if($scope.player.lastPlayed.length > 50){
 			$scope.player.lastPlayed.splice($scope.player.lastPlayed.length - 1,1);
 			$scope.player.lastPlayed.unshift(track);
@@ -781,12 +797,16 @@ angular.module('OEPlayer')
 			crossfade($scope.currentTrack.playerName,50,'in',true).then(function(){
 				$scope.currentTrack.isPaused = !$scope.currentTrack.isPaused;
 				$scope.swappingTracks = false;
+				socket.send('ready',null);
+				socket.send('currentTrack',$scope.currentTrack);
 			});
 		} else {
 			crossfade($scope.currentTrack.playerName,50,'out',true,true).then(function(){
 				player[$scope.currentTrack.playerName].pause($scope.currentTrack.playerName);
 				$scope.currentTrack.isPaused = !$scope.currentTrack.isPaused;
 				$scope.swappingTracks = false;
+				socket.send('ready',null);
+				socket.send('currentTrack',$scope.currentTrack);
 			});
 		}
 	};
