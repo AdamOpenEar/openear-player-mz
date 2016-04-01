@@ -531,7 +531,7 @@ angular.module('OEPlayer')
 		//now check if current playlist valid
 		if(checkPlaylistStart($scope.playlist) || $scope.pushToPlay.status || $scope.energy.status){
 			//reset index if past length
-			if($scope.player.currentIndex > $scope.playlist.tracks.length - 1){
+			if($scope.player.currentIndex >= $scope.playlist.tracks.length - 1){
 				$scope.player.currentIndex = 0;
 			} else {
 				$scope.player.currentIndex++;
