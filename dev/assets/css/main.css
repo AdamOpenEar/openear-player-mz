@@ -964,6 +964,7 @@ input.cmn-toggle-round-flat:checked + label:after {
     border: none;
     border-bottom:1px solid #fff;
     background:transparent;
+    color:#fff;
 }
 .login-form form input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 1000px #1c1d25 inset;

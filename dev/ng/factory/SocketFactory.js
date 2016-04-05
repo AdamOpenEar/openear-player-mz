@@ -27,7 +27,6 @@ angular.module('OEPlayer')
             $rootScope.$broadcast('socket:closed');
         },
         receive:function(data){
-            console.log(JSON.parse(data.data));
             $rootScope.$broadcast('socket:message',JSON.parse(data.data));
         },
         send:function(event,dt){
@@ -40,6 +39,9 @@ angular.module('OEPlayer')
         },
         error:function(err){
             LogSrvc.logError(err);
+        },
+        endConnection:function(){
+            self.socket.close();
         }
 
     };

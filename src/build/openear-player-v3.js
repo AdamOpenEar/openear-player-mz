@@ -37,17 +37,14 @@ angular.module('OEPlayer',[
             $rootScope.online = true;
         });
       }, false);
-  	//this runs the fast click javascript library to stop the 300ms touch screen delay
-  	//FastClick.attach(document.body);
 }])
 .constant('config',{
     'api_url':'https://www.openearmusic.com/api/ios/',
     'module_dir':'ng',
-    'music_library_url':'http://www.openearmusic.com/system/uploads/',
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.1.1-0.1.1'
+    'version':'3.1.1-0.1.3'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -496,6 +493,7 @@ angular.module('OEPlayer')
 
 	var player;
 	var socket;
+	$scope.initialising = false;
 
 	var init = function(){
 
@@ -548,8 +546,10 @@ angular.module('OEPlayer')
 		//start restart timer
 		mtStart();
 		//sockets
-		//socket = new SocketFactory('wss://openear-ws.herokuapp.com');
-		socket = new SocketFactory('ws://localhost:5000');
+		if(!$scope.initialising){
+			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
+			//socket = new SocketFactory('ws://localhost:5000');
+		}
 		$scope.$on('socket:open',function(event,data){
 			socket.send('playerInit',null);
 		});
@@ -583,6 +583,39 @@ angular.module('OEPlayer')
 					case 'restartPlayer':
 						if(!$scope.swappingTracks){
 							$scope.restart();
+						}
+						break;
+					case 'pushToPlayID':
+						if(!$scope.swappingTracks){
+							var playlistID = data.data;
+							//cancel running timer
+							$interval.cancel(player[$scope.currentTrack.playerName].timer);
+							player[$scope.currentTrack.playerName].timer = undefined;
+							//wait
+							crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out',true)
+								.then(function(){
+									$scope.pushToPlay = {
+										status:true,
+										end:getEndTime(SettingsSrvc.pushToPlayTime)
+									};
+									FileFactory.readJSON(config.local_path,'playlists.json')
+										.then(function(data){
+											var venue = JSON.parse(data);
+											for (var i = venue.playlists.length - 1; i >= 0; i--) {
+												if(venue.playlists[i].id == playlistID){
+													LogSrvc.logSystem('push-to-play man');
+													$scope.playlist = venue.playlists[i];
+													$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
+													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end});
+													shuffleArray($scope.playlist.tracks);
+													$scope.player.currentIndex = 0;
+													prepareNextTrack($scope.currentTrack.playerName);
+													startPtpTimer();
+												}
+											}
+										});
+									
+								});//hours to milliseconds, cancel push to play
 						}
 						break;
 				}
@@ -666,6 +699,20 @@ angular.module('OEPlayer')
 			}
 		});
 	};
+
+	var getPlaylistFromId = function(id){
+
+		FileFactory.readJSON(config.local_path,'playlists.json')
+			.then(function(data){
+				var playlists = JSON.parse(data);
+				for (var i = playlists.length - 1; i >= 0; i--) {
+					console.log(playlists[i])
+					if(playlists[i].id == id){
+						return playlists[i];
+					}
+				}
+			});
+	}
 
 	var getTracksOnline = function(){
 		HTTPFactory.getTracks().success(function(data){
@@ -927,6 +974,20 @@ angular.module('OEPlayer')
 		return deferred.promise;
 	};
 
+	var removeBlockedTracks = function(playlist){
+		FileFactory.readJSON(config.local_path,'blocked.json')
+			.then(function(data){
+				var blocked = JSON.parse(data);
+				for (var i = blocked.length - 1; i >= 0; i--) {
+					for (var j = playlist.tracks.length - 1; j >= 0; j--) {
+						if(blocked[i].track_id == playlist.tracks[j].id){
+							playlist.tracks.splice(j,1);
+						}
+					}
+				}
+			});
+	}
+
 	var preparePlaylist = function(fromSlider){
 		StatusSrvc.setStatus('Getting playlist...');
 		//reset index
@@ -944,6 +1005,7 @@ angular.module('OEPlayer')
 					socket.send('currentPlaylist',{name:'Music Library'});
 					$scope.playlist.name = 'Music Library';
 					$scope.playlist.tracks = $scope.availableTracks;
+					removeBlockedTracks($scope.playlist);
 					shuffleArray($scope.playlist.tracks);
 					StatusSrvc.clearStatus();
 					if(!fromSlider){
@@ -967,6 +1029,7 @@ angular.module('OEPlayer')
 								$scope.playlist = schedule.playlists[i].playlist;
 								socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end});
 								$scope.playlist.tracks = data;
+								removeBlockedTracks($scope.playlist);
 								shuffleArray($scope.playlist.tracks);
 								StatusSrvc.clearStatus();
 								if(!fromSlider){
@@ -981,6 +1044,7 @@ angular.module('OEPlayer')
 						$scope.playlist.name = 'Music Library';
 						socket.send('currentPlaylist',{name:'Music Library'});
 						$scope.playlist.tracks = $scope.availableTracks;
+						removeBlockedTracks($scope.playlist);
 						shuffleArray($scope.playlist.tracks);
 						StatusSrvc.clearStatus();
 						if(!fromSlider){
@@ -1458,6 +1522,7 @@ angular.module('OEPlayer')
 			$http.defaults.headers.common.Authentication = '';
 			localStorage.removeItem('Authentication');
 			localStorage.removeItem('venue');
+			socket.endConnection();
 			$location.path('/login');
 		}
 	};
@@ -2284,7 +2349,6 @@ angular.module('OEPlayer')
             $rootScope.$broadcast('socket:closed');
         },
         receive:function(data){
-            console.log(JSON.parse(data.data));
             $rootScope.$broadcast('socket:message',JSON.parse(data.data));
         },
         send:function(event,dt){
@@ -2297,6 +2361,9 @@ angular.module('OEPlayer')
         },
         error:function(err){
             LogSrvc.logError(err);
+        },
+        endConnection:function(){
+            self.socket.close();
         }
 
     };

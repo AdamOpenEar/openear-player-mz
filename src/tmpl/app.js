@@ -1,3 +1,4 @@
+/* @if NODE_ENV == 'DEVELOPMENT' */
 angular.module('OEPlayer',[
     'ngRoute',
     'angular-svg-round-progress',
@@ -44,8 +45,9 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.1.1-0.1.3'
+    'version':'/* @echo version */'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
 }]);
+/* @endif */

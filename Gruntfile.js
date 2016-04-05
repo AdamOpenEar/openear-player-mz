@@ -1,5 +1,7 @@
 module.exports = function(grunt) {
     // Project configuration.
+    var now = new Date().getTime();
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         env:{
@@ -11,13 +13,13 @@ module.exports = function(grunt) {
             }
         },
         preprocess:{
-            dev : {
+            devindex : {
 
                 src : 'src/tmpl/index.html',
                 dest : 'dev/index.html'
 
             },
-            prod : {
+            prodindex : {
 
                 src : 'src/tmpl/index.html',
                 dest : 'www/index.html',
@@ -26,13 +28,42 @@ module.exports = function(grunt) {
                     context : {
                         name : '<%= pkg.name %>',
                         version : '<%= pkg.version %>',
-                        now : new Date().getTime(),
+                        now : now,
                         ver : '<%= ver %>'
                     }
 
                 }
 
+            },
+            cacheman :{
+                src : 'src/tmpl/cache.manifest',
+                dest : 'www/cache.manifest',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }                
+            },
+            appjs :{
+                src : 'src/tmpl/app.js',
+                dest : 'dev/ng/app.js',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                    }
+
+                }                
             }
+
         },
         concat: {
             options: {
@@ -108,7 +139,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-ng-annotate');
     // Default task(s).
-    grunt.registerTask('release', ['env:prod', 'preprocess:prod','concat', 'uglify','cssmin']);
-    grunt.registerTask('dev', ['env:dev', 'preprocess:dev']);
+    grunt.registerTask('release', ['env:prod', 'preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
+    grunt.registerTask('dev', ['env:dev', 'preprocess:devindex','preprocess:appjs']);
 
 };

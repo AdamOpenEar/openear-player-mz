@@ -1,5 +1,6 @@
+<!-- @if NODE_ENV == 'PRODUCTION' -->
 CACHE MANIFEST
-#Version 3.1.1-0.1.3
+#Version <!-- @echo version -->
 
 NETWORK:
 *
@@ -14,11 +15,11 @@ bower_components/moment/min/moment.min.js
 bower_components/angular-moment/angular-moment.min.js
 bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
 
-assets/js/openear-player-v3.min.js?v=1459885676887
-assets/js/templates.js?v=1459885676887
+assets/js/openear-player-v3.min.js?v=<!-- @echo now -->
+assets/js/templates.js?v=<!-- @echo now -->
 
 #CSS
-assets/css/openear-player-v3.min.css?v=1459885676887
+assets/css/openear-player-v3.min.css?v=<!-- @echo now -->
 
 #Images
 assets/img/logo.png
@@ -33,3 +34,4 @@ assets/css/foundation-icons.eot
 assets/css/foundation-icons.woff
 assets/css/foundation-icons.ttf
 assets/css/foundation-icons.svg
+<!-- @endif -->
