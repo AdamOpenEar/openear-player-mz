@@ -44,11 +44,12 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.1.1-0.1.3'
+    'version':'3.1.1-0.1.5'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
-}]);;angular.module('OEPlayer')
+}]);
+;angular.module('OEPlayer')
 .controller('LogCtrl',['$scope','LogSrvc','$rootScope',function($scope,LogSrvc,$rootScope){
 
 	$scope.logs = LogSrvc.logs;
@@ -1149,10 +1150,7 @@ angular.module('OEPlayer')
 							var checkPlaying = function(){
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
-									LogSrvc.logSystem('next track playback error');
-									$interval.cancel(player[playerName].timer);
-									player[playerName].timer = undefined;
-									prepareNextTrack(playerName);
+									window.location.reload();
 								} else {
 									LogSrvc.logSystem('track playing');
 								}

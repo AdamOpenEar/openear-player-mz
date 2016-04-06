@@ -670,10 +670,7 @@ angular.module('OEPlayer')
 							var checkPlaying = function(){
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
-									LogSrvc.logSystem('next track playback error');
-									$interval.cancel(player[playerName].timer);
-									player[playerName].timer = undefined;
-									prepareNextTrack(playerName);
+									window.location.reload();
 								} else {
 									LogSrvc.logSystem('track playing');
 								}
