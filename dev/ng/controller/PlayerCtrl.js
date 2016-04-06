@@ -851,7 +851,7 @@ angular.module('OEPlayer')
 		$scope.initialising = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
-			init();
+			window.location.reload();
 		});
 	};
 
