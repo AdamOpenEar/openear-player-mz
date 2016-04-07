@@ -14,6 +14,7 @@ angular.module('OEPlayer')
 
 	var player;
 	var socket;
+	var pushToPlayTimer;
 	$scope.initialising = false;
 
 	var init = function(){
@@ -69,13 +70,12 @@ angular.module('OEPlayer')
 		//sockets
 		if(!$scope.initialising){
 			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
-			//socket = new SocketFactory('ws://localhost:5000');
 		}
 		$scope.$on('socket:open',function(event,data){
 			socket.send('playerInit',null);
 		});
 		$scope.$on('socket:closed',function(event,data){
-			console.log('closed');
+			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
 		});
 		$scope.$on('socket:message',function(event,data){
 			var auth = localStorage.getItem('Authentication');
@@ -127,7 +127,7 @@ angular.module('OEPlayer')
 													LogSrvc.logSystem('push-to-play man');
 													$scope.playlist = venue.playlists[i];
 													$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
-													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end});
+													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:true});
 													shuffleArray($scope.playlist.tracks);
 													$scope.player.currentIndex = 0;
 													prepareNextTrack($scope.currentTrack.playerName);
@@ -138,6 +138,12 @@ angular.module('OEPlayer')
 									
 								});//hours to milliseconds, cancel push to play
 						}
+						break;
+					case 'cancelPushToPlay':
+						$scope.pushToPlay.status = false;
+						$timeout.cancel(pushToPlayTimer);
+						pushToPlayTimer = undefined;
+						LogSrvc.logSystem('push-to-play timer end');
 						break;
 				}
 			} else {
@@ -227,13 +233,12 @@ angular.module('OEPlayer')
 			.then(function(data){
 				var playlists = JSON.parse(data);
 				for (var i = playlists.length - 1; i >= 0; i--) {
-					console.log(playlists[i])
 					if(playlists[i].id == id){
 						return playlists[i];
 					}
 				}
 			});
-	}
+	};
 
 	var getTracksOnline = function(){
 		HTTPFactory.getTracks().success(function(data){
@@ -507,7 +512,7 @@ angular.module('OEPlayer')
 					}
 				}
 			});
-	}
+	};
 
 	var preparePlaylist = function(fromSlider){
 		StatusSrvc.setStatus('Getting playlist...');
@@ -548,7 +553,7 @@ angular.module('OEPlayer')
 						getPlaylistTracks(schedule.playlists[foundPlaylist])
 							.then(function(data){
 								$scope.playlist = schedule.playlists[i].playlist;
-								socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end});
+								socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:$scope.pushToPlay.status});
 								$scope.playlist.tracks = data;
 								removeBlockedTracks($scope.playlist);
 								shuffleArray($scope.playlist.tracks);
@@ -905,6 +910,13 @@ angular.module('OEPlayer')
 		});
 	};
 
+	$scope.cancelPushToPlay = function(){
+		$scope.pushToPlay.status = false;
+		$timeout.cancel(pushToPlayTimer);
+		pushToPlayTimer = undefined;
+		LogSrvc.logSystem('push-to-play timer end');
+	};
+
 	//LAST TRACK OVERLAY
 	$scope.openLastTracks = function(element){
 		if($scope.lastTracksOpen){
@@ -976,7 +988,7 @@ angular.module('OEPlayer')
 		var time = SettingsSrvc.pushToPlayTime*3600000;
 		//set timeout for push to play
 		var startTimer = function(){
-			var pushToPlayTimer = $timeout(function(){
+			pushToPlayTimer = $timeout(function(){
 				$scope.pushToPlay.status = false;
 				$timeout.cancel(pushToPlayTimer);
 				pushToPlayTimer = undefined;

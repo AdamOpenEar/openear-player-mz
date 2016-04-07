@@ -14,6 +14,7 @@
                 <div id="track-title">{{currentTrack.title}}</div>
                 <div id="track-artist">{{currentTrack.artist}}</div>
                 <div id="track-playlist">{{player.venueName}} - {{playlist.name}} {{pushToPlay.status ? ' - Push to play ' : ''}} {{playlist.end ? ' - ends '+playlist.end : ''}}</div>
+                <div ng-if="pushToPlay.status" ng-click="cancelPushToPlay()" id="cancel-ptp">Cancel</div>
             </div>
             <div id="download-progress" class="progress-circle" ng-class="{display:!ready}">
                 <div

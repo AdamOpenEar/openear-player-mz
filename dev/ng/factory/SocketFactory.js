@@ -10,10 +10,12 @@ angular.module('OEPlayer')
         self.socket.onclose = angular.bind(this,this.close);
         self.socket.onmessage = angular.bind(this,this.receive);
         self.socket.onerror = angular.bind(this,this.error);
+        self.ready = false;
     };
 
     SocketFactory.prototype = {
         open:function(){
+            self.ready = true;
             var data = {token:localStorage.getItem('Authentication'),event:'ping'};
             var ping = $interval(function(){
                 var pingStart = function(){
@@ -30,12 +32,14 @@ angular.module('OEPlayer')
             $rootScope.$broadcast('socket:message',JSON.parse(data.data));
         },
         send:function(event,dt){
-            var data = {
-                token:localStorage.getItem('Authentication'),
-                event:event,
-                data:dt
-            };
-            self.socket.send(JSON.stringify(data));
+            if(self.ready){
+                var data = {
+                    token:localStorage.getItem('Authentication'),
+                    event:event,
+                    data:dt
+                };
+                self.socket.send(JSON.stringify(data));
+            }
         },
         error:function(err){
             LogSrvc.logError(err);
