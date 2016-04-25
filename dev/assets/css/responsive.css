@@ -1,0 +1,47 @@
+@media only screen and (max-width:1921px){
+	#energy-slider-wrapper input {
+		width:700px;
+		left:-3320%;
+	}
+	input.cmn-toggle-round-flat + label{
+		max-width: 120px
+	}
+}
+@media only screen and (max-width:1367px) {
+	#track-title {
+	    font-size: 24px;
+	    padding: 0 5px;
+	}
+	#track-artist {
+    	font-size: 20px;
+	}
+	#track-playlist {
+	    font-size: 15px;
+	}
+	#energy-slider-wrapper input {
+		width:550px;
+		left:-2680%;
+	}
+	#menu i{
+		padding: 15px 0;
+	}
+	.track-timer{
+		font-size: 18px;
+		top:30%;
+	}
+	#system-messages, #loading{
+		font-size: 12px;
+	}
+	#last-played h2{
+	    font-size: 16px;
+	}
+	#player-controls,.progress-circle{
+		top:50%;
+	}
+	#last-played{
+		top:60%;
+	}
+	#online-status{
+		top:23%;
+	}
+}
