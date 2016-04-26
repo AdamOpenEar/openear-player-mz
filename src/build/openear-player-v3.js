@@ -48,8 +48,7 @@ angular.module('OEPlayer',[
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
-}]);
-;angular.module('OEPlayer')
+}]);;angular.module('OEPlayer')
 .controller('LogCtrl',['$scope','LogSrvc','$rootScope',function($scope,LogSrvc,$rootScope){
 
 	$scope.logs = LogSrvc.logs;
@@ -915,11 +914,11 @@ angular.module('OEPlayer')
 					}
 					//getNextTrack(track);
 				},function(error){
-					LogSrvc.logError(error);
+					LogSrvc.logError('write download track error');
 					window.location.reload();
 				});
 		}).error(function(err){
-			LogSrvc.logError(err);
+			LogSrvc.logError('download track error');
 			window.location.reload();
 		});
 	};

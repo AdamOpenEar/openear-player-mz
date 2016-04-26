@@ -60,6 +60,7 @@ angular.module('OEPlayer')
 		    	var mtTimer = $timeout(function(){
 		    		$timeout.cancel(mtTimer);
 		    		mtTimer = undefined;
+		    		LogSrvc.logSystem('4am restart');
 		    		$scope.restart();
 		    	},millisTillFourAM);
 		    };
@@ -224,6 +225,9 @@ angular.module('OEPlayer')
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
 			}
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOnline();
 		});
 	};
 
@@ -247,24 +251,36 @@ angular.module('OEPlayer')
 			} else {
 				StatusSrvc.setStatus('No tracks associated with playlists. Please add music to your playlists.');
 			}
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getScheduleTemplate();
 		});
 	};
 
 	var getScheduleTemplate = function(){
 		HTTPFactory.getScheduleTemplate().success(function(data){
 			writeJSONFiles('template',data,getSchedule);			
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getSchedule();
 		});
 	};
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
 			writeJSONFiles('schedule',data,getBlocked);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getBlocked();
 		});
 	};
 
 	var getBlocked = function(){
 		HTTPFactory.getBlocked().success(function(data){
 			writeJSONFiles('blocked',data,getTracks);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracks();
 		});
 	};
 
@@ -344,9 +360,13 @@ angular.module('OEPlayer')
 					$scope.swappingTracks = true;
 					preparePlaylist();
 				}
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			});
 		},function(error){
 			LogSrvc.logError(error);
+			getTracks();
 		});
 	};
 
@@ -433,14 +453,13 @@ angular.module('OEPlayer')
 					if($scope.unavailableTracks.length === 0){
 						StatusSrvc.clearStatus();
 					}
-					//getNextTrack(track);
 				},function(error){
-					LogSrvc.logError(error);
-					window.location.reload();
+					LogSrvc.logError('write download track error');
+					$scope.unavailableTracks.push(track);
 				});
 		}).error(function(err){
-			LogSrvc.logError(err);
-			window.location.reload();
+			LogSrvc.logError('download track error');
+			$scope.unavailableTracks.push(track);
 		});
 	};
 
@@ -504,10 +523,12 @@ angular.module('OEPlayer')
 		FileFactory.readJSON(config.local_path,'blocked.json')
 			.then(function(data){
 				var blocked = JSON.parse(data);
-				for (var i = blocked.length - 1; i >= 0; i--) {
-					for (var j = playlist.tracks.length - 1; j >= 0; j--) {
-						if(blocked[i].track_id == playlist.tracks[j].id){
-							playlist.tracks.splice(j,1);
+				if(blocked.length > 0){
+					for (var i = blocked.length - 1; i >= 0; i--) {
+						for (var j = playlist.tracks.length - 1; j >= 0; j--) {
+							if(blocked[i].track_id == playlist.tracks[j].id){
+								playlist.tracks.splice(j,1);
+							}
 						}
 					}
 				}
@@ -634,6 +655,8 @@ angular.module('OEPlayer')
 		if($scope.player.online){
 			HTTPFactory.logTrack({logs:[track.id]}).success(function(){
 				LogSrvc.logSystem('Track '+track.title+' logged');
+			}).error(function(err){
+				LogSrvc.logError(err);
 			});
 		} else {
 			var backlog = JSON.parse(localStorage.getItem('backlog'));
@@ -645,6 +668,10 @@ angular.module('OEPlayer')
 			localStorage.setItem('backlog',JSON.stringify(backlog));
 		}
 	};
+
+	var deleteTrack = function(track){
+
+	}
 
 	var loadTrack = function(playerName,track){
 
@@ -675,7 +702,14 @@ angular.module('OEPlayer')
 							var checkPlaying = function(){
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
-									window.location.reload();
+									//reinitialise the file system
+									FileFactory.init()
+										.then(function(){
+											prepareNextTrack(playerName);
+										},function(error){
+											LogSrvc.logError(error);
+											window.location.reload();
+										});
 								} else {
 									LogSrvc.logSystem('track playing');
 								}
