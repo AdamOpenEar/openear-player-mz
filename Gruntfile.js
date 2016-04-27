@@ -16,7 +16,17 @@ module.exports = function(grunt) {
             devindex : {
 
                 src : 'src/tmpl/index.html',
-                dest : 'dev/index.html'
+                dest : 'dev/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }
 
             },
             prodindex : {
