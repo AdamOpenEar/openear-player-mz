@@ -153,7 +153,8 @@ angular.module('OEPlayer')
 		});
 		
 		FileFactory.init()
-			.then(function(){
+			.then(function(res){
+				LogSrvc.logSystem(res);
 				getSetttings();
 			},function(error){
 				LogSrvc.logError(error);
@@ -704,7 +705,8 @@ angular.module('OEPlayer')
 								if(position < 1){
 									//reinitialise the file system
 									FileFactory.init()
-										.then(function(){
+										.then(function(res){
+											LogSrvc.logSystem(res);
 											prepareNextTrack(playerName);
 										},function(error){
 											LogSrvc.logError(error);
