@@ -661,6 +661,13 @@ angular.module('OEPlayer')
 				LogSrvc.logSystem('Track '+track.title+' logged');
 			}).error(function(err){
 				LogSrvc.logError(err);
+				var backlog = JSON.parse(localStorage.getItem('backlog'));
+				if(backlog){
+					backlog.push(track.id);
+				} else {
+					backlog = [track.id];
+				}
+				localStorage.setItem('backlog',JSON.stringify(backlog));
 			});
 		} else {
 			var backlog = JSON.parse(localStorage.getItem('backlog'));
