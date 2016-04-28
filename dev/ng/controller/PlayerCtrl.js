@@ -187,6 +187,9 @@ angular.module('OEPlayer')
 			HTTPFactory.logTrack({logs:backlog}).success(function(){
 				localStorage.removeItem('backlog');
 				getPlaylists();
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			});
 		} else {
 			getPlaylists();
@@ -228,7 +231,7 @@ angular.module('OEPlayer')
 			}
 		}).error(function(err){
 			LogSrvc.logError(err);
-			getTracksOnline();
+			getTracksOffline();
 		});
 	};
 
@@ -254,7 +257,7 @@ angular.module('OEPlayer')
 			}
 		}).error(function(err){
 			LogSrvc.logError(err);
-			getScheduleTemplate();
+			getTracksOffline();
 		});
 	};
 
@@ -263,7 +266,7 @@ angular.module('OEPlayer')
 			writeJSONFiles('template',data,getSchedule);			
 		}).error(function(err){
 			LogSrvc.logError(err);
-			getSchedule();
+			getTracksOffline();
 		});
 	};
 
@@ -272,7 +275,7 @@ angular.module('OEPlayer')
 			writeJSONFiles('schedule',data,getBlocked);
 		}).error(function(err){
 			LogSrvc.logError(err);
-			getBlocked();
+			getTracksOffline();
 		});
 	};
 
@@ -281,7 +284,7 @@ angular.module('OEPlayer')
 			writeJSONFiles('blocked',data,getTracks);
 		}).error(function(err){
 			LogSrvc.logError(err);
-			getTracks();
+			getTracksOffline();
 		});
 	};
 
@@ -704,14 +707,7 @@ angular.module('OEPlayer')
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
 									//reinitialise the file system
-									FileFactory.init()
-										.then(function(res){
-											LogSrvc.logSystem(res);
-											prepareNextTrack(playerName);
-										},function(error){
-											LogSrvc.logError(error);
-											window.location.reload();
-										});
+									window.location.reload();
 								} else {
 									LogSrvc.logSystem('track playing');
 								}
