@@ -16,6 +16,7 @@ angular.module('OEPlayer')
 	var socket;
 	var pushToPlayTimer;
 	$scope.initialising = false;
+	$scope.playbackErr = 0;
 
 	var init = function(){
 
@@ -50,9 +51,15 @@ angular.module('OEPlayer')
 		};
 		$scope.player.online = $rootScope.online;
 
+		var arrRestartTime = SettingsSrvc.restartTime.toString().split('.');
+		var restartTime = {
+			hour:parseInt(arrRestartTime[0]),
+			min:arrRestartTime.length > 1?parseInt(arrRestartTime[1])*10:0
+		};
+
 	    var mtStart = function(){
 			var nowToday = new Date();
-	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, 4, 0, 0, 0) - nowToday;
+	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, restartTime.hour, restartTime.min, 0, 0) - nowToday;
 	    	if (millisTillFourAM < 0) {
 	    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
 	    	}
@@ -60,7 +67,7 @@ angular.module('OEPlayer')
 		    	var mtTimer = $timeout(function(){
 		    		$timeout.cancel(mtTimer);
 		    		mtTimer = undefined;
-		    		LogSrvc.logSystem('4am restart');
+		    		LogSrvc.logSystem(restartTime.hour+':'+restartTime.min+'am restart');
 		    		$scope.restart();
 		    	},millisTillFourAM);
 		    };
@@ -90,25 +97,30 @@ angular.module('OEPlayer')
 					case 'skipForward':
 						if(!$scope.swappingTracks){
 							$scope.skipForward();
+							LogSrvc.logSystem('man app - skipForward');
 						}
 						break;
 					case 'skipBack':
 						if(!$scope.swappingTracks){
 							$scope.skipBack();
+							LogSrvc.logSystem('man app - skipBack');
 						}
 						break;
 					case 'playPause':
 						if(!$scope.swappingTracks){
 							$scope.playPause();
+							LogSrvc.logSystem('man app - playPause');
 						}
 						break;
 					case 'restartPlayer':
 						if(!$scope.swappingTracks){
 							$scope.restart();
+							LogSrvc.logSystem('man app - restart');
 						}
 						break;
 					case 'pushToPlayID':
 						if(!$scope.swappingTracks){
+							LogSrvc.logSystem('man app - pushToPlay');
 							var playlistID = data.data;
 							//cancel running timer
 							$interval.cancel(player[$scope.currentTrack.playerName].timer);
@@ -144,7 +156,7 @@ angular.module('OEPlayer')
 						$scope.pushToPlay.status = false;
 						$timeout.cancel(pushToPlayTimer);
 						pushToPlayTimer = undefined;
-						LogSrvc.logSystem('push-to-play timer end');
+						LogSrvc.logSystem('man app - push-to-play timer end');
 						break;
 				}
 			} else {
@@ -680,10 +692,6 @@ angular.module('OEPlayer')
 		}
 	};
 
-	var deleteTrack = function(track){
-
-	}
-
 	var loadTrack = function(playerName,track){
 
 		try{
@@ -714,9 +722,16 @@ angular.module('OEPlayer')
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
 									//reinitialise the file system
-									window.location.reload();
+									LogSrvc.logError('playback error count - '+$scope.playbackErr);
+									$scope.playbackErr++;
+									if($scope.playbackErr > 5){
+										LogSrvc.logError('playback error - Restarting');
+										window.location.reload();
+									} else {
+										prepareNextTrack(playerName);
+									}
 								} else {
-									LogSrvc.logSystem('track playing');
+									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
 								}
 								$timeout.cancel(checkTimeout);
 							};
@@ -895,6 +910,7 @@ angular.module('OEPlayer')
 		$scope.initialising = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
+			LogSrvc.logSystem('Restarting player');
 			window.location.reload();
 		});
 	};
@@ -1097,7 +1113,7 @@ angular.module('OEPlayer')
 	};
 	//global stop playback
 	var unbindglobalpause = $rootScope.$on('global-pause',function(){
-		$scope.playPause();
+		player[$scope.currentTrack.playerName].pause($scope.currentTrack.playerName);
 	});
 	$scope.$on('$destroy', unbindglobalpause);
 }])

@@ -15,7 +15,6 @@ angular.module('OEPlayer')
                 localStorage.setItem('Authentication',data.authToken);
                 localStorage.setItem('lastLogin',new Date());
                 localStorage.setItem('venue',data.venue[0].name);
-                $location.search('hash', null);
                 $location.path( '/player' );
             } else {
                 $scope.message = data.error;

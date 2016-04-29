@@ -9,7 +9,8 @@ angular.module('OEPlayer')
 		animations:localStorage.getItem('animations')|| 1,
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
-		lang:localStorage.getItem('languages') || 'English'
+		lang:localStorage.getItem('languages') || 'English',
+		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

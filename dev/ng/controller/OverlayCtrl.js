@@ -61,9 +61,16 @@ angular.module('OEPlayer')
     $scope.settings.pushToPlayTime = SettingsSrvc.pushToPlayTime;
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
     $scope.settings.languages = SettingsSrvc.lang;
+    $scope.settings.restartTime = SettingsSrvc.restartTime;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
+    $scope.restartTimes = [
+        {time:4,display:'4.00am'},
+        {time:4.3,display:'4.30am'},
+        {time:5,display:'5.00am'},
+        {time:5.3,display:'5.30am'}
+    ];
     $scope.onlineCheck = [
         {type:1,name:'Standard'},
         {type:2,name:'Alternative'}

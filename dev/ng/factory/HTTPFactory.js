@@ -53,8 +53,9 @@ angular.module('OEPlayer')
         'responseError': function(rejection) {
             // do something on error
             if(rejection.status === 401){
-            	$rootScope.$emit('global-pause');
-                $location.path('/login');
+                localStorage.removeItem('Authentication');
+                localStorage.removeItem('venue');
+            	window.location.reload();
             }
             return $q.reject(rejection);
          }
