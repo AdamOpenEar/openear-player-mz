@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.1.1-0.1.7'
+    'version':'3.1.2-0.0.4'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -71,7 +71,6 @@ angular.module('OEPlayer',[
                 localStorage.setItem('Authentication',data.authToken);
                 localStorage.setItem('lastLogin',new Date());
                 localStorage.setItem('venue',data.venue[0].name);
-                $location.search('hash', null);
                 $location.path( '/player' );
             } else {
                 $scope.message = data.error;
@@ -183,9 +182,16 @@ angular.module('OEPlayer')
     $scope.settings.pushToPlayTime = SettingsSrvc.pushToPlayTime;
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
     $scope.settings.languages = SettingsSrvc.lang;
+    $scope.settings.restartTime = SettingsSrvc.restartTime;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
+    $scope.restartTimes = [
+        {time:4,display:'4.00am'},
+        {time:4.3,display:'4.30am'},
+        {time:5,display:'5.00am'},
+        {time:5.3,display:'5.30am'}
+    ];
     $scope.onlineCheck = [
         {type:1,name:'Standard'},
         {type:2,name:'Alternative'}
@@ -495,6 +501,7 @@ angular.module('OEPlayer')
 	var socket;
 	var pushToPlayTimer;
 	$scope.initialising = false;
+	$scope.playbackErr = 0;
 
 	var init = function(){
 
@@ -529,9 +536,15 @@ angular.module('OEPlayer')
 		};
 		$scope.player.online = $rootScope.online;
 
+		var arrRestartTime = SettingsSrvc.restartTime.toString().split('.');
+		var restartTime = {
+			hour:parseInt(arrRestartTime[0]),
+			min:arrRestartTime.length > 1?parseInt(arrRestartTime[1])*10:0
+		};
+
 	    var mtStart = function(){
 			var nowToday = new Date();
-	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, 4, 0, 0, 0) - nowToday;
+	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, restartTime.hour, restartTime.min, 0, 0) - nowToday;
 	    	if (millisTillFourAM < 0) {
 	    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
 	    	}
@@ -539,6 +552,7 @@ angular.module('OEPlayer')
 		    	var mtTimer = $timeout(function(){
 		    		$timeout.cancel(mtTimer);
 		    		mtTimer = undefined;
+		    		LogSrvc.logSystem(restartTime.hour+':'+restartTime.min+'am restart');
 		    		$scope.restart();
 		    	},millisTillFourAM);
 		    };
@@ -568,25 +582,30 @@ angular.module('OEPlayer')
 					case 'skipForward':
 						if(!$scope.swappingTracks){
 							$scope.skipForward();
+							LogSrvc.logSystem('man app - skipForward');
 						}
 						break;
 					case 'skipBack':
 						if(!$scope.swappingTracks){
 							$scope.skipBack();
+							LogSrvc.logSystem('man app - skipBack');
 						}
 						break;
 					case 'playPause':
 						if(!$scope.swappingTracks){
 							$scope.playPause();
+							LogSrvc.logSystem('man app - playPause');
 						}
 						break;
 					case 'restartPlayer':
 						if(!$scope.swappingTracks){
 							$scope.restart();
+							LogSrvc.logSystem('man app - restart');
 						}
 						break;
 					case 'pushToPlayID':
 						if(!$scope.swappingTracks){
+							LogSrvc.logSystem('man app - pushToPlay');
 							var playlistID = data.data;
 							//cancel running timer
 							$interval.cancel(player[$scope.currentTrack.playerName].timer);
@@ -622,7 +641,7 @@ angular.module('OEPlayer')
 						$scope.pushToPlay.status = false;
 						$timeout.cancel(pushToPlayTimer);
 						pushToPlayTimer = undefined;
-						LogSrvc.logSystem('push-to-play timer end');
+						LogSrvc.logSystem('man app - push-to-play timer end');
 						break;
 				}
 			} else {
@@ -631,7 +650,8 @@ angular.module('OEPlayer')
 		});
 		
 		FileFactory.init()
-			.then(function(){
+			.then(function(res){
+				LogSrvc.logSystem(res);
 				getSetttings();
 			},function(error){
 				LogSrvc.logError(error);
@@ -664,6 +684,9 @@ angular.module('OEPlayer')
 			HTTPFactory.logTrack({logs:backlog}).success(function(){
 				localStorage.removeItem('backlog');
 				getPlaylists();
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			});
 		} else {
 			getPlaylists();
@@ -703,6 +726,9 @@ angular.module('OEPlayer')
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
 			}
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
@@ -726,24 +752,36 @@ angular.module('OEPlayer')
 			} else {
 				StatusSrvc.setStatus('No tracks associated with playlists. Please add music to your playlists.');
 			}
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
 	var getScheduleTemplate = function(){
 		HTTPFactory.getScheduleTemplate().success(function(data){
 			writeJSONFiles('template',data,getSchedule);			
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
 			writeJSONFiles('schedule',data,getBlocked);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
 	var getBlocked = function(){
 		HTTPFactory.getBlocked().success(function(data){
 			writeJSONFiles('blocked',data,getTracks);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
@@ -823,9 +861,13 @@ angular.module('OEPlayer')
 					$scope.swappingTracks = true;
 					preparePlaylist();
 				}
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			});
 		},function(error){
 			LogSrvc.logError(error);
+			getTracks();
 		});
 	};
 
@@ -912,14 +954,13 @@ angular.module('OEPlayer')
 					if($scope.unavailableTracks.length === 0){
 						StatusSrvc.clearStatus();
 					}
-					//getNextTrack(track);
 				},function(error){
 					LogSrvc.logError('write download track error');
-					window.location.reload();
+					$scope.unavailableTracks.push(track);
 				});
 		}).error(function(err){
 			LogSrvc.logError('download track error');
-			window.location.reload();
+			$scope.unavailableTracks.push(track);
 		});
 	};
 
@@ -983,10 +1024,12 @@ angular.module('OEPlayer')
 		FileFactory.readJSON(config.local_path,'blocked.json')
 			.then(function(data){
 				var blocked = JSON.parse(data);
-				for (var i = blocked.length - 1; i >= 0; i--) {
-					for (var j = playlist.tracks.length - 1; j >= 0; j--) {
-						if(blocked[i].track_id == playlist.tracks[j].id){
-							playlist.tracks.splice(j,1);
+				if(blocked.length > 0){
+					for (var i = blocked.length - 1; i >= 0; i--) {
+						for (var j = playlist.tracks.length - 1; j >= 0; j--) {
+							if(blocked[i].track_id == playlist.tracks[j].id){
+								playlist.tracks.splice(j,1);
+							}
 						}
 					}
 				}
@@ -1113,6 +1156,15 @@ angular.module('OEPlayer')
 		if($scope.player.online){
 			HTTPFactory.logTrack({logs:[track.id]}).success(function(){
 				LogSrvc.logSystem('Track '+track.title+' logged');
+			}).error(function(err){
+				LogSrvc.logError(err);
+				var backlog = JSON.parse(localStorage.getItem('backlog'));
+				if(backlog){
+					backlog.push(track.id);
+				} else {
+					backlog = [track.id];
+				}
+				localStorage.setItem('backlog',JSON.stringify(backlog));
 			});
 		} else {
 			var backlog = JSON.parse(localStorage.getItem('backlog'));
@@ -1154,9 +1206,17 @@ angular.module('OEPlayer')
 							var checkPlaying = function(){
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
-									window.location.reload();
+									//reinitialise the file system
+									LogSrvc.logError('playback error count - '+$scope.playbackErr);
+									$scope.playbackErr++;
+									if($scope.playbackErr > 5){
+										LogSrvc.logError('playback error - Restarting');
+										window.location.reload();
+									} else {
+										prepareNextTrack(playerName);
+									}
 								} else {
-									LogSrvc.logSystem('track playing');
+									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
 								}
 								$timeout.cancel(checkTimeout);
 							};
@@ -1335,6 +1395,7 @@ angular.module('OEPlayer')
 		$scope.initialising = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
+			LogSrvc.logSystem('Restarting player');
 			window.location.reload();
 		});
 	};
@@ -1537,7 +1598,7 @@ angular.module('OEPlayer')
 	};
 	//global stop playback
 	var unbindglobalpause = $rootScope.$on('global-pause',function(){
-		$scope.playPause();
+		player[$scope.currentTrack.playerName].pause($scope.currentTrack.playerName);
 	});
 	$scope.$on('$destroy', unbindglobalpause);
 }])
@@ -2037,8 +2098,9 @@ angular.module('OEPlayer')
         'responseError': function(rejection) {
             // do something on error
             if(rejection.status === 401){
-            	$rootScope.$emit('global-pause');
-                $location.path('/login');
+                localStorage.removeItem('Authentication');
+                localStorage.removeItem('venue');
+            	window.location.reload();
             }
             return $q.reject(rejection);
          }
@@ -2121,7 +2183,8 @@ angular.module('OEPlayer')
 				dellib:'Delete Library',
 				conflibdel:'Are you sure you want to delete the library?',
 				confstored:'Are you sure you want to delete stored data?',
-				changeLang:'Changing language will require a restart. Are you sure?'
+				changeLang:'Changing language will require a restart. Are you sure?',
+				restart:'24hr restart time'
 			}
 		},
 		Portuguese:{
@@ -2198,7 +2261,8 @@ angular.module('OEPlayer')
 				dellib:'excluir Biblioteca',
 				conflibdel:'Tem certeza de que deseja excluir a biblioteca ?',
 				confstored:'Tem certeza de que quer apagar os dados armazenados ?',
-				changeLang:'Changing language will require a restart. Are you sure?'
+				changeLang:'Changing language will require a restart. Are you sure?',
+				restart:'24hr restart time'
 			}
 		},
 		Spanish:{
@@ -2275,7 +2339,8 @@ angular.module('OEPlayer')
 				dellib:'Borrar Biblioteca',
 				conflibdel:'¿Está usted seguro que desea borrar la biblioteca?',
 				confstored:'¿Está usted seguro que desea borrar los datos almacenados?',
-				changeLang:'Cambiar idioma requerirá reinicio. ¿Está seguro?'
+				changeLang:'Cambiar idioma requerirá reinicio. ¿Está seguro?',
+				restart:'24hr restart time'
 			}
 		}
 	};
@@ -2325,6 +2390,7 @@ angular.module('OEPlayer')
 		},
 		stop:function(playerName){
 			self[playerName].createdMedia.src = '';
+			URL.revokeObjectURL(self[self.playerName].createdMedia.src);
 		}
 	};
 
@@ -3163,7 +3229,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		animations:localStorage.getItem('animations')|| 1,
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
-		lang:localStorage.getItem('languages') || 'English'
+		lang:localStorage.getItem('languages') || 'English',
+		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){
