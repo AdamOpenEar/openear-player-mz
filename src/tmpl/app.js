@@ -1,4 +1,3 @@
-/* @if NODE_ENV == 'DEVELOPMENT' */
 angular.module('OEPlayer',[
     'ngRoute',
     'angular-svg-round-progress',
@@ -39,6 +38,17 @@ angular.module('OEPlayer',[
         });
       }, false);
 }])
+/* @if NODE_ENV == 'DEVELOPMENT' */
+.constant('config',{
+    'api_url':'http://dev.openearmusic.com/api/ios/',
+    'module_dir':'ng',
+    'local_path':'/',
+    'file_extention':'.mp3',
+    'log_path':'http://dev.openearmusic.com/api/ios/log-track',
+    'version':'/* @echo version */'
+})
+/* @endif */
+/* @if NODE_ENV == 'PRODUCTION' */
 .constant('config',{
     'api_url':'https://www.openearmusic.com/api/ios/',
     'module_dir':'ng',
@@ -47,7 +57,7 @@ angular.module('OEPlayer',[
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
     'version':'/* @echo version */'
 })
+/* @endif */
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
 }]);
-/* @endif */

@@ -16,6 +16,7 @@ angular.module('OEPlayer')
 	var socket;
 	var pushToPlayTimer;
 	$scope.initialising = false;
+	$scope.playbackErr = 0;
 
 	var init = function(){
 
@@ -50,9 +51,15 @@ angular.module('OEPlayer')
 		};
 		$scope.player.online = $rootScope.online;
 
+		var arrRestartTime = SettingsSrvc.restartTime.toString().split('.');
+		var restartTime = {
+			hour:parseInt(arrRestartTime[0]),
+			min:arrRestartTime.length > 1?parseInt(arrRestartTime[1])*10:0
+		};
+
 	    var mtStart = function(){
 			var nowToday = new Date();
-	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, 4, 0, 0, 0) - nowToday;
+	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, restartTime.hour, restartTime.min, 0, 0) - nowToday;
 	    	if (millisTillFourAM < 0) {
 	    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
 	    	}
@@ -60,6 +67,7 @@ angular.module('OEPlayer')
 		    	var mtTimer = $timeout(function(){
 		    		$timeout.cancel(mtTimer);
 		    		mtTimer = undefined;
+		    		LogSrvc.logSystem(restartTime.hour+':'+restartTime.min+'am restart');
 		    		$scope.restart();
 		    	},millisTillFourAM);
 		    };
@@ -89,25 +97,30 @@ angular.module('OEPlayer')
 					case 'skipForward':
 						if(!$scope.swappingTracks){
 							$scope.skipForward();
+							LogSrvc.logSystem('man app - skipForward');
 						}
 						break;
 					case 'skipBack':
 						if(!$scope.swappingTracks){
 							$scope.skipBack();
+							LogSrvc.logSystem('man app - skipBack');
 						}
 						break;
 					case 'playPause':
 						if(!$scope.swappingTracks){
 							$scope.playPause();
+							LogSrvc.logSystem('man app - playPause');
 						}
 						break;
 					case 'restartPlayer':
 						if(!$scope.swappingTracks){
 							$scope.restart();
+							LogSrvc.logSystem('man app - restart');
 						}
 						break;
 					case 'pushToPlayID':
 						if(!$scope.swappingTracks){
+							LogSrvc.logSystem('man app - pushToPlay');
 							var playlistID = data.data;
 							//cancel running timer
 							$interval.cancel(player[$scope.currentTrack.playerName].timer);
@@ -143,7 +156,7 @@ angular.module('OEPlayer')
 						$scope.pushToPlay.status = false;
 						$timeout.cancel(pushToPlayTimer);
 						pushToPlayTimer = undefined;
-						LogSrvc.logSystem('push-to-play timer end');
+						LogSrvc.logSystem('man app - push-to-play timer end');
 						break;
 				}
 			} else {
@@ -152,7 +165,8 @@ angular.module('OEPlayer')
 		});
 		
 		FileFactory.init()
-			.then(function(){
+			.then(function(res){
+				LogSrvc.logSystem(res);
 				getSetttings();
 			},function(error){
 				LogSrvc.logError(error);
@@ -185,6 +199,9 @@ angular.module('OEPlayer')
 			HTTPFactory.logTrack({logs:backlog}).success(function(){
 				localStorage.removeItem('backlog');
 				getPlaylists();
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			});
 		} else {
 			getPlaylists();
@@ -224,6 +241,9 @@ angular.module('OEPlayer')
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
 			}
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
@@ -247,24 +267,36 @@ angular.module('OEPlayer')
 			} else {
 				StatusSrvc.setStatus('No tracks associated with playlists. Please add music to your playlists.');
 			}
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
 	var getScheduleTemplate = function(){
 		HTTPFactory.getScheduleTemplate().success(function(data){
 			writeJSONFiles('template',data,getSchedule);			
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
 			writeJSONFiles('schedule',data,getBlocked);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
 	var getBlocked = function(){
 		HTTPFactory.getBlocked().success(function(data){
 			writeJSONFiles('blocked',data,getTracks);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
 		});
 	};
 
@@ -344,9 +376,13 @@ angular.module('OEPlayer')
 					$scope.swappingTracks = true;
 					preparePlaylist();
 				}
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			});
 		},function(error){
 			LogSrvc.logError(error);
+			getTracks();
 		});
 	};
 
@@ -433,14 +469,13 @@ angular.module('OEPlayer')
 					if($scope.unavailableTracks.length === 0){
 						StatusSrvc.clearStatus();
 					}
-					//getNextTrack(track);
 				},function(error){
-					LogSrvc.logError(error);
-					window.location.reload();
+					LogSrvc.logError('write download track error');
+					$scope.unavailableTracks.push(track);
 				});
 		}).error(function(err){
-			LogSrvc.logError(err);
-			window.location.reload();
+			LogSrvc.logError('download track error');
+			$scope.unavailableTracks.push(track);
 		});
 	};
 
@@ -504,10 +539,12 @@ angular.module('OEPlayer')
 		FileFactory.readJSON(config.local_path,'blocked.json')
 			.then(function(data){
 				var blocked = JSON.parse(data);
-				for (var i = blocked.length - 1; i >= 0; i--) {
-					for (var j = playlist.tracks.length - 1; j >= 0; j--) {
-						if(blocked[i].track_id == playlist.tracks[j].id){
-							playlist.tracks.splice(j,1);
+				if(blocked.length > 0){
+					for (var i = blocked.length - 1; i >= 0; i--) {
+						for (var j = playlist.tracks.length - 1; j >= 0; j--) {
+							if(blocked[i].track_id == playlist.tracks[j].id){
+								playlist.tracks.splice(j,1);
+							}
 						}
 					}
 				}
@@ -634,6 +671,15 @@ angular.module('OEPlayer')
 		if($scope.player.online){
 			HTTPFactory.logTrack({logs:[track.id]}).success(function(){
 				LogSrvc.logSystem('Track '+track.title+' logged');
+			}).error(function(err){
+				LogSrvc.logError(err);
+				var backlog = JSON.parse(localStorage.getItem('backlog'));
+				if(backlog){
+					backlog.push(track.id);
+				} else {
+					backlog = [track.id];
+				}
+				localStorage.setItem('backlog',JSON.stringify(backlog));
 			});
 		} else {
 			var backlog = JSON.parse(localStorage.getItem('backlog'));
@@ -675,9 +721,17 @@ angular.module('OEPlayer')
 							var checkPlaying = function(){
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
-									window.location.reload();
+									//reinitialise the file system
+									LogSrvc.logError('playback error count - '+$scope.playbackErr);
+									$scope.playbackErr++;
+									if($scope.playbackErr > 5){
+										LogSrvc.logError('playback error - Restarting');
+										window.location.reload();
+									} else {
+										prepareNextTrack(playerName);
+									}
 								} else {
-									LogSrvc.logSystem('track playing');
+									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
 								}
 								$timeout.cancel(checkTimeout);
 							};
@@ -856,6 +910,7 @@ angular.module('OEPlayer')
 		$scope.initialising = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
+			LogSrvc.logSystem('Restarting player');
 			window.location.reload();
 		});
 	};
@@ -1058,7 +1113,7 @@ angular.module('OEPlayer')
 	};
 	//global stop playback
 	var unbindglobalpause = $rootScope.$on('global-pause',function(){
-		$scope.playPause();
+		player[$scope.currentTrack.playerName].pause($scope.currentTrack.playerName);
 	});
 	$scope.$on('$destroy', unbindglobalpause);
 }])

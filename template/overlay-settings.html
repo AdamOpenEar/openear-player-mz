@@ -26,6 +26,10 @@
 			<select ng-model="settings.onlineCheck" ng-options="check.type as check.name for check in onlineCheck" ng-change="changeSetting('onlineCheck')"></select>
 		</div>
 		<div class="settings-group">
+			<label>{{lang.settings.restart}}{{settings.restartTime}}</label>
+			<select ng-model="settings.restartTime" ng-options="restart.time as restart.display for restart in restartTimes" ng-change="changeSetting('restartTime')"></select>
+		</div>
+		<div class="settings-group">
 			<label>{{lang.settings.animations}}</label>
 			<input type="checkbox" ng-model="settings.animations" ng-true-value="1" ng-false-value="2" ng-change="changeSetting('animations')">
 		</div>

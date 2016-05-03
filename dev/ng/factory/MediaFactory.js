@@ -42,6 +42,7 @@ angular.module('OEPlayer')
 		},
 		stop:function(playerName){
 			self[playerName].createdMedia.src = '';
+			URL.revokeObjectURL(self[self.playerName].createdMedia.src);
 		}
 	};
 

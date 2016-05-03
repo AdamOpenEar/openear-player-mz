@@ -16,7 +16,17 @@ module.exports = function(grunt) {
             devindex : {
 
                 src : 'src/tmpl/index.html',
-                dest : 'dev/index.html'
+                dest : 'dev/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }
 
             },
             prodindex : {
@@ -62,6 +72,20 @@ module.exports = function(grunt) {
                     }
 
                 }                
+            },
+            appjsprod :{
+                src : 'src/tmpl/app.js',
+                dest : 'src/build/app.js',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                    }
+
+                }                
             }
 
         },
@@ -74,9 +98,11 @@ module.exports = function(grunt) {
             dist: {
                 // the files to concatenate
                 src: [
+                    'src/build/app.js',
                     'dev/ng/**/*.js',
                     'dev/ng/*.js',
-                    '!dev/ng/template.js'
+                    '!dev/ng/template.js',
+                    '!dev/ng/app.js',
                 ],
                 // the location of the resulting JS file
                 dest: 'src/build/<%= pkg.name %>.js'
@@ -139,7 +165,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-ng-annotate');
     // Default task(s).
-    grunt.registerTask('release', ['env:prod', 'preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
+    grunt.registerTask('release', ['env:prod', 'preprocess:appjsprod','preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
     grunt.registerTask('dev', ['env:dev', 'preprocess:devindex','preprocess:appjs']);
 
 };
