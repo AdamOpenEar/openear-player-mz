@@ -36,6 +36,20 @@ angular.module('OEPlayer')
         });
 
 }])
+.controller('OverlayPlaylistCtrl',['$scope',function($scope){
+
+    $scope.selectedView = {
+        name:'ptp',
+        url:'playlists-ptp.html'
+    };
+
+    $scope.selectView = function(name,url){
+        $scope.selectedView = {
+            name:name,
+            url:url
+        };
+    };
+}])
 .controller('OverlayScheduleCtrl',['$scope',function($scope){
 
     $scope.selectedView = {
@@ -140,6 +154,22 @@ angular.module('OEPlayer')
 
     $scope.playPlaylist = function(playlist){
         PlayerSrvc.pushToPlay(playlist);
+        $scope.closeOverlay();
+    };
+
+}])
+.controller('OverlayLibraryPlaylistsTimeCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope',function($scope,FileFactory,config,PlayerSrvc,$rootScope){
+
+    $scope.init = function(){
+        FileFactory.readJSON(config.local_path,'schedule-time.json')
+            .then(function(data){
+                $scope.playlists = JSON.parse(data);
+            });
+    };
+    $scope.init();
+
+    $scope.playSchedule = function(){
+        PlayerSrvc.ptpSchedule($scope.playlists);
         $scope.closeOverlay();
     };
 

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#Version 3.1.2-0.0.4
+#Version 3.2.2-0.0.1
 
 NETWORK:
 *
@@ -14,11 +14,11 @@ bower_components/moment/min/moment.min.js
 bower_components/angular-moment/angular-moment.min.js
 bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
 
-assets/js/openear-player-v3.min.js?v=1462195005564
-assets/js/templates.js?v=1462195005564
+assets/js/openear-player-v3.min.js?v=1464172280123
+assets/js/templates.js?v=1464172280123
 
 #CSS
-assets/css/openear-player-v3.min.css?v=1462195005564
+assets/css/openear-player-v3.min.css?v=1464172280123
 
 #Images
 assets/img/logo.png

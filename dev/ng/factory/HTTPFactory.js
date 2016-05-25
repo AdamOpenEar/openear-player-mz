@@ -14,8 +14,11 @@ angular.module('OEPlayer')
 		getTracks:function(){
 			return $http.get(config.api_url+'tracks');
 		},
-		getSchedule:function(){
-			return $http.get(config.api_url+'schedule');
+        getSchedule:function(){
+            return $http.get(config.api_url+'schedule');
+        },
+		getScheduleTime:function(){
+			return $http.get(config.api_url+'schedule-time');
 		},
 		logTrack:function(logs){
 			return $http.post(config.log_path,logs);

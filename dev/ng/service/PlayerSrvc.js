@@ -10,7 +10,12 @@ angular.module('OEPlayer')
 
 	PlayerSrvc.pushToPlay = function(playlist){
 		PlayerSrvc.playlist = playlist;
-		$rootScope.$broadcast('push-to-play');	
+		$rootScope.$broadcast('push-to-play');
+	};
+
+	PlayerSrvc.ptpSchedule = function(schedule){
+		PlayerSrvc.schedule = schedule;
+		$rootScope.$broadcast('ptp-schedule');
 	};
 
 	return PlayerSrvc;

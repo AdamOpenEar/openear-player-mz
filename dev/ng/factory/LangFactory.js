@@ -28,6 +28,10 @@ angular.module('OEPlayer')
 			},
 			playlists:{
 				title:'Push to Play',
+				sub:{
+					ptp:'Playlists',
+					time:'Time Based'
+				},
 				table:{
 					title:'Title',
 					album:'Album',
