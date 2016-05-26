@@ -798,7 +798,7 @@ angular.module('OEPlayer')
 								$timeout.cancel(checkTimeout);
 							};
 							checkPlaying();
-						},20000);
+						},SettingsSrvc.crossfadeIn*10);
 					}
 					startTimer(playerName);
 				},function(error){
@@ -1005,6 +1005,7 @@ angular.module('OEPlayer')
 		//add to last played
 		addToLastPlayed($scope.currentTrack);
 		logTrack($scope.currentTrack);
+		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
@@ -1021,6 +1022,7 @@ angular.module('OEPlayer')
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//change index
 		$scope.player.currentIndex = $scope.player.currentIndex - 2;
+		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);

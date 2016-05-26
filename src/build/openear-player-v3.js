@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.2.3-0.0.1'
+    'version':'3.2.4-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -1334,7 +1334,7 @@ angular.module('OEPlayer')
 								$timeout.cancel(checkTimeout);
 							};
 							checkPlaying();
-						},20000);
+						},SettingsSrvc.crossfadeIn*10);
 					}
 					startTimer(playerName);
 				},function(error){
@@ -1541,6 +1541,7 @@ angular.module('OEPlayer')
 		//add to last played
 		addToLastPlayed($scope.currentTrack);
 		logTrack($scope.currentTrack);
+		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
@@ -1557,6 +1558,7 @@ angular.module('OEPlayer')
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//change index
 		$scope.player.currentIndex = $scope.player.currentIndex - 2;
+		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
