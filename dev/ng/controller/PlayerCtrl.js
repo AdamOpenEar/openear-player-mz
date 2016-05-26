@@ -1006,7 +1006,7 @@ angular.module('OEPlayer')
 		addToLastPlayed($scope.currentTrack);
 		logTrack($scope.currentTrack);
 		//fade out
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
 		});
 
@@ -1022,7 +1022,7 @@ angular.module('OEPlayer')
 		//change index
 		$scope.player.currentIndex = $scope.player.currentIndex - 2;
 		//fade out
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
 		});
 	};
