@@ -1164,6 +1164,22 @@ angular.module('OEPlayer')
 					$scope.playlist.end = 'ENDED';
 					$interval.cancel($scope.pushToPlaySchedule.timer);
 					$scope.pushToPlaySchedule.timer = undefined;
+					//if not swapping
+					if(!$scope.swappingTracks){
+						$scope.skipForward();
+					} else {
+						var recheck = $timeout(function(){
+							if(!$scope.swappingTracks){
+								//cancel check
+								$timeout.cancel(recheck);
+								$scope.skipForward();
+							} else {
+								$timeout.cancel(recheck);
+								recheck();
+							}
+						},11000);
+						recheck();
+					}
 				}
 			},1000);
 		};

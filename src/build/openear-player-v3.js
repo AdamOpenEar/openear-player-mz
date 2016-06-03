@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.2.4-0.0.1'
+    'version':'3.2.5-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -136,7 +136,7 @@ angular.module('OEPlayer',[
         var today = new Date();
         var timeDiff = Math.abs(today.getTime() - lastLogin.getTime());
         var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        return diffDays > 30 ? false : true;
+        return diffDays > 90 ? false : true;
     };
 
 }]);
@@ -1700,6 +1700,22 @@ angular.module('OEPlayer')
 					$scope.playlist.end = 'ENDED';
 					$interval.cancel($scope.pushToPlaySchedule.timer);
 					$scope.pushToPlaySchedule.timer = undefined;
+					//if not swapping
+					if(!$scope.swappingTracks){
+						$scope.skipForward();
+					} else {
+						var recheck = $timeout(function(){
+							if(!$scope.swappingTracks){
+								//cancel check
+								$timeout.cancel(recheck);
+								$scope.skipForward();
+							} else {
+								$timeout.cancel(recheck);
+								recheck();
+							}
+						},11000);
+						recheck();
+					}
 				}
 			},1000);
 		};
