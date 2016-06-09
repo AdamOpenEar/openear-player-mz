@@ -1109,21 +1109,29 @@ angular.module('OEPlayer')
 		var time = SettingsSrvc.pushToPlayTime*3600000;
 		//set timeout for push to play
 		var startTimer = function(){
-			pushToPlayTimer = $timeout(function(){
+			$scope.pushToPlay.timer = $timeout(function(){
 				$scope.pushToPlay.status = false;
-				$timeout.cancel(pushToPlayTimer);
-				pushToPlayTimer = undefined;
+				$timeout.cancel($scope.pushToPlay.timer);
+				$scope.pushToPlay.timer = undefined;
 				LogSrvc.logSystem('push-to-play timer end');
 			},time);
 		};
 		startTimer();
+	};
+	$scope.cancelPushToPlay = function(){
+		$scope.pushToPlay.status = false;
+		$timeout.cancel($scope.pushToPlay.timer);
+		$scope.pushToPlay.timer = undefined;
+		LogSrvc.logSystem('push-to-play timer end');
 	};
 	$scope.$on('$destroy', unbindPushToPlay);
 
 	//push to play schedule
 	var unbindPtpSchedule = $rootScope.$on('ptp-schedule',function(){
 		//cancel pust to play if running
-		$scope.pushToPlay.status = false;
+		if($scope.pushToPlay.status){
+			$scope.pushToPlay.status = false;
+		}
 		//cancel running timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
@@ -1185,6 +1193,12 @@ angular.module('OEPlayer')
 		};
 		startTimer();
 	};
+	$scope.cancelPushToPlaySchedule = function(){
+		$scope.pushToPlaySchedule.status = false;
+		$interval.cancel($scope.pushToPlaySchedule.timer);
+		$scope.pushToPlaySchedule.timer = undefined;
+		LogSrvc.logSystem('push-to-play schedule timer end');
+	};
 	var msToMinSec = function(ms){
 		var minutes = Math.floor(ms / 60000);
   		var seconds = ((ms % 60000) / 1000).toFixed(0);
@@ -1231,7 +1245,7 @@ angular.module('OEPlayer')
 			//set blocked on local storage if offline - sent on init
 			HTTPFactory.blockTrack(track.id).success(function(){
 				track.blocked = true;
-			},function(){
+			}).error(function(){
 				var blocked = JSON.parse(localStorage.getItem('blocked'));
 				blocked.push(track.id);
 				localStorage.setItem(blocked);
