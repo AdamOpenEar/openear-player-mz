@@ -40,7 +40,7 @@ angular.module('OEPlayer',[
 }])
 /* @if NODE_ENV == 'DEVELOPMENT' */
 .constant('config',{
-    'api_url':'http://localhost/oe-apis/oe-player/v1/public/',
+    'api_url':'http://dev.openearmusic.com/player-api/',
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
