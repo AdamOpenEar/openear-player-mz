@@ -1,0 +1,10 @@
+<div ng-controller="OverlayLibraryPlaylistsTimeCtrl">
+    <div class="overlay-btn-group clearfix">
+        <a ng-click="!$root.ready || playSchedule()" ng-disabled="!$root.ready">Press to start</a>
+    </div>
+    <div ng-repeat="playlist in playlists">
+        <div class="library-playlist schedule-time">
+            <span class="library-playlist-info">{{playlist.name}} - <em>{{playlist.pivot.start}} to {{playlist.pivot.end}}</em></span>
+        </div>
+    </div>
+</div>

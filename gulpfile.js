@@ -87,4 +87,3 @@ gulp.task('template', function () {
     .pipe(gulp.dest('dev/assets/js/'))
     .pipe(gulp.dest('www/assets/js/'));
 });
-gulp.start();

@@ -1,0 +1,27 @@
+<div ng-controller="OverlayLibraryPlaylistsCtrl">
+    <div ng-repeat="playlist in playlists">
+        <div class="library-playlist">
+            <a ng-click="!$root.ready || playPlaylist(playlist)" ng-disabled="!$root.ready"><i class="fi-play-circle"></i></a>
+            <span class="library-playlist-info">{{playlist.name}} - <em>{{playlist.tracks.length}} tracks</em></span>
+            <i class="fi-list-thumbnails" ng-click="playlist.showTracks = !playlist.showTracks"></i>
+        </div>
+        <table class="oeplayer-table" ng-if="playlist.showTracks">
+            <thead>
+                <tr>
+                    <th>{{lang.playlists.table.title}}</th>
+                    <th>{{lang.playlists.table.artist}}</th>
+                    <th>{{lang.playlists.table.album}}</th>
+                    <th>{{lang.playlists.table.block}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="track in playlist.tracks">
+                    <td>{{track.title}}</td>
+                    <td>{{track.artist}}</td>
+                    <td>{{track.album}}</td>
+                    <td class="icon"><a ng-click="blockTrack(track)"><i class="fi-prohibited" ng-disabled="track.blocked"></i></a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

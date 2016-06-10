@@ -165,7 +165,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-ng-annotate');
     // Default task(s).
-    grunt.registerTask('release', ['env:prod', 'preprocess:appjsprod','preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
+    grunt.registerTask('prod', ['env:prod', 'preprocess:appjsprod','preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
     grunt.registerTask('dev', ['env:dev', 'preprocess:devindex','preprocess:appjs']);
 
 };

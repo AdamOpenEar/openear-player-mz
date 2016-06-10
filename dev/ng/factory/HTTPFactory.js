@@ -14,8 +14,11 @@ angular.module('OEPlayer')
 		getTracks:function(){
 			return $http.get(config.api_url+'tracks');
 		},
-		getSchedule:function(){
-			return $http.get(config.api_url+'schedule');
+        getSchedule:function(){
+            return $http.get(config.api_url+'schedule');
+        },
+		getScheduleTime:function(){
+			return $http.get(config.api_url+'schedule-time');
 		},
 		logTrack:function(logs){
 			return $http.post(config.log_path,logs);
@@ -26,6 +29,9 @@ angular.module('OEPlayer')
 		getBlocked:function(){
 			return $http.get(config.api_url+'blocked-tracks');
 		},
+        getTrackSrc(id){
+            return $http.get(config.api_url+'track/'+id);
+        },
 		getTrackFile:function(src){
             return $http({
                 type:'GET',
