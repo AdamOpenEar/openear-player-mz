@@ -1,5 +1,5 @@
 <div ng-controller="OverlayLibraryPlaylistsCtrl">
-    <div ng-repeat="playlist in venue.playlists">
+    <div ng-repeat="playlist in playlists">
         <div class="library-playlist">
             <a ng-click="!$root.ready || playPlaylist(playlist)" ng-disabled="!$root.ready"><i class="fi-play-circle"></i></a>
             <span class="library-playlist-info">{{playlist.name}} - <em>{{playlist.tracks.length}} tracks</em></span>

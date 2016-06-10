@@ -38,7 +38,7 @@ angular.module('OEPlayer')
             localStorage.setItem('lastLogin',new Date());
             localStorage.setItem('venue',decodeURI(query.venue));
             $location.url($location.path());
-            $location.path( '/player' );    
+            $location.path( '/player' );
         }
 
     } else if(localStorage.getItem('Authentication')){
