@@ -557,6 +557,9 @@ input.cmn-toggle-round-flat:checked + label:after {
     padding:6px;
     width:100%;
 }
+.overlay-btn-group > a[disabled=disabled]{
+    color: #30343f;
+}
 .overlay-btn-group > a > i{
     font-size: 18px;
 }
@@ -641,6 +644,9 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 .library-playlist.schedule-time{
     height:67px;
+}
+.library-playlist > a[disabled=disabled] i{
+    color: #30343f;
 }
 /*====== SCHEDULER ======*/
 .schedule-wrapper{

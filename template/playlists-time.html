@@ -1,6 +1,6 @@
 <div ng-controller="OverlayLibraryPlaylistsTimeCtrl">
     <div class="overlay-btn-group clearfix">
-        <a ng-click="!$root.ready || playSchedule()" ng-disabled="!$root.ready">Press to start</a>
+        <a ng-click="swappingTracks || playSchedule()" ng-disabled="swappingTracks">Press to start</a>
     </div>
     <div ng-repeat="playlist in playlists">
         <div class="library-playlist schedule-time">
