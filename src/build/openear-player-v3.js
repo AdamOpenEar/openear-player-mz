@@ -39,12 +39,12 @@ angular.module('OEPlayer',[
       }, false);
 }])
 .constant('config',{
-    'api_url':'https://www.openearmusic.com/api/ios/',
+    'api_url':'https://api.player.openearmusic.com/v1/',
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
-    'log_path':'https://www.openearmusic.com/api/ios/log-track',
-    'version':'3.2.5-0.0.1'
+    'log_path':'https://api.player.openearmusic.com/v1/log-track',
+    'version':'3.2.6-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -94,7 +94,7 @@ angular.module('OEPlayer',[
             localStorage.setItem('lastLogin',new Date());
             localStorage.setItem('venue',decodeURI(query.venue));
             $location.url($location.path());
-            $location.path( '/player' );    
+            $location.path( '/player' );
         }
 
     } else if(localStorage.getItem('Authentication')){
@@ -289,7 +289,7 @@ angular.module('OEPlayer')
     $scope.init = function(){
         FileFactory.readJSON(config.local_path,'playlists.json')
             .then(function(data){
-                $scope.venue = JSON.parse(data);
+                $scope.playlists = JSON.parse(data);
             });
     };
     $scope.init();
@@ -534,7 +534,8 @@ angular.module('OEPlayer')
 
     $scope.init();
 
-}]);;/*jshint -W083 */
+}]);
+;/*jshint -W083 */
 angular.module('OEPlayer')
 
 .controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http','MediaFactory','LangFactory','SocketFactory',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http,MediaFactory,LangFactory,SocketFactory){
@@ -581,6 +582,7 @@ angular.module('OEPlayer')
 		$scope.pushToPlay = {
 			status:false
 		};
+		$scope.timer = {};
 		$scope.pushToPlaySchedule = {
 			status:false
 		};
@@ -775,7 +777,7 @@ angular.module('OEPlayer')
 
 	var getPlaylists = function(){
 		HTTPFactory.getPlaylists().success(function(data){
-			if(data.playlists.length > 0){
+			if(data.length > 0){
 				writeJSONFiles('playlists',data,getTracksOnline);
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
@@ -938,8 +940,7 @@ angular.module('OEPlayer')
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){
-            	var d = JSON.parse(data);
-                $scope.availableTracks = d.tracks;
+                $scope.availableTracks = JSON.parse(data.tracks);
                 $scope.swappingTracks = true;
 				preparePlaylist();
             },function(error){
@@ -998,31 +999,36 @@ angular.module('OEPlayer')
 	};
 
 	var downloadTrack = function(track){
-		HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
-			FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
-				.then(function(res){
-					LogSrvc.logSystem(res);
-					$scope.availableTracks.push(track);
-					var index = $scope.unavailableTracks.indexOf(track);
-					$scope.unavailableTracks.splice(index,1);
-					StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
-					//if all downloaded
-					if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && !$scope.playing){
-						$scope.swappingTracks = true;
-						$scope.playing = true;
-						preparePlaylist();
-					} else if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && $scope.playing){
-						StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable.');
-					}
-					if($scope.unavailableTracks.length === 0){
-						StatusSrvc.clearStatus();
-					}
-				},function(error){
-					LogSrvc.logError('write download track error');
-					$scope.unavailableTracks.push(track);
-				});
-		}).error(function(err){
-			LogSrvc.logError('download track error');
+		HTTPFactory.getTrackSrc(track.id).success(function(track){
+			HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
+				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
+					.then(function(res){
+						LogSrvc.logSystem(res);
+						$scope.availableTracks.push(track);
+						var index = $scope.unavailableTracks.indexOf(track);
+						$scope.unavailableTracks.splice(index,1);
+						StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
+						//if all downloaded
+						if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && !$scope.playing){
+							$scope.swappingTracks = true;
+							$scope.playing = true;
+							preparePlaylist();
+						} else if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && $scope.playing){
+							StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable.');
+						}
+						if($scope.unavailableTracks.length === 0){
+							StatusSrvc.clearStatus();
+						}
+					},function(error){
+						LogSrvc.logError('write download track error');
+						$scope.unavailableTracks.push(track);
+					});
+			}).error(function(err){
+				LogSrvc.logError('download track error');
+				$scope.unavailableTracks.push(track);
+			});
+		}).error(function(){
+			LogSrvc.logError('get track error');
 			$scope.unavailableTracks.push(track);
 		});
 	};
@@ -1070,11 +1076,11 @@ angular.module('OEPlayer')
 		var deferred = $q.defer();
 		FileFactory.readJSON(config.local_path,'playlists.json')
 			.then(function(data){
-				var venue = JSON.parse(data);
+				var playlists = JSON.parse(data);
 				
-				for (var i = 0; i < venue.playlists.length; i++) {
-					if(venue.playlists[i].id == playlist.playlist_id){
-						deferred.resolve(venue.playlists[i].tracks);
+				for (var i = 0; i < playlists.length; i++) {
+					if(playlists[i].id == playlist.playlist_id){
+						deferred.resolve(playlists[i].tracks);
 						break;
 					}
 				}
@@ -1344,7 +1350,13 @@ angular.module('OEPlayer')
 		}
 		catch(e){
 			LogSrvc.logError(e);
-			prepareNextTrack(playerName);
+			$scope.playbackErr++;
+			if($scope.playbackErr > 5){
+				LogSrvc.logError('playback error - Restarting');
+				window.location.reload();
+			} else {
+				prepareNextTrack(playerName);
+			}
 		}
 	};
 	var startTimer = function(playerName){
@@ -1645,21 +1657,29 @@ angular.module('OEPlayer')
 		var time = SettingsSrvc.pushToPlayTime*3600000;
 		//set timeout for push to play
 		var startTimer = function(){
-			pushToPlayTimer = $timeout(function(){
+			$scope.pushToPlay.timer = $timeout(function(){
 				$scope.pushToPlay.status = false;
-				$timeout.cancel(pushToPlayTimer);
-				pushToPlayTimer = undefined;
+				$timeout.cancel($scope.pushToPlay.timer);
+				$scope.pushToPlay.timer = undefined;
 				LogSrvc.logSystem('push-to-play timer end');
 			},time);
 		};
 		startTimer();
+	};
+	$scope.cancelPushToPlay = function(){
+		$scope.pushToPlay.status = false;
+		$timeout.cancel($scope.pushToPlay.timer);
+		$scope.pushToPlay.timer = undefined;
+		LogSrvc.logSystem('push-to-play timer end');
 	};
 	$scope.$on('$destroy', unbindPushToPlay);
 
 	//push to play schedule
 	var unbindPtpSchedule = $rootScope.$on('ptp-schedule',function(){
 		//cancel pust to play if running
-		$scope.pushToPlay.status = false;
+		if($scope.pushToPlay.status){
+			$scope.pushToPlay.status = false;
+		}
 		//cancel running timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
@@ -1721,6 +1741,12 @@ angular.module('OEPlayer')
 		};
 		startTimer();
 	};
+	$scope.cancelPushToPlaySchedule = function(){
+		$scope.pushToPlaySchedule.status = false;
+		$interval.cancel($scope.pushToPlaySchedule.timer);
+		$scope.pushToPlaySchedule.timer = undefined;
+		LogSrvc.logSystem('push-to-play schedule timer end');
+	};
 	var msToMinSec = function(ms){
 		var minutes = Math.floor(ms / 60000);
   		var seconds = ((ms % 60000) / 1000).toFixed(0);
@@ -1767,7 +1793,7 @@ angular.module('OEPlayer')
 			//set blocked on local storage if offline - sent on init
 			HTTPFactory.blockTrack(track.id).success(function(){
 				track.blocked = true;
-			},function(){
+			}).error(function(){
 				var blocked = JSON.parse(localStorage.getItem('blocked'));
 				blocked.push(track.id);
 				localStorage.setItem(blocked);
@@ -2264,6 +2290,9 @@ angular.module('OEPlayer')
 		getBlocked:function(){
 			return $http.get(config.api_url+'blocked-tracks');
 		},
+        getTrackSrc:function(id){
+            return $http.get(config.api_url+'track/'+id);
+        },
 		getTrackFile:function(src){
             return $http({
                 type:'GET',

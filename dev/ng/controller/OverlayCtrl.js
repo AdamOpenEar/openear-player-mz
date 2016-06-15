@@ -147,7 +147,7 @@ angular.module('OEPlayer')
     $scope.init = function(){
         FileFactory.readJSON(config.local_path,'playlists.json')
             .then(function(data){
-                $scope.venue = JSON.parse(data);
+                $scope.playlists = JSON.parse(data);
             });
     };
     $scope.init();

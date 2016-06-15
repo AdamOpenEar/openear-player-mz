@@ -45,6 +45,7 @@ angular.module('OEPlayer')
 		$scope.pushToPlay = {
 			status:false
 		};
+		$scope.timer = {};
 		$scope.pushToPlaySchedule = {
 			status:false
 		};
@@ -239,7 +240,7 @@ angular.module('OEPlayer')
 
 	var getPlaylists = function(){
 		HTTPFactory.getPlaylists().success(function(data){
-			if(data.playlists.length > 0){
+			if(data.length > 0){
 				writeJSONFiles('playlists',data,getTracksOnline);
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
@@ -402,8 +403,7 @@ angular.module('OEPlayer')
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){
-            	var d = JSON.parse(data);
-                $scope.availableTracks = d.tracks;
+                $scope.availableTracks = JSON.parse(data.tracks);
                 $scope.swappingTracks = true;
 				preparePlaylist();
             },function(error){
@@ -462,31 +462,36 @@ angular.module('OEPlayer')
 	};
 
 	var downloadTrack = function(track){
-		HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
-			FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
-				.then(function(res){
-					LogSrvc.logSystem(res);
-					$scope.availableTracks.push(track);
-					var index = $scope.unavailableTracks.indexOf(track);
-					$scope.unavailableTracks.splice(index,1);
-					StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
-					//if all downloaded
-					if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && !$scope.playing){
-						$scope.swappingTracks = true;
-						$scope.playing = true;
-						preparePlaylist();
-					} else if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && $scope.playing){
-						StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable.');
-					}
-					if($scope.unavailableTracks.length === 0){
-						StatusSrvc.clearStatus();
-					}
-				},function(error){
-					LogSrvc.logError('write download track error');
-					$scope.unavailableTracks.push(track);
-				});
-		}).error(function(err){
-			LogSrvc.logError('download track error');
+		HTTPFactory.getTrackSrc(track.id).success(function(track){
+			HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
+				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
+					.then(function(res){
+						LogSrvc.logSystem(res);
+						$scope.availableTracks.push(track);
+						var index = $scope.unavailableTracks.indexOf(track);
+						$scope.unavailableTracks.splice(index,1);
+						StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
+						//if all downloaded
+						if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && !$scope.playing){
+							$scope.swappingTracks = true;
+							$scope.playing = true;
+							preparePlaylist();
+						} else if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && $scope.playing){
+							StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable.');
+						}
+						if($scope.unavailableTracks.length === 0){
+							StatusSrvc.clearStatus();
+						}
+					},function(error){
+						LogSrvc.logError('write download track error');
+						$scope.unavailableTracks.push(track);
+					});
+			}).error(function(err){
+				LogSrvc.logError('download track error');
+				$scope.unavailableTracks.push(track);
+			});
+		}).error(function(){
+			LogSrvc.logError('get track error');
 			$scope.unavailableTracks.push(track);
 		});
 	};
@@ -534,11 +539,11 @@ angular.module('OEPlayer')
 		var deferred = $q.defer();
 		FileFactory.readJSON(config.local_path,'playlists.json')
 			.then(function(data){
-				var venue = JSON.parse(data);
+				var playlists = JSON.parse(data);
 				
-				for (var i = 0; i < venue.playlists.length; i++) {
-					if(venue.playlists[i].id == playlist.playlist_id){
-						deferred.resolve(venue.playlists[i].tracks);
+				for (var i = 0; i < playlists.length; i++) {
+					if(playlists[i].id == playlist.playlist_id){
+						deferred.resolve(playlists[i].tracks);
 						break;
 					}
 				}
@@ -808,7 +813,13 @@ angular.module('OEPlayer')
 		}
 		catch(e){
 			LogSrvc.logError(e);
-			prepareNextTrack(playerName);
+			$scope.playbackErr++;
+			if($scope.playbackErr > 5){
+				LogSrvc.logError('playback error - Restarting');
+				window.location.reload();
+			} else {
+				prepareNextTrack(playerName);
+			}
 		}
 	};
 	var startTimer = function(playerName){
