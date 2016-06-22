@@ -1,7 +1,7 @@
 <div ng-controller="OverlayLibraryPlaylistsCtrl">
     <div ng-repeat="playlist in playlists">
         <div class="library-playlist">
-            <a ng-click="!$root.ready || playPlaylist(playlist)" ng-disabled="!$root.ready"><i class="fi-play-circle"></i></a>
+            <a ng-click="swappingTracks || playPlaylist(playlist)" ng-disabled="swappingTracks"><i class="fi-play-circle"></i></a>
             <span class="library-playlist-info">{{playlist.name}} - <em>{{playlist.tracks.length}} tracks</em></span>
             <i class="fi-list-thumbnails" ng-click="playlist.showTracks = !playlist.showTracks"></i>
         </div>
