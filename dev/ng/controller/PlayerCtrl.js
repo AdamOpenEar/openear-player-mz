@@ -139,7 +139,7 @@ angular.module('OEPlayer')
 									FileFactory.readJSON(config.local_path,'playlists.json')
 										.then(function(data){
 											var playlists = JSON.parse(data);
-											for (var i = playlists.playlists.length - 1; i >= 0; i--) {
+											for (var i = playlists.length - 1; i >= 0; i--) {
 												if(playlists[i].id == playlistID){
 													LogSrvc.logSystem('push-to-play man');
 													$scope.playlist = playlists[i];
