@@ -1,6 +1,67 @@
 angular.module('OEPlayer')
 .factory('FileFactory',['FileSystem','$q',function(FileSystem,$q){
 
+	var seq = [165,150,151,86];
+	var swapIn = function(abv) {
+		var data = abv;
+		if(!checkSequence(abv)) {
+			data = swap(abv);
+			var seqData = new Array();
+			for(var i = 0; i < data.length; i++) {
+				seqData[i] =   data[i];
+			}
+			for(var i = 0; i < seq.length; i++) {
+				seqData[data.length + i] = seq[i];
+			}
+			data = new Uint8Array(seqData);
+		}
+		return data;
+	};
+	var swapOut = function(abv,dir,filename) {
+		var data = abv;
+		if(checkSequence(abv)) {
+			var noSeqData = new Array();
+			for(var i = 0; i < data.length - 4; i++) {
+				noSeqData[i] = data[i];
+			}
+			data = new Uint8Array(noSeqData);
+			data = swap(data);
+		} else {
+			FileSystem.readAsArrayBuffer(dir,filename.toString())
+				.then(function(result){
+					var abv = new Uint8Array(result);
+					abv = swapIn(abv);
+					var blob = new Blob([abv], {type: 'audio/mpeg'});
+					FileSystem.writeFile(dir,filename.toString(),blob,true)
+						.then(function(result){
+							console.log('encrypted');
+						},function(error){
+							console.log(error);
+						});
+				},function(error){
+					console.log(error);
+				});
+		}
+		return data;
+	};
+	var swap = function(abv) {
+		for(var i = 0; i < abv.length; i+=2) {
+			if(i+1 > abv.length) break;
+	    	var temp = abv[i];
+	    	abv[i] = abv[i + 1];
+	    	abv[i + 1] = temp;
+	    }
+	    return abv;	
+	};
+	var checkSequence = function(abv) {
+		for(var i = 0; i < seq.length; i++) {
+			if(abv[(abv.length - 4) + i] != seq[i]){
+				return false;
+			}
+		}
+		return true;
+	};
+
 	return {
 		init:function(){
 			var deferred = $q.defer();
@@ -14,7 +75,9 @@ angular.module('OEPlayer')
 		},
 		writeTrack: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
-			var blob = new Blob([data], {type: 'audio/mpeg'});
+			var abv  = new Uint8Array(data);
+			abv = swapIn(abv);
+			var blob = new Blob([abv], {type: 'audio/mpeg'});
 			FileSystem.writeFile(dir,filename.toString(),blob,blnReplace)
 				.then(function(result){
 					deferred.resolve(result);
@@ -59,7 +122,9 @@ angular.module('OEPlayer')
 			var deferred = $q.defer();
 			FileSystem.readAsArrayBuffer(dir,filename.toString())
 				.then(function(result){
-					var blob = new Blob([(result)], {type: 'audio/mpeg'});
+					var abv = new Uint8Array(result);
+					abv = swapOut(abv,dir,filename);
+					var blob = new Blob([(abv)], {type: 'audio/mpeg'});
 					deferred.resolve(blob);
 				},function(error){
 					deferred.reject(error);
