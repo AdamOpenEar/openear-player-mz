@@ -138,11 +138,11 @@ angular.module('OEPlayer')
 									};
 									FileFactory.readJSON(config.local_path,'playlists.json')
 										.then(function(data){
-											var venue = JSON.parse(data);
-											for (var i = venue.playlists.length - 1; i >= 0; i--) {
-												if(venue.playlists[i].id == playlistID){
+											var playlists = JSON.parse(data);
+											for (var i = playlists.playlists.length - 1; i >= 0; i--) {
+												if(playlists[i].id == playlistID){
 													LogSrvc.logSystem('push-to-play man');
-													$scope.playlist = venue.playlists[i];
+													$scope.playlist = playlists[i];
 													$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
 													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:true});
 													shuffleArray($scope.playlist.tracks);
