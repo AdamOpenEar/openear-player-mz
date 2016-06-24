@@ -51,6 +51,10 @@ angular.module('OEPlayer')
         },
         reprocessFile:function(track){
         	return $http.post(config.api_url+'reprocess-file',track);
+        },
+        sendError:function(err,venueID){
+            var data = {venueID:venueID,error:err};
+            return $http.post(config.api_url+'error',data);
         }
 	};
 }])
