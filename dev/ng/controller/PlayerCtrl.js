@@ -510,12 +510,11 @@ angular.module('OEPlayer')
 	};
 
 	var checkPlaylistStart = function(playlist){
-
 		//if playlist is for today
 		var now = moment();
 		var time = getTime();
 
-		if(playlist.day == (now.weekday() === 0 ? 7 : now.weekday() - 1)){
+		if(playlist.day == (now.weekday() === 0 ? 6 : now.weekday() - 1)){
 			//if start and end of playlist between now
 			if(playlist.midnight_overlap == 1){
 				if(playlist.start <= time && time < '23:59:59'){
