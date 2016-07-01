@@ -2,8 +2,8 @@ angular.module('OEPlayer')
 .service('SettingsSrvc',['$rootScope',function($rootScope){
 
 	SettingsSrvc = {
-		crossfadeIn:parseInt(localStorage.getItem('crossfadeIn'))|| 1000,
-		crossfadeOut:parseInt(localStorage.getItem('crossfadeOut'))|| 1000,
+		crossfadeIn:parseInt(localStorage.getItem('crossfadeIn'))|| 500,
+		crossfadeOut:parseInt(localStorage.getItem('crossfadeOut'))|| 500,
 		skipCrossfadeOut:parseInt(localStorage.getItem('skipCrossfadeOut'))|| 500,
 		onlineCheck:parseInt(localStorage.getItem('onlineCheck'))|| 1,
 		animations:localStorage.getItem('animations')|| 1,

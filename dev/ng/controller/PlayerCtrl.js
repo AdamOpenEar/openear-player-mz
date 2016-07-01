@@ -138,11 +138,11 @@ angular.module('OEPlayer')
 									};
 									FileFactory.readJSON(config.local_path,'playlists.json')
 										.then(function(data){
-											var venue = JSON.parse(data);
-											for (var i = venue.playlists.length - 1; i >= 0; i--) {
-												if(venue.playlists[i].id == playlistID){
+											var playlists = JSON.parse(data);
+											for (var i = playlists.length - 1; i >= 0; i--) {
+												if(playlists[i].id == playlistID){
 													LogSrvc.logSystem('push-to-play man');
-													$scope.playlist = venue.playlists[i];
+													$scope.playlist = playlists[i];
 													$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
 													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:true});
 													shuffleArray($scope.playlist.tracks);
@@ -511,12 +511,11 @@ angular.module('OEPlayer')
 	};
 
 	var checkPlaylistStart = function(playlist){
-
 		//if playlist is for today
 		var now = moment();
 		var time = getTime();
 
-		if(playlist.day == (now.weekday() === 0 ? 7 : now.weekday() - 1)){
+		if(playlist.day == (now.weekday() === 0 ? 6 : now.weekday() - 1)){
 			//if start and end of playlist between now
 			if(playlist.midnight_overlap == 1){
 				if(playlist.start <= time && time < '23:59:59'){
@@ -794,9 +793,7 @@ angular.module('OEPlayer')
 										LogSrvc.logError('playback error - Restarting');
 										window.location.reload();
 									} else {
-										$interval.cancel(player[playerName].timer);
-										player[playerName].timer = undefined;
-										prepareNextTrack(playerName);
+										cancelTimer(playerName);
 									}
 								} else {
 									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
@@ -804,12 +801,12 @@ angular.module('OEPlayer')
 								$timeout.cancel(checkTimeout);
 							};
 							checkPlaying();
-						},SettingsSrvc.crossfadeIn*10);
+						},SettingsSrvc.crossfadeIn*11);
 					}
 					startTimer(playerName);
 				},function(error){
 					LogSrvc.logError(error);
-					prepareNextTrack(playerName);
+					cancelTimer(playerName);
 				});
 		}
 		catch(e){
@@ -819,10 +816,17 @@ angular.module('OEPlayer')
 				LogSrvc.logError('playback error - Restarting');
 				window.location.reload();
 			} else {
-				prepareNextTrack(playerName);
+				cancelTimer(playerName);
 			}
 		}
 	};
+	var cancelTimer = function(playerName){
+		player[playerName].stop(playerName);
+		$interval.cancel(player[playerName].timer);
+		player[playerName].timer = undefined;
+		prepareNextTrack(playerName);
+	};
+
 	var startTimer = function(playerName){
 		player[playerName].timer = $interval(function(){
 			//just a timer
@@ -1249,11 +1253,6 @@ angular.module('OEPlayer')
 	$scope.blockTrack = function(track){
 		var c = confirm('Are you sure you want to block this track?');
 		if(c){
-			for (var i = $scope.playlist.tracks.length - 1; i >= 0; i--) {
-				if($scope.playlist.tracks[i].id == track.id){
-					$scope.playlist.tracks.splice(i,1);
-				}
-			}
 			//set blocked on local storage if offline - sent on init
 			HTTPFactory.blockTrack(track.id).success(function(){
 				track.blocked = true;

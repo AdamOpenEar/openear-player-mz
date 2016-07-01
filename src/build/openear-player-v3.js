@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.2.6-0.0.1'
+    'version':'3.2.8-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -675,11 +675,11 @@ angular.module('OEPlayer')
 									};
 									FileFactory.readJSON(config.local_path,'playlists.json')
 										.then(function(data){
-											var venue = JSON.parse(data);
-											for (var i = venue.playlists.length - 1; i >= 0; i--) {
-												if(venue.playlists[i].id == playlistID){
+											var playlists = JSON.parse(data);
+											for (var i = playlists.length - 1; i >= 0; i--) {
+												if(playlists[i].id == playlistID){
 													LogSrvc.logSystem('push-to-play man');
-													$scope.playlist = venue.playlists[i];
+													$scope.playlist = playlists[i];
 													$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
 													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:true});
 													shuffleArray($scope.playlist.tracks);
@@ -1047,12 +1047,11 @@ angular.module('OEPlayer')
 	};
 
 	var checkPlaylistStart = function(playlist){
-
 		//if playlist is for today
 		var now = moment();
 		var time = getTime();
 
-		if(playlist.day == (now.weekday() === 0 ? 7 : now.weekday() - 1)){
+		if(playlist.day == (now.weekday() === 0 ? 6 : now.weekday() - 1)){
 			//if start and end of playlist between now
 			if(playlist.midnight_overlap == 1){
 				if(playlist.start <= time && time < '23:59:59'){
@@ -1330,9 +1329,7 @@ angular.module('OEPlayer')
 										LogSrvc.logError('playback error - Restarting');
 										window.location.reload();
 									} else {
-										$interval.cancel(player[playerName].timer);
-										player[playerName].timer = undefined;
-										prepareNextTrack(playerName);
+										cancelTimer(playerName);
 									}
 								} else {
 									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
@@ -1340,12 +1337,12 @@ angular.module('OEPlayer')
 								$timeout.cancel(checkTimeout);
 							};
 							checkPlaying();
-						},SettingsSrvc.crossfadeIn*10);
+						},SettingsSrvc.crossfadeIn*11);
 					}
 					startTimer(playerName);
 				},function(error){
 					LogSrvc.logError(error);
-					prepareNextTrack(playerName);
+					cancelTimer(playerName);
 				});
 		}
 		catch(e){
@@ -1355,10 +1352,17 @@ angular.module('OEPlayer')
 				LogSrvc.logError('playback error - Restarting');
 				window.location.reload();
 			} else {
-				prepareNextTrack(playerName);
+				cancelTimer(playerName);
 			}
 		}
 	};
+	var cancelTimer = function(playerName){
+		player[playerName].stop(playerName);
+		$interval.cancel(player[playerName].timer);
+		player[playerName].timer = undefined;
+		prepareNextTrack(playerName);
+	};
+
 	var startTimer = function(playerName){
 		player[playerName].timer = $interval(function(){
 			//just a timer
@@ -1785,11 +1789,6 @@ angular.module('OEPlayer')
 	$scope.blockTrack = function(track){
 		var c = confirm('Are you sure you want to block this track?');
 		if(c){
-			for (var i = $scope.playlist.tracks.length - 1; i >= 0; i--) {
-				if($scope.playlist.tracks[i].id == track.id){
-					$scope.playlist.tracks.splice(i,1);
-				}
-			}
 			//set blocked on local storage if offline - sent on init
 			HTTPFactory.blockTrack(track.id).success(function(){
 				track.blocked = true;
@@ -2163,6 +2162,67 @@ angular.module('OEPlayer')
 }]);;angular.module('OEPlayer')
 .factory('FileFactory',['FileSystem','$q',function(FileSystem,$q){
 
+	var seq = [165,150,151,86];
+	var swapIn = function(abv) {
+		var data = abv;
+		if(!checkSequence(abv)) {
+			data = swap(abv);
+			var seqData = [];
+			for(var i = 0; i < data.length; i++) {
+				seqData[i] =   data[i];
+			}
+			for(var j = 0; j < seq.length; j++) {
+				seqData[data.length + j] = seq[j];
+			}
+			data = new Uint8Array(seqData);
+		}
+		return data;
+	};
+	var swapOut = function(abv,dir,filename) {
+		var data = abv;
+		if(checkSequence(abv)) {
+			var noSeqData = [];
+			for(var i = 0; i < data.length - 4; i++) {
+				noSeqData[i] = data[i];
+			}
+			data = new Uint8Array(noSeqData);
+			data = swap(data);
+		} else {
+			FileSystem.readAsArrayBuffer(dir,filename.toString())
+				.then(function(result){
+					var abv = new Uint8Array(result);
+					abv = swapIn(abv);
+					var blob = new Blob([abv], {type: 'audio/mpeg'});
+					FileSystem.writeFile(dir,filename.toString(),blob,true)
+						.then(function(result){
+							console.log('encrypted');
+						},function(error){
+							console.log(error);
+						});
+				},function(error){
+					console.log(error);
+				});
+		}
+		return data;
+	};
+	var swap = function(abv) {
+		for(var i = 0; i < abv.length; i+=2) {
+			if(i+1 > abv.length) break;
+	    	var temp = abv[i];
+	    	abv[i] = abv[i + 1];
+	    	abv[i + 1] = temp;
+	    }
+	    return abv;	
+	};
+	var checkSequence = function(abv) {
+		for(var i = 0; i < seq.length; i++) {
+			if(abv[(abv.length - 4) + i] != seq[i]){
+				return false;
+			}
+		}
+		return true;
+	};
+
 	return {
 		init:function(){
 			var deferred = $q.defer();
@@ -2176,7 +2236,9 @@ angular.module('OEPlayer')
 		},
 		writeTrack: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
-			var blob = new Blob([data], {type: 'audio/mpeg'});
+			var abv = new Uint8Array(data);
+			abv = swapIn(abv);
+			var blob = new Blob([abv], {type: 'audio/mpeg'});
 			FileSystem.writeFile(dir,filename.toString(),blob,blnReplace)
 				.then(function(result){
 					deferred.resolve(result);
@@ -2221,7 +2283,9 @@ angular.module('OEPlayer')
 			var deferred = $q.defer();
 			FileSystem.readAsArrayBuffer(dir,filename.toString())
 				.then(function(result){
-					var blob = new Blob([(result)], {type: 'audio/mpeg'});
+					var abv = new Uint8Array(result);
+					abv = swapOut(abv,dir,filename);
+					var blob = new Blob([(abv)], {type: 'audio/mpeg'});
 					deferred.resolve(blob);
 				},function(error){
 					deferred.reject(error);
@@ -2312,6 +2376,10 @@ angular.module('OEPlayer')
         },
         reprocessFile:function(track){
         	return $http.post(config.api_url+'reprocess-file',track);
+        },
+        sendError:function(err,venueID){
+            var data = {venueID:venueID,error:err};
+            return $http.post(config.api_url+'error',data);
         }
 	};
 }])
@@ -3383,34 +3451,22 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
         }
     };
 }]);;angular.module('OEPlayer')
-.service('LogSrvc',['$rootScope','$q',function($rootScope,$q){
+.service('LogSrvc',[function(){
 	
 	var LogSrvc = {};
 	
-	LogSrvc.logs = [];
-	LogSrvc.intLogs = [];
 	var d, log;
 
 	LogSrvc.logSystem = function(log){
 		d = new Date();
 		log = '[SYSTEM] '+log + ' ' + d.getHours() +':'+d.getMinutes()+':'+d.getSeconds();
 		console.log(log);
-		LogSrvc.intLogs.push(log);
-		return $q.when(LogSrvc.intLogs).then(function(data) {
-	        // this is the magic
-        	angular.copy(data, LogSrvc.logs);
-      	});
 	};
 	LogSrvc.logError = function(log){
 		d = new Date();
 		var err = new Error();
 		log = '[ERROR] '+log + ' ' + d.getHours() +':'+d.getMinutes()+':'+d.getSeconds()+err.stack;
 		console.log(log);
-		LogSrvc.intLogs.push(log);
-		return $q.when(LogSrvc.intLogs).then(function(data) {
-	        // this is the magic
-        	angular.copy(data, LogSrvc.logs);
-      	});
 	};
 
 	return LogSrvc;
@@ -3454,8 +3510,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 .service('SettingsSrvc',['$rootScope',function($rootScope){
 
 	SettingsSrvc = {
-		crossfadeIn:parseInt(localStorage.getItem('crossfadeIn'))|| 1000,
-		crossfadeOut:parseInt(localStorage.getItem('crossfadeOut'))|| 1000,
+		crossfadeIn:parseInt(localStorage.getItem('crossfadeIn'))|| 500,
+		crossfadeOut:parseInt(localStorage.getItem('crossfadeOut'))|| 500,
 		skipCrossfadeOut:parseInt(localStorage.getItem('skipCrossfadeOut'))|| 500,
 		onlineCheck:parseInt(localStorage.getItem('onlineCheck'))|| 1,
 		animations:localStorage.getItem('animations')|| 1,

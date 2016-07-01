@@ -6,12 +6,12 @@ angular.module('OEPlayer')
 		var data = abv;
 		if(!checkSequence(abv)) {
 			data = swap(abv);
-			var seqData = new Array();
+			var seqData = [];
 			for(var i = 0; i < data.length; i++) {
 				seqData[i] =   data[i];
 			}
-			for(var i = 0; i < seq.length; i++) {
-				seqData[data.length + i] = seq[i];
+			for(var j = 0; j < seq.length; j++) {
+				seqData[data.length + j] = seq[j];
 			}
 			data = new Uint8Array(seqData);
 		}
@@ -20,7 +20,7 @@ angular.module('OEPlayer')
 	var swapOut = function(abv,dir,filename) {
 		var data = abv;
 		if(checkSequence(abv)) {
-			var noSeqData = new Array();
+			var noSeqData = [];
 			for(var i = 0; i < data.length - 4; i++) {
 				noSeqData[i] = data[i];
 			}
@@ -75,7 +75,7 @@ angular.module('OEPlayer')
 		},
 		writeTrack: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
-			var abv  = new Uint8Array(data);
+			var abv = new Uint8Array(data);
 			abv = swapIn(abv);
 			var blob = new Blob([abv], {type: 'audio/mpeg'});
 			FileSystem.writeFile(dir,filename.toString(),blob,blnReplace)
