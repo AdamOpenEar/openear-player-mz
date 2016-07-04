@@ -14,18 +14,45 @@ module.exports = function(grunt) {
         },
         preprocess:{
             devindex : {
-
                 src : 'src/tmpl/index.html',
                 dest : 'dev/index.html',
                 options : {
-
                     context : {
                         name : '<%= pkg.name %>',
                         version : '<%= pkg.version %>',
                         now : now,
-                        ver : '<%= ver %>'
+                        ver : '<%= ver %>',
+                        company: 'OpenEar Player'
                     }
+                }
+            },
+            devindexSecretlife : {
 
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/secretlife/dev/index.html',
+                options : {
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Secret Life - Powered by OpenEar Player'
+                    }
+                }
+
+            },
+            devindexPunch : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/punch/dev/index.html',
+                options : {
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Punch Taverns - Powered by OpenEar Player'
+                    }
                 }
 
             },
@@ -136,6 +163,39 @@ module.exports = function(grunt) {
                 files:[
                     {expand: true, src: ['dev/bower_components/*'], dest: 'www/bower_components/', filter: 'isFile'}
                 ]
+            },
+            secretlife:{
+                files:[
+                    {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/secretlife/'},
+                    {expand: true, src: ['dev/ng/**'], dest: 'whitelabel/secretlife/'},
+                    {
+                        expand: true,
+                        src: [
+                            'dev/assets/css/normalize.css',
+                            'dev/assets/css/responsive.css',
+                            'dev/assets/css/fonts/foundation-icons.css',
+                            'dev/assets/js/**'
+                        ],
+                        dest: 'whitelabel/secretlife/'
+                    }
+                ]
+            },
+            punch:{
+                files:[
+                    {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/punch/'},
+                    {expand: true, src: ['dev/ng/**'], dest: 'whitelabel/punch/'},
+                    {
+                        expand: true,
+                        src: [
+                            'dev/assets/css/normalize.css',
+                            'dev/assets/css/responsive.css',
+                            'dev/assets/css/main.css',
+                            'dev/assets/css/fonts/foundation-icons.css',
+                            'dev/assets/js/**'
+                        ],
+                        dest: 'whitelabel/punch/'
+                    }
+                ]
             }
         },
         cssmin: {
@@ -166,6 +226,14 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-ng-annotate');
     // Default task(s).
     grunt.registerTask('prod', ['env:prod', 'preprocess:appjsprod','preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
-    grunt.registerTask('dev', ['env:dev', 'preprocess:devindex','preprocess:appjs']);
+    grunt.registerTask('dev', [
+        'env:dev',
+        'preprocess:devindex',
+        'preprocess:devindexSecretlife',
+        'preprocess:devindexPunch',
+        'preprocess:appjs',
+        'copy:secretlife'
+        'copy:punch'
+    ]);
 
 };
