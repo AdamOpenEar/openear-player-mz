@@ -232,7 +232,7 @@ module.exports = function(grunt) {
         'preprocess:devindexSecretlife',
         'preprocess:devindexPunch',
         'preprocess:appjs',
-        'copy:secretlife'
+        'copy:secretlife',
         'copy:punch'
     ]);
 
