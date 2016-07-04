@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.2.8-0.0.1'
+    'version':'3.2.9-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -940,7 +940,7 @@ angular.module('OEPlayer')
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){
-                $scope.availableTracks = JSON.parse(data.tracks);
+                $scope.availableTracks = JSON.parse(data);
                 $scope.swappingTracks = true;
 				preparePlaylist();
             },function(error){

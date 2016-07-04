@@ -404,7 +404,7 @@ angular.module('OEPlayer')
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){
-                $scope.availableTracks = JSON.parse(data.tracks);
+                $scope.availableTracks = JSON.parse(data);
                 $scope.swappingTracks = true;
 				preparePlaylist();
             },function(error){
