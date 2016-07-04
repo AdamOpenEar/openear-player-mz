@@ -327,6 +327,8 @@ angular.module('OEPlayer')
 					}
 				}
 			}
+			//count local tracks
+			LogSrvc.logSystem('tracks local count = '+tracksLocal.length);
 			//now check for broken tracks
 			angular.forEach(tracksLocal,function(track,index){
 				//check file metadata
@@ -337,14 +339,11 @@ angular.module('OEPlayer')
 								.then(function(res){
 									//remove from tracks local
 									tracksLocal.splice(index,1);
-									//add to unavailable
 									LogSrvc.logSystem(res);
 								});
 						}
 					});
 			});
-			//count local tracks
-			LogSrvc.logSystem('tracks local count = '+tracksLocal.length);
 			//now get set tracks
 			HTTPFactory.getTracks().success(function(data){
 				var tracksServer = data.tracks;
@@ -404,7 +403,8 @@ angular.module('OEPlayer')
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){
-                $scope.availableTracks = JSON.parse(data);
+            	var d = JSON.parse(data);
+                $scope.availableTracks = d.tracks;
                 $scope.swappingTracks = true;
 				preparePlaylist();
             },function(error){
