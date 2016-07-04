@@ -66,7 +66,8 @@ module.exports = function(grunt) {
                         name : '<%= pkg.name %>',
                         version : '<%= pkg.version %>',
                         now : now,
-                        ver : '<%= ver %>'
+                        ver : '<%= ver %>',
+                        company: 'OpenEar Player'
                     }
 
                 }
@@ -190,7 +191,7 @@ module.exports = function(grunt) {
                             'dev/assets/css/normalize.css',
                             'dev/assets/css/responsive.css',
                             'dev/assets/css/main.css',
-                            'dev/assets/css/fonts/foundation-icons.css',
+                            'dev/assets/css/fonts/**',
                             'dev/assets/js/**'
                         ],
                         dest: 'whitelabel/punch/'
@@ -225,7 +226,15 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-ng-annotate');
     // Default task(s).
-    grunt.registerTask('prod', ['env:prod', 'preprocess:appjsprod','preprocess:prodindex','preprocess:cacheman','concat', 'uglify','cssmin']);
+    grunt.registerTask('prod', [
+        'env:prod',
+        'preprocess:appjsprod',
+        'preprocess:prodindex',
+        'preprocess:cacheman',
+        'concat',
+        'uglify',
+        'cssmin'
+    ]);
     grunt.registerTask('dev', [
         'env:dev',
         'preprocess:devindex',
