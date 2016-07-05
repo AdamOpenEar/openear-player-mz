@@ -26,7 +26,7 @@
 			<select ng-model="settings.onlineCheck" ng-options="check.type as check.name for check in onlineCheck" ng-change="changeSetting('onlineCheck')"></select>
 		</div>
 		<div class="settings-group">
-			<label>{{lang.settings.restart}}{{settings.restartTime}}</label>
+			<label>{{lang.settings.restart}}</label>
 			<select ng-model="settings.restartTime" ng-options="restart.time as restart.display for restart in restartTimes" ng-change="changeSetting('restartTime')"></select>
 		</div>
 		<div class="settings-group">

@@ -1,5 +1,5 @@
 angular.module('OEPlayer')
-.factory('HTTPFactory',['$http','config','$q',function($http,config,$q){
+.factory('HTTPFactory',['$http','config','$q','SettingsSrvc',function($http,config,$q,SettingsSrvc){
 	
 	return {
 		login:function(data){

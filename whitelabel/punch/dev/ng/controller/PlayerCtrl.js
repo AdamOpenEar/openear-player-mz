@@ -400,6 +400,7 @@ angular.module('OEPlayer')
 	};
 
 	var getTracksOffline = function(){
+		LogSrvc.logSystem('Playing offline');
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){

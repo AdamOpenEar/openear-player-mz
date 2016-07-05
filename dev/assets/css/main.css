@@ -934,7 +934,7 @@ input.cmn-toggle-round-flat:checked + label:after {
     width:50%;
     display: inline-block;
 }
-.settings-group button{
+.settings-group button, .settings-group select{
     color: #000;
 }
 /* ===== login =====*/
