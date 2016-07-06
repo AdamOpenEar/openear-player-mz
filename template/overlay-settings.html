@@ -50,6 +50,10 @@
 			<button ng-click="deleteLibrary()">Go!</button>
 		</div>
 		<div class="settings-group">
+			<label>Change filesize</label>
+			<select ng-model="settings.fileSize" ng-options="fileSize.type as fileSize.display for fileSize in fileSizes" ng-change="changeFileSize()"></select>
+		</div>
+		<div class="settings-group">
 			<label>Version</label>
 			<div>{{version}}</div>
 		</div>

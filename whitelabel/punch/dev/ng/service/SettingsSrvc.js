@@ -10,7 +10,8 @@ angular.module('OEPlayer')
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
 		lang:localStorage.getItem('languages') || 'English',
-		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4
+		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
+		fileSize:localStorage.getItem('fileSize') || 'file_ios'
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

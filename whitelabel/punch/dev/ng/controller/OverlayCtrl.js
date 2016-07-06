@@ -76,6 +76,7 @@ angular.module('OEPlayer')
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
     $scope.settings.languages = SettingsSrvc.lang;
     $scope.settings.restartTime = SettingsSrvc.restartTime;
+    $scope.settings.fileSize = SettingsSrvc.fileSize;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -88,6 +89,10 @@ angular.module('OEPlayer')
     $scope.onlineCheck = [
         {type:1,name:'Standard'},
         {type:2,name:'Alternative'}
+    ];
+    $scope.fileSizes = [
+        {type:'file_small',display:'Small'},
+        {type:'file_ios',display:'Standard'}
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
@@ -139,6 +144,23 @@ angular.module('OEPlayer')
                 });
         }
     };
+
+    $scope.changeFileSize = function(){
+        var c = confirm('This will delete the library and redownload the tracks. Are you sure?');
+        if(c){
+            SettingsSrvc.setSetting('fileSize',$scope.settings.fileSize);
+            FileFactory.readDirectory('')
+                .then(function(data){
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        FileFactory.deleteFile('',data[i].name)
+                            .then(function(res){
+                                LogSrvc.logSystem(res);
+                            });
+                    }
+                    window.location.reload();
+                });
+        }
+    }
 
 
 }])

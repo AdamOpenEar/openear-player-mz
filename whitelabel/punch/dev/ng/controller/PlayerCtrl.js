@@ -465,7 +465,7 @@ angular.module('OEPlayer')
 
 	var downloadTrack = function(track){
 		HTTPFactory.getTrackSrc(track.id).success(function(track){
-			HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
+			HTTPFactory.getTrackFile(track[SettingsSrvc.fileSize].filename.src).success(function(data){
 				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 					.then(function(res){
 						LogSrvc.logSystem(res);

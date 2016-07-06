@@ -41,8 +41,10 @@ angular.module('OEPlayer')
 			return self[playerName].createdMedia.duration;
 		},
 		stop:function(playerName){
-			self[playerName].createdMedia.src = '';
-			URL.revokeObjectURL(self[self.playerName].createdMedia.src);
+			if(typeof self[playerName] !== 'undefined'){
+				self[playerName].createdMedia.src = '';
+				URL.revokeObjectURL(self[self.playerName].createdMedia.src);
+			}
 		}
 	};
 

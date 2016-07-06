@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'http://localhost/oe-apis/oe-player/v1/public/log-track',
-    'version':'3.2.10-0.0.1'
+    'version':'3.2.11-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
