@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.2.10-0.0.1'
+    'version':'3.2.11-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -218,6 +218,7 @@ angular.module('OEPlayer')
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
     $scope.settings.languages = SettingsSrvc.lang;
     $scope.settings.restartTime = SettingsSrvc.restartTime;
+    $scope.settings.fileSize = SettingsSrvc.fileSize;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -230,6 +231,10 @@ angular.module('OEPlayer')
     $scope.onlineCheck = [
         {type:1,name:'Standard'},
         {type:2,name:'Alternative'}
+    ];
+    $scope.fileSizes = [
+        {type:'file_small',display:'Small'},
+        {type:'file_ios',display:'Standard'}
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
@@ -281,6 +286,23 @@ angular.module('OEPlayer')
                 });
         }
     };
+
+    $scope.changeFileSize = function(){
+        var c = confirm('This will delete the library and redownload the tracks. Are you sure?');
+        if(c){
+            SettingsSrvc.setSetting('fileSize',$scope.settings.fileSize);
+            FileFactory.readDirectory('')
+                .then(function(data){
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        FileFactory.deleteFile('',data[i].name)
+                            .then(function(res){
+                                LogSrvc.logSystem(res);
+                            });
+                    }
+                    window.location.reload();
+                });
+        }
+    }
 
 
 }])
@@ -1002,7 +1024,7 @@ angular.module('OEPlayer')
 
 	var downloadTrack = function(track){
 		HTTPFactory.getTrackSrc(track.id).success(function(track){
-			HTTPFactory.getTrackFile(track.file_ios.filename.src).success(function(data){
+			HTTPFactory.getTrackFile(track[SettingsSrvc.fileSize].filename.src).success(function(data){
 				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 					.then(function(res){
 						LogSrvc.logSystem(res);
@@ -2357,7 +2379,7 @@ angular.module('OEPlayer')
 			return $http.get(config.api_url+'blocked-tracks');
 		},
         getTrackSrc:function(id){
-            return $http.get(config.api_url+'track/'+id);
+            return $http.get(config.api_url+'track/'+id+'/'+SettingsSrvc.fileSize);
         },
 		getTrackFile:function(src){
             return $http({
@@ -2685,8 +2707,10 @@ angular.module('OEPlayer')
 			return self[playerName].createdMedia.duration;
 		},
 		stop:function(playerName){
-			self[playerName].createdMedia.src = '';
-			URL.revokeObjectURL(self[self.playerName].createdMedia.src);
+			if(typeof self[playerName] !== 'undefined'){
+				self[playerName].createdMedia.src = '';
+				URL.revokeObjectURL(self[self.playerName].createdMedia.src);
+			}
 		}
 	};
 
@@ -3520,7 +3544,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
 		lang:localStorage.getItem('languages') || 'English',
-		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4
+		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
+		fileSize:localStorage.getItem('fileSize') || 'file_ios'
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){
