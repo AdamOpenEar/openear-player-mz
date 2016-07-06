@@ -73,9 +73,40 @@ module.exports = function(grunt) {
                 }
 
             },
+            prodindexPunch : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/punch/www/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Punch Taverns - Powered by OpenEar Player'
+                    }
+
+                }
+
+            },
             cacheman :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'www/cache.manifest',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }                
+            },
+            cachemanPunch :{
+                src : 'src/tmpl/cache.manifest',
+                dest : 'whitelabel/punch/www/cache.manifest',
                 options : {
 
                     context : {
@@ -160,11 +191,6 @@ module.exports = function(grunt) {
             }
         },
         copy:{
-            prod:{
-                files:[
-                    {expand: true, src: ['dev/bower_components/*'], dest: 'www/bower_components/', filter: 'isFile'}
-                ]
-            },
             secretlife:{
                 files:[
                     {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/secretlife/'},
@@ -197,6 +223,14 @@ module.exports = function(grunt) {
                         dest: 'whitelabel/punch/'
                     }
                 ]
+            },
+            prodPunch:{
+                files:[
+                    {expand: true, src: ['www/bower_components/**'], dest: 'whitelabel/punch/'},
+                    {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/punch/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/punch/dev/assets/img',src: ['**'], dest: 'whitelabel/punch/www/assets/img/'},
+                    {expand: true, cwd:'whitelabel/punch/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/punch/www/assets/css/fonts/'}
+                ]
             }
         },
         cssmin: {
@@ -204,7 +238,7 @@ module.exports = function(grunt) {
                 shorthandCompacting: false,
                 roundingPrecision: -1
             },
-            target: {
+            prod: {
                 files: {
                     'www/assets/css/<%= pkg.name %>.min.css': [
                         'dev/assets/css/normalize.css',
@@ -213,7 +247,17 @@ module.exports = function(grunt) {
                         'dev/assets/css/fonts/foundation-icons.css'
                     ]
                 }
-            }
+            },
+            prodPunch: {
+                files: {
+                    'whitelabel/punch/www/assets/css/<%= pkg.name %>.min.css': [
+                        'whitelabel/punch/dev/assets/css/normalize.css',
+                        'whitelabel/punch/dev/assets/css/main.css',
+                        'whitelabel/punch/dev/assets/css/responsive.css',
+                        'whitelabel/punch/dev/assets/css/fonts/foundation-icons.css'
+                    ]
+                }
+            }            
         }
     })
     // Load the plugin that provides the "uglify" task.
@@ -230,10 +274,14 @@ module.exports = function(grunt) {
         'env:prod',
         'preprocess:appjsprod',
         'preprocess:prodindex',
+        'preprocess:prodindexPunch',
         'preprocess:cacheman',
+        'preprocess:cachemanPunch',
         'concat',
         'uglify',
-        'cssmin'
+        'cssmin:prod',
+        'cssmin:prodPunch',
+        'copy:prodPunch'
     ]);
     grunt.registerTask('dev', [
         'env:dev',

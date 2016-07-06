@@ -937,6 +937,7 @@ angular.module('OEPlayer')
 	};
 
 	var getTracksOffline = function(){
+		LogSrvc.logSystem('Playing offline');
 		//read current library
 		FileFactory.readJSON(config.local_path,'tracks.json')
             .then(function(data){
@@ -2325,7 +2326,7 @@ angular.module('OEPlayer')
 		}
 	};
 }]);;angular.module('OEPlayer')
-.factory('HTTPFactory',['$http','config','$q',function($http,config,$q){
+.factory('HTTPFactory',['$http','config','$q','SettingsSrvc',function($http,config,$q,SettingsSrvc){
 	
 	return {
 		login:function(data){
