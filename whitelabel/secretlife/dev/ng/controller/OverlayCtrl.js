@@ -91,8 +91,8 @@ angular.module('OEPlayer')
         {type:2,name:'Alternative'}
     ];
     $scope.fileSizes = [
-        {type:'file_small',display:'Small'},
-        {type:'file_ios',display:'Standard'}
+        {type:1,display:'Small'},
+        {type:2,display:'Standard'}
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
@@ -160,7 +160,7 @@ angular.module('OEPlayer')
                     window.location.reload();
                 });
         }
-    }
+    };
 
 
 }])

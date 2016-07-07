@@ -233,8 +233,8 @@ angular.module('OEPlayer')
         {type:2,name:'Alternative'}
     ];
     $scope.fileSizes = [
-        {type:'file_small',display:'Small'},
-        {type:'file_ios',display:'Standard'}
+        {type:1,display:'Small'},
+        {type:2,display:'Standard'}
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
@@ -302,7 +302,7 @@ angular.module('OEPlayer')
                     window.location.reload();
                 });
         }
-    }
+    };
 
 
 }])
@@ -1023,8 +1023,20 @@ angular.module('OEPlayer')
 	};
 
 	var downloadTrack = function(track){
-		HTTPFactory.getTrackSrc(track.id).success(function(track){
-			HTTPFactory.getTrackFile(track[SettingsSrvc.fileSize].filename.src).success(function(data){
+		var src = {};
+		if(SettingsSrvc.fileSize === 1){
+			src = {
+				endpoint:'getTrackSrcSmall',
+				type:'file_small'
+			};
+		} else {
+			src = {
+				endpoint:'getTrackSrc',
+				type:'file_ios'
+			};
+		}
+		HTTPFactory[src.endpoint](track.id).success(function(track){
+			HTTPFactory.getTrackFile(track[src.type].filename.src).success(function(data){
 				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 					.then(function(res){
 						LogSrvc.logSystem(res);
@@ -2379,7 +2391,10 @@ angular.module('OEPlayer')
 			return $http.get(config.api_url+'blocked-tracks');
 		},
         getTrackSrc:function(id){
-            return $http.get(config.api_url+'track/'+id+'/'+SettingsSrvc.fileSize);
+            return $http.get(config.api_url+'track/'+id);
+        },
+        getTrackSrcSmall:function(id){
+            return $http.get(config.api_url+'track-small/'+id);
         },
 		getTrackFile:function(src){
             return $http({
@@ -3545,7 +3560,7 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
 		lang:localStorage.getItem('languages') || 'English',
 		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
-		fileSize:localStorage.getItem('fileSize') || 'file_ios'
+		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

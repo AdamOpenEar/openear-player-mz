@@ -30,7 +30,10 @@ angular.module('OEPlayer')
 			return $http.get(config.api_url+'blocked-tracks');
 		},
         getTrackSrc:function(id){
-            return $http.get(config.api_url+'track/'+id+'/'+SettingsSrvc.fileSize);
+            return $http.get(config.api_url+'track/'+id);
+        },
+        getTrackSrcSmall:function(id){
+            return $http.get(config.api_url+'track-small/'+id);
         },
 		getTrackFile:function(src){
             return $http({

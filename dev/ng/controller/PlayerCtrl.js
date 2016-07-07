@@ -464,8 +464,20 @@ angular.module('OEPlayer')
 	};
 
 	var downloadTrack = function(track){
-		HTTPFactory.getTrackSrc(track.id).success(function(track){
-			HTTPFactory.getTrackFile(track[SettingsSrvc.fileSize].filename.src).success(function(data){
+		var src = {};
+		if(SettingsSrvc.fileSize === 1){
+			src = {
+				endpoint:'getTrackSrcSmall',
+				type:'file_small'
+			};
+		} else {
+			src = {
+				endpoint:'getTrackSrc',
+				type:'file_ios'
+			};
+		}
+		HTTPFactory[src.endpoint](track.id).success(function(track){
+			HTTPFactory.getTrackFile(track[src.type].filename.src).success(function(data){
 				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 					.then(function(res){
 						LogSrvc.logSystem(res);
