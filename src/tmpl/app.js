@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
-    'log_path':'https://api.player.openearmusic.com/v1/',
+    'log_path':'https://api.player.openearmusic.com/v1/log-track',
     'version':'/* @echo version */'
 })
 /* @endif */
