@@ -961,6 +961,7 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 .login-form form .form-group{
     margin: 20px 0;
+    color:#fff;
 }
 .login-form form label{
     width:23%;
