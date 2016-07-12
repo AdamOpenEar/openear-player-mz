@@ -492,23 +492,26 @@ angular.module('OEPlayer')
 							$scope.playing = true;
 							preparePlaylist(false,true);
 						}
+						$scope.availableTracks.push(track);
 						getNextTrack(track);
 					},function(error){
 						LogSrvc.logError('write download track error');
 						$scope.unavailableTracks.push(track);
+						getNextTrack(track);
 					});
 			}).error(function(err){
 				LogSrvc.logError('download track error');
 				$scope.unavailableTracks.push(track);
+				getNextTrack(track);
 			});
 		}).error(function(){
 			LogSrvc.logError('get track error');
 			$scope.unavailableTracks.push(track);
+			getNextTrack(track);
 		});
 	};
 
 	var getNextTrack = function(track){
-		$scope.availableTracks.push(track);
 		$scope.unavailableTracks.splice(0,1);
 		StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable. Controls disabled.');
 		if($scope.unavailableTracks.length > 0){
@@ -639,7 +642,6 @@ angular.module('OEPlayer')
 									//now load
 									promise.then(function(){
 										shuffleArray($scope.playlist.tracks);
-										console.log($scope.playlist.tracks);
 										$scope.playlist.tracks.push.apply($scope.playlist.tracks,playlistTracks);
 										loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
 									});
