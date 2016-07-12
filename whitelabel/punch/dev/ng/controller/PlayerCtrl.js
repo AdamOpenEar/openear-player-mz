@@ -487,13 +487,10 @@ angular.module('OEPlayer')
 					.then(function(res){
 						LogSrvc.logSystem(res);
 						$scope.availableTracks.push(track);
-						StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable.');
 						//if all downloaded
-						if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && !$scope.playing){
+						if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.9) && !$scope.playing){
 							$scope.playing = true;
 							preparePlaylist(false,true);
-						} else if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.8) && $scope.playing){
-							StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable.');
 						}
 						getNextTrack(track);
 					},function(error){
@@ -513,9 +510,9 @@ angular.module('OEPlayer')
 	var getNextTrack = function(track){
 		$scope.availableTracks.push(track);
 		$scope.unavailableTracks.splice(0,1);
-		StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
-		//check here for proportion of available to play from
+		StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable. Controls disabled.');
 		if($scope.unavailableTracks.length > 0){
+			$scope.swappingTracks = true;
 			downloadTrack($scope.unavailableTracks[0]);
 		} else {
 			$scope.swappingTracks = false;
@@ -625,13 +622,34 @@ angular.module('OEPlayer')
 								socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:$scope.pushToPlay.status});
 								$scope.playlist.tracks = data;
 								removeBlockedTracks($scope.playlist);
-								if(!downloading){
+								if(downloading){
+									var playlistTracks = angular.copy($scope.playlist.tracks);
+									$scope.playlist.tracks = [];
+									//set promise all to wait for all checks
+									var promise = $q.all(null);
+									angular.forEach(playlistTracks,function(track,index){
+										promise = FileFactory.checkFile('',track.id+'.mp3')
+											.then(function(data){
+												$scope.playlist.tracks.push(track);
+												playlistTracks.splice(index,1);
+											},function(err){
+												console.log(err);
+											});
+									});
+									//now load
+									promise.then(function(){
+										shuffleArray($scope.playlist.tracks);
+										console.log($scope.playlist.tracks);
+										$scope.playlist.tracks.push.apply($scope.playlist.tracks,playlistTracks);
+										loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+									});
+								} else {
 									shuffleArray($scope.playlist.tracks);
+									if(!fromSlider){
+										loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+									}
 								}
 								StatusSrvc.clearStatus();
-								if(!fromSlider){
-									loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
-								}
 							},function(error){
 								LogSrvc.logError(error);
 							});
