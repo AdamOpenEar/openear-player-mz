@@ -49,6 +49,19 @@ angular.module('OEPlayer')
             );
             return q.promise;
         },
+        getAvailableSpace:function(){
+            var q = $q.defer();
+            navigator.webkitPersistentStorage.queryUsageAndQuota(
+                function(used,quota){
+                    var res = [used,quota];
+                    q.resolve(res);
+                },
+                function(err){
+                    q.reject(err);
+                }
+            );
+            return q.promise;
+        },
         checkDir: function (path, dir) {
             oefs.c++;
             var q = $q.defer();

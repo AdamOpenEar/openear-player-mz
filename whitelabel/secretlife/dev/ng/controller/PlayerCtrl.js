@@ -20,6 +20,16 @@ angular.module('OEPlayer')
 
 	var init = function(){
 
+		FileFactory.getAvailableSpace()
+			.then(function(res){
+				var used = formatBytes(res[0]);
+				var quota = formatBytes(res[1]);
+				console.log(used);
+				console.log(quota);
+			},function(err){
+				console.log(err);
+			});
+
 		player = {};
 
 		LogSrvc.logSystem('init called');
@@ -176,6 +186,15 @@ angular.module('OEPlayer')
 				LogSrvc.logError(error);
 			});
 	};
+
+	var formatBytes = function(bytes,decimals) {
+   		if(bytes == 0) return '0 Byte';
+   		var k = 1000; // or 1024 for binary
+   		var dm = decimals + 1 || 3;
+   		var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+   		var i = Math.floor(Math.log(bytes) / Math.log(k));
+   		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+	}
 
 	//watch online status
 	$scope.$watch('online', function(newStatus) {
