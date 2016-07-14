@@ -54,6 +54,10 @@
 			<select ng-model="settings.fileSize" ng-options="fileSize.type as fileSize.display for fileSize in fileSizes" ng-change="changeFileSize()"></select>
 		</div>
 		<div class="settings-group">
+			<label>Available space</label>
+			<div>{{available}}</div>
+		</div>
+		<div class="settings-group">
 			<label>Version</label>
 			<div>{{version}}</div>
 		</div>

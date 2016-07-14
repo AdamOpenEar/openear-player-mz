@@ -946,6 +946,9 @@ input.cmn-toggle-round-flat:checked + label:after {
 .settings-group button, .settings-group select{
     color: #000;
 }
+.settings-group div{
+    display: inline-block;
+}
 /* ===== login =====*/
 .login-form{
     width:100%;

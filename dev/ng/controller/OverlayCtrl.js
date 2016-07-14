@@ -64,7 +64,7 @@ angular.module('OEPlayer')
     	};
     };
 }])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config',function($scope,SettingsSrvc,FileFactory,LogSrvc,config){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -97,6 +97,22 @@ angular.module('OEPlayer')
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
     $scope.version = config.version;
+
+    var formatBytes = function(bytes,decimals) {
+        if(bytes == 0) return '0 Byte';
+        var k = 1000; // or 1024 for binary
+        var dm = decimals + 1 || 3;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    };
+
+    FileFactory.getAvailableSpace()
+        .then(function(res){
+            $scope.available = formatBytes(res[1] - res[0]);
+        },function(err){
+            console.log(err);
+        });
 
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
@@ -157,7 +173,16 @@ angular.module('OEPlayer')
                                 LogSrvc.logSystem(res);
                             });
                     }
-                    window.location.reload();
+                    var data = {
+                        fileSize:$scope.settings.fileSize
+                    };
+                    HTTPFactory.setSettings(data)
+                        .success(function(data){
+                            window.location.reload();
+                        })
+                        .error(function(err){
+                            LogSrvc.logError(err);
+                        });
                 });
         }
     };

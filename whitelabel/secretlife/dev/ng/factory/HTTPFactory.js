@@ -60,6 +60,9 @@ angular.module('OEPlayer')
         },
         getSettings:function(){
             return $http.get(config.api_url+'settings');
+        },
+        setSettings:function(data){
+            return $http.post(config.api_url+'set-settings',data);
         }
 	};
 }])

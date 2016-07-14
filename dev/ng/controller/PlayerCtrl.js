@@ -20,16 +20,6 @@ angular.module('OEPlayer')
 
 	var init = function(){
 
-		FileFactory.getAvailableSpace()
-			.then(function(res){
-				var used = formatBytes(res[0]);
-				var quota = formatBytes(res[1]);
-				console.log(used);
-				console.log(quota);
-			},function(err){
-				console.log(err);
-			});
-
 		player = {};
 
 		LogSrvc.logSystem('init called');
@@ -194,7 +184,7 @@ angular.module('OEPlayer')
    		var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
    		var i = Math.floor(Math.log(bytes) / Math.log(k));
    		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-	}
+	};
 
 	//watch online status
 	$scope.$watch('online', function(newStatus) {
@@ -204,6 +194,10 @@ angular.module('OEPlayer')
 	var getSetttings = function(){
 		HTTPFactory.getSettings()
 			.success(function(data){
+				//filesize has been changed
+				if(data.file_size !== SettingsSrvc.fileSize){
+
+				}
 				//if animations on
 				if(SettingsSrvc.animations == 1){
 					$element.addClass('animations');
@@ -215,9 +209,9 @@ angular.module('OEPlayer')
 				} else {
 					getTracksOffline();
 				}
-			})
-			.error(function(){
-
+			}).error(function(err){
+				LogSrvc.logError(err);
+				getTracksOffline();
 			})
 	};
 
@@ -500,33 +494,66 @@ angular.module('OEPlayer')
 				type:'file_ios'
 			};
 		}
-		HTTPFactory[src.endpoint](track.id).success(function(trk){
-			HTTPFactory.getTrackFile(trk[src.type].filename.src).success(function(data){
-				FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
-					.then(function(res){
-						LogSrvc.logSystem(res);
-						$scope.availableTracks.push(track);
-						//if all downloaded
-						if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.9) && !$scope.playing){
-							$scope.playing = true;
-							preparePlaylist(false,true);
-						}
-						$scope.availableTracks.push(track);
-						getNextTrack(track);
-					},function(error){
-						LogSrvc.logError('write download track error');
+		FileFactory.getAvailableSpace()
+			.then(function(res){
+			var mb = ((res[1] - res[0])/1048576).toFixed(2);
+			if(mb > 100){
+				HTTPFactory[src.endpoint](track.id).success(function(trk){
+					HTTPFactory.getTrackFile(trk[src.type].filename.src).success(function(data){
+						FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
+							.then(function(res){
+								LogSrvc.logSystem(res);
+								$scope.availableTracks.push(track);
+								//if all downloaded
+								if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.9) && !$scope.playing){
+									$scope.playing = true;
+									preparePlaylist(false,true);
+								}
+								$scope.availableTracks.push(track);
+								getNextTrack(track);
+							},function(error){
+								LogSrvc.logError('write download track error');
+								$scope.unavailableTracks.push(track);
+								getNextTrack(track);
+							});
+					}).error(function(err){
+						LogSrvc.logError('download track error');
 						$scope.unavailableTracks.push(track);
 						getNextTrack(track);
 					});
-			}).error(function(err){
-				LogSrvc.logError('download track error');
-				$scope.unavailableTracks.push(track);
-				getNextTrack(track);
-			});
-		}).error(function(){
-			LogSrvc.logError('get track error');
-			$scope.unavailableTracks.push(track);
-			getNextTrack(track);
+				}).error(function(){
+					LogSrvc.logError('get track error');
+					$scope.unavailableTracks.push(track);
+					getNextTrack(track);
+				});
+			} else {
+				StatusSrvc.setStatus('Storage full.');
+				var c = confirm('You have run out of storage space on the player. You can either remove some playlists or convert your library to small files. Press OK to convert to small files.');
+				if(c){
+					SettingsSrvc.setSetting('fileSize',1);
+					FileFactory.readDirectory('')
+		                .then(function(data){
+		                    for (var i = data.length - 1; i >= 0; i--) {
+		                        FileFactory.deleteFile('',data[i].name)
+		                            .then(function(res){
+		                                LogSrvc.logSystem(res);
+		                            });
+		                    }
+		                    var data = {
+		                        fileSize:1
+		                    };
+		                    HTTPFactory.setSettings(data)
+		                        .success(function(data){
+		                            window.location.reload();
+		                        })
+		                        .error(function(err){
+		                        	LogSrvc.logError(err);
+		                        });
+		                });
+				}
+			}
+		},function(err){
+			console.log(err);
 		});
 	};
 
