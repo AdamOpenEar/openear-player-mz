@@ -113,6 +113,18 @@ angular.module('OEPlayer')
         },function(err){
             console.log(err);
         });
+    $scope.noTracks = 0;
+    FileFactory.readDirectory('')
+        .then(function(data){
+            //loop local files and push to local track array
+            if(data.length > 0){
+                for (var i = data.length - 1; i >= 0; i--) {
+                    if(data[i].name.indexOf('.json') == -1){
+                        $scope.noTracks++;
+                    }
+                }
+            }
+        });
 
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){

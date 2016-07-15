@@ -196,6 +196,18 @@ angular.module('OEPlayer')
 			.success(function(data){
 				//filesize has been changed
 				if(data.file_size !== SettingsSrvc.fileSize){
+					SettingsSrvc.setSetting('fileSize',data.file_size);
+					//delete files
+					FileFactory.readDirectory('')
+		                .then(function(data){
+		                    for (var i = data.length - 1; i >= 0; i--) {
+		                        FileFactory.deleteFile('',data[i].name)
+		                            .then(function(res){
+		                                LogSrvc.logSystem(res);
+		                            });
+		                    }
+							window.location.reload();
+						});
 
 				}
 				//if animations on
@@ -496,8 +508,8 @@ angular.module('OEPlayer')
 		}
 		FileFactory.getAvailableSpace()
 			.then(function(res){
-			var mb = ((res[1] - res[0])/1048576).toFixed(2);
-			if(mb > 100){
+			var left = ((res[1] - res[0])/1048576).toFixed(2);
+			if(left > 100){
 				HTTPFactory[src.endpoint](track.id).success(function(trk){
 					HTTPFactory.getTrackFile(trk[src.type].filename.src).success(function(data){
 						FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
@@ -527,7 +539,14 @@ angular.module('OEPlayer')
 					getNextTrack(track);
 				});
 			} else {
-				StatusSrvc.setStatus('Storage full.');
+				//stop players if playing
+				if(typeof player['playerOne'] !== 'undefined'){
+					player['playerOne'].stop('playerOne');
+				}
+				if(typeof player['playerTwo'] !== 'undefined'){
+					player['playerTwo'].stop('playerTwo');
+				}
+				StatusSrvc.setStatus('Storage full. Please contact OpenEar on 0141 248 6006.');
 				var c = confirm('You have run out of storage space on the player. You can either remove some playlists or convert your library to small files. Press OK to convert to small files.');
 				if(c){
 					SettingsSrvc.setSetting('fileSize',1);
@@ -550,6 +569,8 @@ angular.module('OEPlayer')
 		                        	LogSrvc.logError(err);
 		                        });
 		                });
+				} else {
+					$scope.swappingTracks = false;
 				}
 			}
 		},function(err){
@@ -876,7 +897,7 @@ angular.module('OEPlayer')
 									$scope.playbackErr++;
 									if($scope.playbackErr > 5){
 										LogSrvc.logError('playback error check playing - Restarting');
-										//window.location.reload();
+										window.location.reload();
 									} else {
 										cancelTimer(playerName);
 									}
@@ -894,9 +915,9 @@ angular.module('OEPlayer')
 					$scope.playbackErr++;
 					if($scope.playbackErr > 5){
 						LogSrvc.logError('playback error loading - Restarting');
-						//window.location.reload();
+						window.location.reload();
 					} else {
-						//cancelTimer(playerName);
+						cancelTimer(playerName);
 					}
 				});
 		}
@@ -905,7 +926,7 @@ angular.module('OEPlayer')
 			$scope.playbackErr++;
 			if($scope.playbackErr > 5){
 				LogSrvc.logError('playback error catch - Restarting');
-				//window.location.reload();
+				window.location.reload();
 			} else {
 				cancelTimer(playerName);
 			}
