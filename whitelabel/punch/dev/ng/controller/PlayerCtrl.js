@@ -178,7 +178,7 @@ angular.module('OEPlayer')
 	};
 
 	var formatBytes = function(bytes,decimals) {
-   		if(bytes == 0) return '0 Byte';
+   		if(bytes === 0) return '0 Byte';
    		var k = 1000; // or 1024 for binary
    		var dm = decimals + 1 || 3;
    		var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -224,7 +224,7 @@ angular.module('OEPlayer')
 			}).error(function(err){
 				LogSrvc.logError(err);
 				getTracksOffline();
-			})
+			});
 	};
 
 	var processBacklog = function(){
@@ -540,11 +540,11 @@ angular.module('OEPlayer')
 				});
 			} else {
 				//stop players if playing
-				if(typeof player['playerOne'] !== 'undefined'){
-					player['playerOne'].stop('playerOne');
+				if(typeof player.playerOne !== 'undefined'){
+					player.playerOne.stop('playerOne');
 				}
-				if(typeof player['playerTwo'] !== 'undefined'){
-					player['playerTwo'].stop('playerTwo');
+				if(typeof player.playerTwo !== 'undefined'){
+					player.playerTwo.stop('playerTwo');
 				}
 				StatusSrvc.setStatus('Storage full. Please contact OpenEar on 0141 248 6006.');
 				var c = confirm('You have run out of storage space on the player. You can either remove some playlists or convert your library to small files. Press OK to convert to small files.');
@@ -558,10 +558,10 @@ angular.module('OEPlayer')
 		                                LogSrvc.logSystem(res);
 		                            });
 		                    }
-		                    var data = {
+		                    var dt = {
 		                        fileSize:1
 		                    };
-		                    HTTPFactory.setSettings(data)
+		                    HTTPFactory.setSettings(dt)
 		                        .success(function(data){
 		                            window.location.reload();
 		                        })

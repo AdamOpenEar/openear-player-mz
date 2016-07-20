@@ -99,7 +99,7 @@ angular.module('OEPlayer')
     $scope.version = config.version;
 
     var formatBytes = function(bytes,decimals) {
-        if(bytes == 0) return '0 Byte';
+        if(bytes === 0) return '0 Byte';
         var k = 1000; // or 1024 for binary
         var dm = decimals + 1 || 3;
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -185,10 +185,10 @@ angular.module('OEPlayer')
                                 LogSrvc.logSystem(res);
                             });
                     }
-                    var data = {
+                    var dt = {
                         fileSize:$scope.settings.fileSize
                     };
-                    HTTPFactory.setSettings(data)
+                    HTTPFactory.setSettings(dt)
                         .success(function(data){
                             window.location.reload();
                         })

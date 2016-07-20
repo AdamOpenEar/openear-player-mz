@@ -19,7 +19,7 @@ angular.module('OEPlayer')
 			console.log(success);
 		}).error(function(err){
 			console.log(err);
-		})
+		});
 	};
 
 	return LogSrvc;
