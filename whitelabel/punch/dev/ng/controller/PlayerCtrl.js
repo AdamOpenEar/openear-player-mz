@@ -72,7 +72,7 @@ angular.module('OEPlayer')
 		    		$timeout.cancel(mtTimer);
 		    		mtTimer = undefined;
 		    		LogSrvc.logSystem(restartTime.hour+':'+restartTime.min+'am restart');
-		    		$scope.restart();
+		    		window.location.reload();
 		    	},millisTillFourAM);
 		    };
 	    	mtTimerStart();
@@ -173,7 +173,7 @@ angular.module('OEPlayer')
 				LogSrvc.logSystem(res);
 				getSetttings();
 			},function(error){
-				LogSrvc.logError(error);
+				LogSrvc.logError('error initialising');
 			});
 	};
 
@@ -222,7 +222,7 @@ angular.module('OEPlayer')
 					getTracksOffline();
 				}
 			}).error(function(err){
-				LogSrvc.logError(err);
+				LogSrvc.logError('http err getting settings - going offline');
 				getTracksOffline();
 			});
 	};
@@ -235,7 +235,7 @@ angular.module('OEPlayer')
 				localStorage.removeItem('backlog');
 				getPlaylists();
 			}).error(function(err){
-				LogSrvc.logError(err);
+				LogSrvc.logError('err processing backlog');
 				getTracksOffline();
 			});
 		} else {
@@ -370,7 +370,7 @@ angular.module('OEPlayer')
 								.then(function(res){
 									//remove from tracks local
 									tracksLocal.splice(index,1);
-									LogSrvc.logSystem(res);
+									LogSrvc.logError('track metadata warning - track deleted');
 								});
 						}
 					});
@@ -413,7 +413,6 @@ angular.module('OEPlayer')
 				//set status
 				if($scope.unavailableTracks.length > 0){
 					StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks');
-					$scope.toDownload = parseInt($scope.tracksNeeded*0.2);
 					prepareDownload();
 				} else {
 					//disable controls until fadein finished
@@ -421,11 +420,11 @@ angular.module('OEPlayer')
 					preparePlaylist();
 				}
 			}).error(function(err){
-				LogSrvc.logError(err);
+				LogSrvc.logError('http err getting tracks - going offline');
 				getTracksOffline();
 			});
 		},function(error){
-			LogSrvc.logError(error);
+			LogSrvc.logError('err reading tracks filesystem');
 			getTracks();
 		});
 	};
@@ -440,7 +439,7 @@ angular.module('OEPlayer')
                 $scope.swappingTracks = true;
 				preparePlaylist();
             },function(error){
-				LogSrvc.logError(error);
+				LogSrvc.logError('error reading tracks offline - stopped');
 			});
 	};
 
@@ -512,12 +511,16 @@ angular.module('OEPlayer')
 			if(left > 100){
 				HTTPFactory[src.endpoint](track.id).success(function(trk){
 					HTTPFactory.getTrackFile(trk[src.type].filename.src).success(function(data){
+						LogSrvc.logSystem('download complete');
 						FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 							.then(function(res){
-								LogSrvc.logSystem(res);
+								LogSrvc.logSystem('write track complete');
 								$scope.availableTracks.push(track);
 								//if all downloaded
 								if($scope.unavailableTracks.length < ($scope.tracksNeeded * 0.9) && !$scope.playing){
+									$scope.playing = true;
+									preparePlaylist(false,true);
+								} else if($scope.unavailableTracks.length === 1 && !$scope.playing){
 									$scope.playing = true;
 									preparePlaylist(false,true);
 								}
@@ -566,7 +569,7 @@ angular.module('OEPlayer')
 		                            window.location.reload();
 		                        })
 		                        .error(function(err){
-		                        	LogSrvc.logError(err);
+		                        	LogSrvc.logError('http err getting settings - stopped');
 		                        });
 		                });
 				} else {
@@ -720,7 +723,7 @@ angular.module('OEPlayer')
 								}
 								StatusSrvc.clearStatus();
 							},function(error){
-								LogSrvc.logError(error);
+								LogSrvc.logError('error reading playlist file - preparePlaylist');
 							});
 					//if we didn't find a playlist, go to library
 					} else {
@@ -843,7 +846,7 @@ angular.module('OEPlayer')
 			HTTPFactory.logTrack({logs:[track.id]}).success(function(){
 				LogSrvc.logSystem('Track '+track.title+' logged');
 			}).error(function(err){
-				LogSrvc.logError(err);
+				LogSrvc.logError('http err logging track - logTrack 1');
 				var backlog = JSON.parse(localStorage.getItem('backlog'));
 				if(backlog){
 					backlog.push(track.id);
@@ -893,8 +896,8 @@ angular.module('OEPlayer')
 								var position = player[playerName].getCurrentPosition(playerName);
 								if(position < 1){
 									//reinitialise the file system
-									LogSrvc.logError('playback error count - '+$scope.playbackErr);
 									$scope.playbackErr++;
+									LogSrvc.logError('playback error count check playing - '+$scope.playbackErr);
 									if($scope.playbackErr > 5){
 										LogSrvc.logError('playback error check playing - Restarting');
 										window.location.reload();
@@ -911,8 +914,8 @@ angular.module('OEPlayer')
 					}
 					startTimer(playerName);
 				},function(error){
-					LogSrvc.logError(error);
 					$scope.playbackErr++;
+					LogSrvc.logError('error loading track - no.'+$scope.playbackErr);
 					if($scope.playbackErr > 5){
 						LogSrvc.logError('playback error loading - Restarting');
 						window.location.reload();
@@ -922,8 +925,8 @@ angular.module('OEPlayer')
 				});
 		}
 		catch(e){
-			LogSrvc.logError(e);
 			$scope.playbackErr++;
+			LogSrvc.logError('playback error catch no.' +$scope.playbackErr);
 			if($scope.playbackErr > 5){
 				LogSrvc.logError('playback error catch - Restarting');
 				window.location.reload();
