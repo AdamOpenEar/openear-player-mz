@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.2.12-0.0.1'
+    'version':'3.2.12-0.0.2'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -1219,7 +1219,6 @@ angular.module('OEPlayer')
 		FileFactory.readJSON(config.local_path,'playlists.json')
 			.then(function(data){
 				var playlists = JSON.parse(data);
-				
 				for (var i = 0; i < playlists.length; i++) {
 					if(playlists[i].id == playlist.playlist_id){
 						deferred.resolve(playlists[i].tracks);
@@ -1313,7 +1312,26 @@ angular.module('OEPlayer')
 									});
 								} else {
 									shuffleArray($scope.playlist.tracks);
-									if(!fromSlider){
+									//check for interleave
+									if(schedule.playlists[foundPlaylist].interleave && !fromSlider){
+										getPlaylistTracks(schedule.playlists[foundPlaylist].interleave)
+											.then(function(data){
+												var interleave = shuffleArray(data);
+												i=0;
+												angular.forEach($scope.playlist.tracks,function(track){
+													if(i%schedule.playlists[foundPlaylist].interleave.ratio === 0){
+														$scope.playlist.tracks.splice(i,0,interleave[0]);
+														interleave.splice(0,1);
+													}
+													i++;
+												});
+												$scope.playlist.name += ' WITH '+schedule.playlists[foundPlaylist].interleave.playlist.name+' - 1 in '+schedule.playlists[foundPlaylist].interleave.ratio+' Interleave';
+												loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+											},function(error){
+												LogSrvc.logError('no interleave playlist - loading normal playlist');
+												loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+											});
+									} else if(!fromSlider){
 										loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
 									}
 								}
@@ -1624,7 +1642,7 @@ angular.module('OEPlayer')
 	var addToLastPlayed = function(track){
 		track.time = getTime();
 		socket.send('lastPlayed',track);
-		if($scope.player.lastPlayed.length > 50){
+		if($scope.player.lastPlayed.length > 25){
 			$scope.player.lastPlayed.splice($scope.player.lastPlayed.length - 1,1);
 			$scope.player.lastPlayed.unshift(track);
 		} else {
@@ -3675,11 +3693,11 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		var err = new Error();
 		log = '[ERROR] '+log + ' ' + d.getHours() +':'+d.getMinutes()+':'+d.getSeconds()+err.stack;
 		console.log(log);
-		HTTPFactory.sendError(log).success(function(success){
-			console.log(success);
-		}).error(function(err){
-			console.log(err);
-		});
+		//HTTPFactory.sendError(log).success(function(success){
+		//	console.log(success);
+		//}).error(function(err){
+		//	console.log(err);
+		//});
 	};
 
 	return LogSrvc;
@@ -3732,7 +3750,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
 		lang:localStorage.getItem('languages') || 'English',
 		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
-		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2
+		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
+		errors:parseFloat(localStorage.getItem('errors'))|| 1
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

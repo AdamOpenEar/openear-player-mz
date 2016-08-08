@@ -15,11 +15,11 @@ angular.module('OEPlayer')
 		var err = new Error();
 		log = '[ERROR] '+log + ' ' + d.getHours() +':'+d.getMinutes()+':'+d.getSeconds()+err.stack;
 		console.log(log);
-		HTTPFactory.sendError(log).success(function(success){
-			console.log(success);
-		}).error(function(err){
-			console.log(err);
-		});
+		//HTTPFactory.sendError(log).success(function(success){
+		//	console.log(success);
+		//}).error(function(err){
+		//	console.log(err);
+		//});
 	};
 
 	return LogSrvc;

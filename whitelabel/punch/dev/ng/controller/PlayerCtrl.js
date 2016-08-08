@@ -623,7 +623,6 @@ angular.module('OEPlayer')
 		FileFactory.readJSON(config.local_path,'playlists.json')
 			.then(function(data){
 				var playlists = JSON.parse(data);
-				
 				for (var i = 0; i < playlists.length; i++) {
 					if(playlists[i].id == playlist.playlist_id){
 						deferred.resolve(playlists[i].tracks);
@@ -717,7 +716,26 @@ angular.module('OEPlayer')
 									});
 								} else {
 									shuffleArray($scope.playlist.tracks);
-									if(!fromSlider){
+									//check for interleave
+									if(schedule.playlists[foundPlaylist].interleave && !fromSlider){
+										getPlaylistTracks(schedule.playlists[foundPlaylist].interleave)
+											.then(function(data){
+												var interleave = shuffleArray(data);
+												i=0;
+												angular.forEach($scope.playlist.tracks,function(track){
+													if(i%schedule.playlists[foundPlaylist].interleave.ratio === 0){
+														$scope.playlist.tracks.splice(i,0,interleave[0]);
+														interleave.splice(0,1);
+													}
+													i++;
+												});
+												$scope.playlist.name += ' WITH '+schedule.playlists[foundPlaylist].interleave.playlist.name+' - 1 in '+schedule.playlists[foundPlaylist].interleave.ratio+' Interleave';
+												loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+											},function(error){
+												LogSrvc.logError('no interleave playlist - loading normal playlist');
+												loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
+											});
+									} else if(!fromSlider){
 										loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
 									}
 								}
@@ -1028,7 +1046,7 @@ angular.module('OEPlayer')
 	var addToLastPlayed = function(track){
 		track.time = getTime();
 		socket.send('lastPlayed',track);
-		if($scope.player.lastPlayed.length > 50){
+		if($scope.player.lastPlayed.length > 25){
 			$scope.player.lastPlayed.splice($scope.player.lastPlayed.length - 1,1);
 			$scope.player.lastPlayed.unshift(track);
 		} else {
