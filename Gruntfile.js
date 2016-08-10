@@ -216,7 +216,6 @@ module.exports = function(grunt) {
                         src: [
                             'dev/assets/css/normalize.css',
                             'dev/assets/css/responsive.css',
-                            'dev/assets/css/main.css',
                             'dev/assets/css/fonts/**',
                             'dev/assets/js/**'
                         ],

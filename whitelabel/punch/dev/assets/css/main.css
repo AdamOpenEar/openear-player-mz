@@ -180,6 +180,7 @@ body > div > div{
 }
 #menu img{
     max-width: 90%;
+    margin-top: 20px;
 }
 #main{
     height:100%;
