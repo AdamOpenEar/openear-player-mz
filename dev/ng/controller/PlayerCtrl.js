@@ -923,6 +923,7 @@ angular.module('OEPlayer')
 										cancelTimer(playerName);
 									}
 								} else {
+									logTrack($scope.currentTrack);
 									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
 								}
 								$timeout.cancel(checkTimeout);
@@ -984,7 +985,6 @@ angular.module('OEPlayer')
 						crossfade(playerName,SettingsSrvc.crossfadeOut,'out',false)
 							.then(function(){
 								addToLastPlayed($scope.currentTrack);
-								logTrack($scope.currentTrack);
 								prepareNextTrack(playerName);
 							});
 					}
@@ -1153,7 +1153,6 @@ angular.module('OEPlayer')
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//add to last played
 		addToLastPlayed($scope.currentTrack);
-		logTrack($scope.currentTrack);
 		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
@@ -1164,13 +1163,12 @@ angular.module('OEPlayer')
 
 	$scope.skipBack = function(){
 		//add to last played
-		addToLastPlayed($scope.currentTrack);
-		logTrack($scope.currentTrack);
 		//stop timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//change index
 		$scope.player.currentIndex = $scope.player.currentIndex - 2;
+		addToLastPlayed($scope.currentTrack);
 		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){

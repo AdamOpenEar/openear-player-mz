@@ -77,6 +77,7 @@ angular.module('OEPlayer')
     $scope.settings.languages = SettingsSrvc.lang;
     $scope.settings.restartTime = SettingsSrvc.restartTime;
     $scope.settings.fileSize = SettingsSrvc.fileSize;
+    $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -133,11 +134,29 @@ angular.module('OEPlayer')
             var c = confirm($scope.lang.settings.changeLang);
             if(c){
                 SettingsSrvc.setSetting(setting,$scope.settings[setting]);
-                location.reload();
+                window.location.reload();
             }
         } else {
             SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         }
+    };
+
+    $scope.saveLoginHash = function(){
+        if($scope.settings.loginHash){
+            var c = confirm('This will restart the player. OK?');
+            if(c){
+                localStorage.removeItem('Authentication');
+                localStorage.setItem('loginHash',$scope.settings.loginHash);
+                window.location.reload();
+            }
+        } else {
+            alert('No hash set');
+        }
+    };
+
+    $scope.clearLoginHash = function(){
+        $scope.settings.loginHash = null;
+        localStorage.removeItem('loginHash');
     };
 
     $scope.deleteLibrary = function(){

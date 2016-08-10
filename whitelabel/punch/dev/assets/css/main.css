@@ -943,7 +943,7 @@ input.cmn-toggle-round-flat:checked + label:after {
     width:50%;
     display: inline-block;
 }
-.settings-group button, .settings-group select{
+.settings-group button, .settings-group select, .settings-group input{
     color: #000;
 }
 .settings-group div{

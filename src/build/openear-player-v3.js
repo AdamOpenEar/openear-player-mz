@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.2.12-0.0.2'
+    'version':'3.2.14-0.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -97,6 +97,29 @@ angular.module('OEPlayer',[
             $location.path( '/player' );
         }
 
+    } else if(localStorage.getItem('loginHash')){
+            HTTPFactory.loginHash({loginHash:localStorage.getItem('loginHash')}).success(function(data){
+                if(data.authToken){
+                    $http.defaults.headers.common.Authentication = data.authToken;
+                    localStorage.setItem('Authentication',data.authToken);
+                    localStorage.setItem('lastLogin',new Date());
+                    localStorage.setItem('venue',data.venue[0].name);
+                    $location.path( '/player' );
+                } else {
+                    localStorage.removeItem('loginHash');
+                    $scope.message = 'Login hash incorrect. Use username and password.';
+                }
+            }).error(function(){
+                if(!localStorage.getItem('lastLogin')){
+                    StatusSrvc.setStatus('ERR-PLY02. Player offline and no record of last login. Please check connection.');
+                } else {
+                    if(!$scope.checkLastLogin){
+                        StatusSrvc.setStatus('Last login over 30 days ago. Please connect to the internet and login.' );
+                    } else {
+                        $location.path('/player');
+                    }
+                }
+            });
     } else if(localStorage.getItem('Authentication')){
         $http.defaults.headers.common.Authentication = localStorage.getItem('Authentication');
         $location.path( '/player' );
@@ -219,6 +242,7 @@ angular.module('OEPlayer')
     $scope.settings.languages = SettingsSrvc.lang;
     $scope.settings.restartTime = SettingsSrvc.restartTime;
     $scope.settings.fileSize = SettingsSrvc.fileSize;
+    $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -275,11 +299,29 @@ angular.module('OEPlayer')
             var c = confirm($scope.lang.settings.changeLang);
             if(c){
                 SettingsSrvc.setSetting(setting,$scope.settings[setting]);
-                location.reload();
+                window.location.reload();
             }
         } else {
             SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         }
+    };
+
+    $scope.saveLoginHash = function(){
+        if($scope.settings.loginHash){
+            var c = confirm('This will restart the player. OK?');
+            if(c){
+                localStorage.removeItem('Authentication');
+                localStorage.setItem('loginHash',$scope.settings.loginHash);
+                window.location.reload();
+            }
+        } else {
+            alert('No hash set');
+        }
+    };
+
+    $scope.clearLoginHash = function(){
+        $scope.settings.loginHash = null;
+        localStorage.removeItem('loginHash');
     };
 
     $scope.deleteLibrary = function(){
@@ -1519,6 +1561,7 @@ angular.module('OEPlayer')
 										cancelTimer(playerName);
 									}
 								} else {
+									logTrack($scope.currentTrack);
 									LogSrvc.logSystem('track '+$scope.currentTrack.title+' playing');
 								}
 								$timeout.cancel(checkTimeout);
@@ -1580,7 +1623,6 @@ angular.module('OEPlayer')
 						crossfade(playerName,SettingsSrvc.crossfadeOut,'out',false)
 							.then(function(){
 								addToLastPlayed($scope.currentTrack);
-								logTrack($scope.currentTrack);
 								prepareNextTrack(playerName);
 							});
 					}
@@ -1749,7 +1791,6 @@ angular.module('OEPlayer')
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//add to last played
 		addToLastPlayed($scope.currentTrack);
-		logTrack($scope.currentTrack);
 		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
@@ -1760,13 +1801,12 @@ angular.module('OEPlayer')
 
 	$scope.skipBack = function(){
 		//add to last played
-		addToLastPlayed($scope.currentTrack);
-		logTrack($scope.currentTrack);
 		//stop timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//change index
 		$scope.player.currentIndex = $scope.player.currentIndex - 2;
+		addToLastPlayed($scope.currentTrack);
 		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
@@ -2601,6 +2641,7 @@ angular.module('OEPlayer')
             if(rejection.status === 401){
                 localStorage.removeItem('Authentication');
                 localStorage.removeItem('venue');
+                localStorage.removeItem('loginHash');
             	window.location.reload();
             }
             return $q.reject(rejection);
@@ -2895,8 +2936,8 @@ angular.module('OEPlayer')
 		},
 		stop:function(playerName){
 			if(typeof self[playerName] !== 'undefined'){
+				URL.revokeObjectURL(self[playerName].createdMedia.src);
 				self[playerName].createdMedia.src = '';
-				URL.revokeObjectURL(self[self.playerName].createdMedia.src);
 			}
 		}
 	};

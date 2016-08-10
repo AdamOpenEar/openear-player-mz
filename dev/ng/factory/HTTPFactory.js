@@ -73,6 +73,7 @@ angular.module('OEPlayer')
             if(rejection.status === 401){
                 localStorage.removeItem('Authentication');
                 localStorage.removeItem('venue');
+                localStorage.removeItem('loginHash');
             	window.location.reload();
             }
             return $q.reject(rejection);
