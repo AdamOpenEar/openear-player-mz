@@ -64,7 +64,7 @@ angular.module('OEPlayer')
     	};
     };
 }])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory','$rootScope',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory,$rootScope){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -78,9 +78,11 @@ angular.module('OEPlayer')
     $scope.settings.restartTime = SettingsSrvc.restartTime;
     $scope.settings.fileSize = SettingsSrvc.fileSize;
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
+    $scope.settings.volume = SettingsSrvc.volume;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
+    $scope.volumes = [1,2,3,4,5,6,7,8,9,10];
     $scope.restartTimes = [
         {time:4,display:'4.00am'},
         {time:4.3,display:'4.30am'},
@@ -218,6 +220,10 @@ angular.module('OEPlayer')
         }
     };
 
+    $scope.changeVolume = function(){
+        SettingsSrvc.setSetting('volume',$scope.settings.volume);
+        $rootScope.$emit('volume-change');
+    };
 
 }])
 .controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope',function($scope,FileFactory,config,PlayerSrvc,$rootScope){

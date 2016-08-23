@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.2.14-0.0.4'
+    'version':'3.3.0'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -229,7 +229,7 @@ angular.module('OEPlayer')
     	};
     };
 }])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory','$rootScope',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory,$rootScope){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -243,9 +243,11 @@ angular.module('OEPlayer')
     $scope.settings.restartTime = SettingsSrvc.restartTime;
     $scope.settings.fileSize = SettingsSrvc.fileSize;
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
+    $scope.settings.volume = SettingsSrvc.volume;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
+    $scope.volumes = [1,2,3,4,5,6,7,8,9,10];
     $scope.restartTimes = [
         {time:4,display:'4.00am'},
         {time:4.3,display:'4.30am'},
@@ -383,6 +385,10 @@ angular.module('OEPlayer')
         }
     };
 
+    $scope.changeVolume = function(){
+        SettingsSrvc.setSetting('volume',$scope.settings.volume);
+        $rootScope.$emit('volume-change');
+    };
 
 }])
 .controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope',function($scope,FileFactory,config,PlayerSrvc,$rootScope){
@@ -668,7 +674,8 @@ angular.module('OEPlayer')
 			lastPlayed:[],
 			currentIndex:0,
 			online:true,
-			venueName:localStorage.getItem('venue')
+			venueName:localStorage.getItem('venue'),
+			volume:SettingsSrvc.volume
 		};
 		StatusSrvc.setStatus('Loading '+$scope.player.venueName+'...');
 		
@@ -720,11 +727,13 @@ angular.module('OEPlayer')
 		//sockets
 		if(!$scope.initialising){
 			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
+			//socket = new SocketFactory('ws://localhost:5000');
 		}
 		$scope.$on('socket:open',function(event,data){
-			socket.send('playerInit',null);
+			socket.send('playerInit',{volume:SettingsSrvc.volume});
 		});
 		$scope.$on('socket:closed',function(event,data){
+			//socket = new SocketFactory('ws://localhost:5000');
 			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
 		});
 		$scope.$on('socket:message',function(event,data){
@@ -800,6 +809,10 @@ angular.module('OEPlayer')
 						pushToPlayTimer = undefined;
 						LogSrvc.logSystem('man app - push-to-play timer end');
 						break;
+					case 'volume':
+						SettingsSrvc.setSetting('volume',data.data);
+						changeVolume(data.data);
+						break;
 				}
 			} else {
 				LogSrvc.logSystem('Not authenticated');
@@ -813,6 +826,11 @@ angular.module('OEPlayer')
 			},function(error){
 				LogSrvc.logError('error initialising');
 			});
+	};
+
+	var changeVolume = function(volume){
+		$scope.player.volume = volume;
+		player[$scope.currentTrack.playerName].setVolume(volume/10,$scope.currentTrack.playerName);
 	};
 
 	var formatBytes = function(bytes,decimals) {
@@ -1635,7 +1653,10 @@ angular.module('OEPlayer')
 	var crossfade = function(playerName,time,direction,wait,pause){
 
 		var deferred = $q.defer();
-		var vol = (direction == 'out') ? 1 : 0;
+		if(SettingsSrvc.volume < 2){
+			StatusSrvc.setStatus('Volume low.');
+		}
+		var vol = (direction == 'out') ? SettingsSrvc.volume/10 : 0;
 		$scope.swappingTracks = true;
 		socket.send('swappingTracks',null);
 		if(!wait){
@@ -1646,9 +1667,9 @@ angular.module('OEPlayer')
 			//set direction
 			var cfFunc = function(){
 				if(direction === 'out'){
-					vol = vol - 0.1;
+					vol = vol - (SettingsSrvc.volume/100);
 					if(vol > 0){
-						player[playerName].setVolume(vol.toFixed(1),playerName);
+						player[playerName].setVolume(vol.toFixed(2),playerName);
 					} else {
 						$interval.cancel(cfTimer);
 						cfTimer = undefined;
@@ -1661,13 +1682,13 @@ angular.module('OEPlayer')
 						}
 					}
 				} else {
-					vol = vol + 0.1;
-					if(vol < 1){
-						player[playerName].setVolume(vol.toFixed(1),playerName);
+					vol = vol + (SettingsSrvc.volume/100);
+					if(vol < SettingsSrvc.volume/10){
+						player[playerName].setVolume(vol.toFixed(2),playerName);
 					} else {
 						$interval.cancel(cfTimer);
 						cfTimer = undefined;
-						player[playerName].setVolume(1,playerName);
+						player[playerName].setVolume(SettingsSrvc.volume/10,playerName);
 						if(wait){
 							deferred.resolve();
 						}
@@ -1820,6 +1841,11 @@ angular.module('OEPlayer')
 		pushToPlayTimer = undefined;
 		LogSrvc.logSystem('push-to-play timer end');
 	};
+
+	var unbindVolume = $rootScope.$on('volume-change',function(){
+		changeVolume(SettingsSrvc.volume);
+	});
+	$scope.$on('$destroy', unbindVolume);
 
 	//LAST TRACK OVERLAY
 	$scope.openLastTracks = function(element){
@@ -3786,13 +3812,14 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		crossfadeOut:parseInt(localStorage.getItem('crossfadeOut'))|| 500,
 		skipCrossfadeOut:parseInt(localStorage.getItem('skipCrossfadeOut'))|| 500,
 		onlineCheck:parseInt(localStorage.getItem('onlineCheck'))|| 1,
-		animations:localStorage.getItem('animations')|| 1,
+		animations:localStorage.getItem('animations')|| 2,
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
 		lang:localStorage.getItem('languages') || 'English',
 		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
-		errors:parseFloat(localStorage.getItem('errors'))|| 1
+		errors:parseFloat(localStorage.getItem('errors'))|| 1,
+		volume:parseInt(localStorage.getItem('volume')) || 10
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

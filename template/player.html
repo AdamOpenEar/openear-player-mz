@@ -66,6 +66,7 @@
                 <div id="skip-forward" class="skip-btn">
                     <i ng-click="swappingTracks || skipForward()" class="fi-next" ng-disabled="swappingTracks"></i>
                 </div>
+                <div id="volume"><i class="fi-volume"></i> {{player.volume == 10 ? 'Max' : player.volume}}</div>
             </div>
         </div>
         <div class="track-timer" id="track-duration" ng-class="{display:ready}">{{timer.duration}}</div>

@@ -313,7 +313,15 @@ body > div > div{
 #online-status span[disabled=disabled]{
     color: #30343f;
 }
-
+#volume{
+    position: absolute;
+    width:70px;
+    font-size: 14px;
+    color:#26cd7d;
+    left: -35px;
+    top: 8px;
+    text-align: center;
+}
 #last-played{
     position: absolute;
     width:100%;

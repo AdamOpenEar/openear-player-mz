@@ -30,7 +30,8 @@ angular.module('OEPlayer')
 			lastPlayed:[],
 			currentIndex:0,
 			online:true,
-			venueName:localStorage.getItem('venue')
+			venueName:localStorage.getItem('venue'),
+			volume:SettingsSrvc.volume
 		};
 		StatusSrvc.setStatus('Loading '+$scope.player.venueName+'...');
 		
@@ -82,11 +83,13 @@ angular.module('OEPlayer')
 		//sockets
 		if(!$scope.initialising){
 			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
+			//socket = new SocketFactory('ws://localhost:5000');
 		}
 		$scope.$on('socket:open',function(event,data){
-			socket.send('playerInit',null);
+			socket.send('playerInit',{volume:SettingsSrvc.volume});
 		});
 		$scope.$on('socket:closed',function(event,data){
+			//socket = new SocketFactory('ws://localhost:5000');
 			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
 		});
 		$scope.$on('socket:message',function(event,data){
@@ -162,6 +165,10 @@ angular.module('OEPlayer')
 						pushToPlayTimer = undefined;
 						LogSrvc.logSystem('man app - push-to-play timer end');
 						break;
+					case 'volume':
+						SettingsSrvc.setSetting('volume',data.data);
+						changeVolume(data.data);
+						break;
 				}
 			} else {
 				LogSrvc.logSystem('Not authenticated');
@@ -175,6 +182,11 @@ angular.module('OEPlayer')
 			},function(error){
 				LogSrvc.logError('error initialising');
 			});
+	};
+
+	var changeVolume = function(volume){
+		$scope.player.volume = volume;
+		player[$scope.currentTrack.playerName].setVolume(volume/10,$scope.currentTrack.playerName);
 	};
 
 	var formatBytes = function(bytes,decimals) {
@@ -997,7 +1009,10 @@ angular.module('OEPlayer')
 	var crossfade = function(playerName,time,direction,wait,pause){
 
 		var deferred = $q.defer();
-		var vol = (direction == 'out') ? 1 : 0;
+		if(SettingsSrvc.volume < 2){
+			StatusSrvc.setStatus('Volume low.');
+		}
+		var vol = (direction == 'out') ? SettingsSrvc.volume/10 : 0;
 		$scope.swappingTracks = true;
 		socket.send('swappingTracks',null);
 		if(!wait){
@@ -1008,9 +1023,9 @@ angular.module('OEPlayer')
 			//set direction
 			var cfFunc = function(){
 				if(direction === 'out'){
-					vol = vol - 0.1;
+					vol = vol - (SettingsSrvc.volume/100);
 					if(vol > 0){
-						player[playerName].setVolume(vol.toFixed(1),playerName);
+						player[playerName].setVolume(vol.toFixed(2),playerName);
 					} else {
 						$interval.cancel(cfTimer);
 						cfTimer = undefined;
@@ -1023,13 +1038,13 @@ angular.module('OEPlayer')
 						}
 					}
 				} else {
-					vol = vol + 0.1;
-					if(vol < 1){
-						player[playerName].setVolume(vol.toFixed(1),playerName);
+					vol = vol + (SettingsSrvc.volume/100);
+					if(vol < SettingsSrvc.volume/10){
+						player[playerName].setVolume(vol.toFixed(2),playerName);
 					} else {
 						$interval.cancel(cfTimer);
 						cfTimer = undefined;
-						player[playerName].setVolume(1,playerName);
+						player[playerName].setVolume(SettingsSrvc.volume/10,playerName);
 						if(wait){
 							deferred.resolve();
 						}
@@ -1182,6 +1197,11 @@ angular.module('OEPlayer')
 		pushToPlayTimer = undefined;
 		LogSrvc.logSystem('push-to-play timer end');
 	};
+
+	var unbindVolume = $rootScope.$on('volume-change',function(){
+		changeVolume(SettingsSrvc.volume);
+	});
+	$scope.$on('$destroy', unbindVolume);
 
 	//LAST TRACK OVERLAY
 	$scope.openLastTracks = function(element){

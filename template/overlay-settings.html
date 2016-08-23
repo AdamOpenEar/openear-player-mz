@@ -54,6 +54,10 @@
 			<select ng-model="settings.fileSize" ng-options="fileSize.type as fileSize.display for fileSize in fileSizes" ng-change="changeFileSize()"></select>
 		</div>
 		<div class="settings-group">
+			<label>Volume</label>
+			<select ng-model="settings.volume" ng-options="volume for volume in volumes" ng-change="changeVolume()"></select>
+		</div>
+		<div class="settings-group">
 			<label>Login hash</label>
 			<input ng-model="settings.loginHash"/>
 			<button ng-click="saveLoginHash()">Save</button>

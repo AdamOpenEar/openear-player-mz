@@ -312,11 +312,20 @@ body > div > div{
 #online-status span[disabled=disabled]{
     color: #30343f;
 }
-
+/* volume */
+#volume{
+    position: absolute;
+    width:70px;
+    font-size: 14px;
+    color:#26cd7d;
+    left: -35px;
+    top: 8px;
+    text-align: center;
+}
 #last-played{
     position: absolute;
     width:100%;
-    top:50%;
+    top:52%;
     padding:20px 20px 0px 20px;
     -webkit-overflow-scrolling: touch;
     overflow: auto;
