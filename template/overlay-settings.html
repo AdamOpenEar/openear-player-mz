@@ -13,14 +13,14 @@
 			<label>{{lang.settings.fadein}}</label>
 			<select ng-model="settings.crossfadeIn" ng-options="time for time in cfTimes" ng-change="changeSetting('crossfadeIn')"></select>
 		</div>
-		<div class="settings-group">
+		<!--<div class="settings-group">
 			<label>{{lang.settings.fadeout}}</label>
 			<select ng-model="settings.crossfadeOut" ng-options="time for time in cfTimes" ng-change="changeSetting('crossfadeOut')"></select>
 		</div>
 		<div class="settings-group">
 			<label>{{lang.settings.skip}}</label>
 			<select ng-model="settings.skipCrossfadeOut" ng-options="time for time in cfTimes" ng-change="changeSetting('skipCrossfadeOut')"></select>
-		</div>
+		</div>-->
 		<div class="settings-group">
 			<label>{{lang.settings.online}}</label>
 			<select ng-model="settings.onlineCheck" ng-options="check.type as check.name for check in onlineCheck" ng-change="changeSetting('onlineCheck')"></select>

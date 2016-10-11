@@ -373,10 +373,10 @@ body > div > div{
 #player-wrapper.animations.active-last-played #blur-wrapper,#player-wrapper.animations.active-last-played .track-timer{
     -webkit-filter: blur(10px);
 }
-#track-progress > div > svg > path{
+#track-progress > div > svg > path, #download-progress > div > svg > path{
     stroke:#38b7ee !important;
 }
-#track-progress > div > svg > circle{
+#track-progress > div > svg > circle, #download-progress > div > svg > circle{
     stroke: #fff !important;
 }
 #energy-slider{

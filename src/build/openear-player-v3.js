@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.3.0'
+    'version':'3.3.0.1'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -777,7 +777,7 @@ angular.module('OEPlayer')
 							$interval.cancel(player[$scope.currentTrack.playerName].timer);
 							player[$scope.currentTrack.playerName].timer = undefined;
 							//wait
-							crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out',true)
+							crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',true)
 								.then(function(){
 									$scope.pushToPlay = {
 										status:true,
@@ -1638,7 +1638,7 @@ angular.module('OEPlayer')
 						player[playerName].timer = undefined;
 						LogSrvc.logSystem('next track');
 						$scope.swappingTracks = true;
-						crossfade(playerName,SettingsSrvc.crossfadeOut,'out',false)
+						crossfade(playerName,SettingsSrvc.crossfadeIn,'out',false)
 							.then(function(){
 								addToLastPlayed($scope.currentTrack);
 								prepareNextTrack(playerName);
@@ -1779,7 +1779,7 @@ angular.module('OEPlayer')
 		player[$scope.currentTrack.playerName].timer = undefined;
 		$scope.initialising = true;
 		//fade out
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',true).then(function(){
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',true).then(function(){
 			LogSrvc.logSystem('Restarting player');
 			window.location.reload();
 		});
@@ -1814,7 +1814,7 @@ angular.module('OEPlayer')
 		addToLastPlayed($scope.currentTrack);
 		$scope.swappingTracks = true;
 		//fade out
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
 		});
 
@@ -1830,7 +1830,7 @@ angular.module('OEPlayer')
 		addToLastPlayed($scope.currentTrack);
 		$scope.swappingTracks = true;
 		//fade out
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.skipCrossfadeOut,'out',false).then(function(){
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
 		});
 	};
@@ -1902,7 +1902,7 @@ angular.module('OEPlayer')
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//wait
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out',true)
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',true)
 			.then(function(){
 				$scope.pushToPlay = {
 					status:true,
@@ -1947,7 +1947,7 @@ angular.module('OEPlayer')
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//wait
-		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeOut,'out',true)
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',true)
 			.then(function(){
 				var start = new Date();
 				$scope.pushToPlaySchedule = {
@@ -2744,7 +2744,7 @@ angular.module('OEPlayer')
 			settings:{
 				title:'Settings',
 				language:'Language',
-				fadein:'Fade in time (seconds)',
+				fadein:'Fade time (seconds)',
 				fadeout:'Fade out time (seconds)',
 				skip:'Skip fade out time (seconds)',
 				online:'Online check type',
