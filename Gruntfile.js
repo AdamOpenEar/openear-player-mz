@@ -295,7 +295,7 @@ module.exports = function(grunt) {
             prodDolce:{
                 files:[
                     {expand: true, src: ['www/bower_components/**'], dest: 'whitelabel/dolce/'},
-                    {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/dolce/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/js/', src: ['**'], dest: 'whitelabel/dolce/www/assets/js/'},
                     {expand: true, cwd:'whitelabel/dolce/dev/assets/img',src: ['**'], dest: 'whitelabel/dolce/www/assets/img/'},
                     {expand: true, cwd:'whitelabel/dolce/dev/assets/css',src: ['**'], dest: 'whitelabel/dolce/www/assets/css'},
                     {expand: true, cwd:'whitelabel/dolce/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/dolce/www/assets/css/fonts/'}
