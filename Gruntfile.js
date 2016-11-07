@@ -41,6 +41,21 @@ module.exports = function(grunt) {
                 }
 
             },
+            devindexDolce : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/dolce/dev/index.html',
+                options : {
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Dolce - Powered by OpenEar Player'
+                    }
+                }
+
+            },
             devindexPunch : {
 
                 src : 'src/tmpl/index.html',
@@ -90,6 +105,23 @@ module.exports = function(grunt) {
                 }
 
             },
+            prodindexDolce : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/dolce/www/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Dolce - Powered by OpenEar Player'
+                    }
+
+                }
+
+            },
             cacheman :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'www/cache.manifest',
@@ -107,6 +139,20 @@ module.exports = function(grunt) {
             cachemanPunch :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'whitelabel/punch/www/cache.manifest',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }                
+            },
+            cachemanDolce :{
+                src : 'src/tmpl/cache.manifest',
+                dest : 'whitelabel/dolce/www/cache.manifest',
                 options : {
 
                     context : {
@@ -207,6 +253,21 @@ module.exports = function(grunt) {
                     }
                 ]
             },
+            dolce:{
+                files:[
+                    {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/dolce/'},
+                    {expand: true, src: ['dev/ng/**'], dest: 'whitelabel/dolce/'},
+                    {
+                        expand: true,
+                        src: [
+                            'dev/assets/css/normalize.css',
+                            'dev/assets/css/responsive.css',
+                            'dev/assets/css/fonts/foundation-icons.css'
+                        ],
+                        dest: 'whitelabel/dolce/'
+                    }
+                ]
+            },
             punch:{
                 files:[
                     {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/punch/'},
@@ -229,6 +290,15 @@ module.exports = function(grunt) {
                     {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/punch/www/assets/js/'},
                     {expand: true, cwd:'whitelabel/punch/dev/assets/img',src: ['**'], dest: 'whitelabel/punch/www/assets/img/'},
                     {expand: true, cwd:'whitelabel/punch/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/punch/www/assets/css/fonts/'}
+                ]
+            },
+            prodDolce:{
+                files:[
+                    {expand: true, src: ['www/bower_components/**'], dest: 'whitelabel/dolce/'},
+                    {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/dolce/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/img',src: ['**'], dest: 'whitelabel/dolce/www/assets/img/'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/css',src: ['**'], dest: 'whitelabel/dolce/www/assets/css'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/dolce/www/assets/css/fonts/'}
                 ]
             }
         },
@@ -256,6 +326,16 @@ module.exports = function(grunt) {
                         'whitelabel/punch/dev/assets/css/fonts/foundation-icons.css'
                     ]
                 }
+            },
+            prodDolce: {
+                files: {
+                    'whitelabel/dolce/www/assets/css/<%= pkg.name %>.min.css': [
+                        'whitelabel/dolce/dev/assets/css/normalize.css',
+                        'whitelabel/dolce/dev/assets/css/main.css',
+                        'whitelabel/dolce/dev/assets/css/responsive.css',
+                        'whitelabel/dolce/dev/assets/css/fonts/foundation-icons.css'
+                    ]
+                }
             }            
         }
     })
@@ -274,12 +354,16 @@ module.exports = function(grunt) {
         'preprocess:appjsprod',
         'preprocess:prodindex',
         'preprocess:prodindexPunch',
+        'preprocess:prodindexDolce',
         'preprocess:cacheman',
         'preprocess:cachemanPunch',
+        'preprocess:cachemanDolce',
         'concat',
         'uglify',
         'cssmin:prod',
         'cssmin:prodPunch',
+        'cssmin:prodDolce',
+        'copy:prodDolce',
         'copy:prodPunch'
     ]);
     grunt.registerTask('dev', [
@@ -287,8 +371,10 @@ module.exports = function(grunt) {
         'preprocess:devindex',
         'preprocess:devindexSecretlife',
         'preprocess:devindexPunch',
+        'preprocess:devindexDolce',
         'preprocess:appjs',
         'copy:secretlife',
+        'copy:dolce',
         'copy:punch'
     ]);
 
