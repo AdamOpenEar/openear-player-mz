@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                         version : '<%= pkg.version %>',
                         now : now,
                         ver : '<%= ver %>',
-                        company: 'Dolce - Powered by OpenEar Player'
+                        company: 'Dolce | Player | Powered by OpenEar Player'
                     }
                 }
 
@@ -116,7 +116,7 @@ module.exports = function(grunt) {
                         version : '<%= pkg.version %>',
                         now : now,
                         ver : '<%= ver %>',
-                        company: 'Dolce - Powered by OpenEar Player'
+                        company: 'Dolce | Player'
                     }
 
                 }

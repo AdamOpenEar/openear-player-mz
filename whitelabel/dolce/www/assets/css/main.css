@@ -1031,7 +1031,17 @@ input.cmn-toggle-round-flat:checked + label:after {
 .login-form > form > .btn:hover{
     background: #c1e3ec;
 }
-
+#powered-by{
+    position: absolute;
+    bottom:10px;
+    left:0;
+    width:100%;
+    text-align: center;
+}
+#powered-by img{
+    padding:0;
+    max-width: 66px;
+}
 /* ==========================================================================
    Helper classes
    ========================================================================== */
@@ -1197,5 +1207,12 @@ input.cmn-toggle-round-flat:checked + label:after {
     h2,
     h3 {
         page-break-after: avoid;
+    }
+}
+
+@media only screen and (max-width:1441px) {
+    #energy-slider-wrapper input {
+        width:550px !important;
+        left:-2680% !important;
     }
 }
