@@ -31,7 +31,8 @@ angular.module('OEPlayer')
 			currentIndex:0,
 			online:true,
 			venueName:localStorage.getItem('venue'),
-			volume:SettingsSrvc.volume
+			volume:SettingsSrvc.volume,
+			hasSchedule:false
 		};
 		StatusSrvc.setStatus('Loading '+$scope.player.venueName+'...');
 		
@@ -674,6 +675,7 @@ angular.module('OEPlayer')
 				LogSrvc.logSystem('getting current playlist');
 			    var schedule = JSON.parse(data);
 				if(schedule.code === 0){
+					$scope.player.hasSchedule = false;
 					$rootScope.ready = true;
 					LogSrvc.logSystem('no schedule - music library');
 					socket.send('currentPlaylist',{name:'Music Library'});
@@ -688,6 +690,7 @@ angular.module('OEPlayer')
 						loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
 					}
 				} else {
+					$scope.player.hasSchedule = true;
 					foundPlaylist = false;
 					for (var i = 0; i < schedule.playlists.length; i++) {
 						if(checkPlaylistStart(schedule.playlists[i])){
@@ -857,7 +860,7 @@ angular.module('OEPlayer')
 			} else {
 				startNextPtpSchedule();
 			}
-		}else if(checkPlaylistStart($scope.playlist) || $scope.pushToPlay.status || $scope.energy.status){
+		}else if(checkPlaylistStart($scope.playlist) || $scope.pushToPlay.status || $scope.energy.status || !$scope.player.hasSchedule){
 			//reset index if past length
 			if($scope.player.currentIndex >= $scope.playlist.tracks.length - 1){
 				$scope.player.currentIndex = 0;
