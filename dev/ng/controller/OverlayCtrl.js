@@ -179,6 +179,7 @@ angular.module('OEPlayer')
     $scope.deleteJson = function(){
         var c = confirm($scope.lang.settings.confstored);
         if(c){
+            localStorage.removeItem('backlog');
             FileFactory.readDirectory('')
                 .then(function(data){
                     for (var i = data.length - 1; i >= 0; i--) {
