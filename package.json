@@ -1,6 +1,6 @@
 {
   "name": "openear-player-v3",
-  "version": "3.3.0.2",
+  "version": "3.3.0.3",
   "description": "",
   "main": "index.js",
   "dependencies": {
