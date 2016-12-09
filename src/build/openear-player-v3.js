@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.3.0.3'
+    'version':'3.3.0.4'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -1255,7 +1255,6 @@ angular.module('OEPlayer')
 		//if playlist is for today
 		var now = moment();
 		var time = getTime();
-
 		if(playlist.day == (now.weekday() === 0 ? 6 : now.weekday() - 1)){
 			//if start and end of playlist between now
 			if(playlist.midnight_overlap == 1){
@@ -1272,6 +1271,16 @@ angular.module('OEPlayer')
 				} else {
 					return false;
 				}
+			}
+		} else if(playlist.midnight_overlap == 1 && time < '03:59:59'){
+			if(playlist.day == (now.weekday() === 0 ? 5 : now.weekday() - 2)){
+				if(playlist.end >= time){
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
 			}
 		}
 	};
