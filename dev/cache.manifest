@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#Version 3.1.1 0.1.0
+#Version 3.3.1.1
 
 NETWORK:
 *
@@ -16,7 +16,6 @@ bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
 
 ng/init.js
 ng/app.js
-ng/templates.js
 ng/controller/PlayerCtrl.js
 ng/controller/LogCtrl.js
 ng/controller/LoginCtrl.js
@@ -32,6 +31,8 @@ ng/service/PlayerSrvc.js
 ng/service/OverlaySrvc.js
 ng/service/SettingsSrvc.js
 ng/directive/ScheduleDirective.js
+
+assets/js/templates.js
 
 #CSS
 assets/css/normalize.css
