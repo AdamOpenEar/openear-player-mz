@@ -1,5 +1,5 @@
 angular.module('OEPlayer')
-.factory('MediaFactory',['$document','$rootScope','PlayerSrvc','$interval','$q','FileFactory','config','LogSrvc',function($document,$rootScope,PlayerSrvc,$interval,$q,FileFactory,config,LogSrvc){
+.factory('MediaFactory',['$document','$rootScope','PlayerSrvc','$interval','$q','FileFactory','config','LogSrvc','SettingsSrvc',function($document,$rootScope,PlayerSrvc,$interval,$q,FileFactory,config,LogSrvc,SettingsSrvc){
 
 	var self = this;
 
@@ -15,7 +15,14 @@ angular.module('OEPlayer')
 					self[self.playerName] = {};
 					self[self.playerName].createdMedia = $document[0].createElement('audio');
 					self[self.playerName].createdMedia.src = URL.createObjectURL(track);
-					deferred.resolve();
+					self[self.playerName].createdMedia.setSinkId(SettingsSrvc.outputDevice)
+						.then(function(){
+							deferred.resolve();		
+						})
+						.catch(function(){
+							deferred.resolve();
+						})
+					
 				},function(error){
 					deferred.reject(error);
 					LogSrvc.logError(error);

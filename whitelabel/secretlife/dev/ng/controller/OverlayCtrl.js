@@ -79,6 +79,7 @@ angular.module('OEPlayer')
     $scope.settings.fileSize = SettingsSrvc.fileSize;
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
     $scope.settings.volume = SettingsSrvc.volume;
+    $scope.settings.outputDevice = SettingsSrvc.outputDevice;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -100,6 +101,7 @@ angular.module('OEPlayer')
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
     $scope.version = config.version;
+    $scope.outputDevices = [];
 
     var formatBytes = function(bytes,decimals) {
         if(bytes === 0) return '0 Byte';
@@ -128,6 +130,27 @@ angular.module('OEPlayer')
                 }
             }
         });
+
+    navigator.mediaDevices.getUserMedia({audio:true,video:false})
+        .then(function(){return navigator.mediaDevices.enumerateDevices()})
+        .then(function(devices){
+            for (var i = devices.length - 1; i >= 0; i--) {
+                if(devices[i].kind === 'audiooutput'){
+                    $scope.outputDevices.push(devices[i]);
+                }
+            }
+        })
+        .catch(function(err){
+            alert('Error getting output devices.');
+        });
+
+    $scope.changeOutputDevice = function(){
+        var c = confirm('This will restart the player. OK?');
+        if(c){
+            SettingsSrvc.setSetting('outputDevice',$scope.settings.outputDevice);
+            window.location.reload();
+        }
+    }
 
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){

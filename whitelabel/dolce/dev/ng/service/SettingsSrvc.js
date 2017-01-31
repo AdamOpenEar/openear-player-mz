@@ -13,7 +13,8 @@ angular.module('OEPlayer')
 		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
-		volume:parseInt(localStorage.getItem('volume')) || 10
+		volume:parseInt(localStorage.getItem('volume')) || 10,
+		outputDevice:localStorage.getItem('outputDevice') || 'default'
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){
