@@ -41,6 +41,21 @@ module.exports = function(grunt) {
                 }
 
             },
+            devindexDolce : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/dolce/dev/index.html',
+                options : {
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Dolce | Player | Powered by OpenEar Player'
+                    }
+                }
+
+            },
             devindexPunch : {
 
                 src : 'src/tmpl/index.html',
@@ -73,9 +88,71 @@ module.exports = function(grunt) {
                 }
 
             },
+            prodindexPunch : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/punch/www/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Punch Taverns - Powered by OpenEar Player'
+                    }
+
+                }
+
+            },
+            prodindexDolce : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/dolce/www/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Dolce | Player'
+                    }
+
+                }
+
+            },
             cacheman :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'www/cache.manifest',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }                
+            },
+            cachemanPunch :{
+                src : 'src/tmpl/cache.manifest',
+                dest : 'whitelabel/punch/www/cache.manifest',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }                
+            },
+            cachemanDolce :{
+                src : 'src/tmpl/cache.manifest',
+                dest : 'whitelabel/dolce/www/cache.manifest',
                 options : {
 
                     context : {
@@ -160,11 +237,6 @@ module.exports = function(grunt) {
             }
         },
         copy:{
-            prod:{
-                files:[
-                    {expand: true, src: ['dev/bower_components/*'], dest: 'www/bower_components/', filter: 'isFile'}
-                ]
-            },
             secretlife:{
                 files:[
                     {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/secretlife/'},
@@ -181,6 +253,21 @@ module.exports = function(grunt) {
                     }
                 ]
             },
+            dolce:{
+                files:[
+                    {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/dolce/'},
+                    {expand: true, src: ['dev/ng/**'], dest: 'whitelabel/dolce/'},
+                    {
+                        expand: true,
+                        src: [
+                            'dev/assets/css/normalize.css',
+                            'dev/assets/css/responsive.css',
+                            'dev/assets/css/fonts/foundation-icons.css'
+                        ],
+                        dest: 'whitelabel/dolce/'
+                    }
+                ]
+            },
             punch:{
                 files:[
                     {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/punch/'},
@@ -190,12 +277,29 @@ module.exports = function(grunt) {
                         src: [
                             'dev/assets/css/normalize.css',
                             'dev/assets/css/responsive.css',
-                            'dev/assets/css/main.css',
                             'dev/assets/css/fonts/**',
                             'dev/assets/js/**'
                         ],
                         dest: 'whitelabel/punch/'
                     }
+                ]
+            },
+            prodPunch:{
+                files:[
+                    {expand: true, src: ['www/bower_components/**'], dest: 'whitelabel/punch/'},
+                    {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/punch/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/punch/dev/assets/img',src: ['**'], dest: 'whitelabel/punch/www/assets/img/'},
+                    {expand: true, cwd:'whitelabel/punch/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/punch/www/assets/css/fonts/'}
+                ]
+            },
+            prodDolce:{
+                files:[
+                    {expand: true, src: ['www/bower_components/**'], dest: 'whitelabel/dolce/'},
+                    {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/dolce/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/js/', src: ['**'], dest: 'whitelabel/dolce/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/img',src: ['**'], dest: 'whitelabel/dolce/www/assets/img/'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/css',src: ['**'], dest: 'whitelabel/dolce/www/assets/css'},
+                    {expand: true, cwd:'whitelabel/dolce/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/dolce/www/assets/css/fonts/'}
                 ]
             }
         },
@@ -204,7 +308,7 @@ module.exports = function(grunt) {
                 shorthandCompacting: false,
                 roundingPrecision: -1
             },
-            target: {
+            prod: {
                 files: {
                     'www/assets/css/<%= pkg.name %>.min.css': [
                         'dev/assets/css/normalize.css',
@@ -213,7 +317,27 @@ module.exports = function(grunt) {
                         'dev/assets/css/fonts/foundation-icons.css'
                     ]
                 }
-            }
+            },
+            prodPunch: {
+                files: {
+                    'whitelabel/punch/www/assets/css/<%= pkg.name %>.min.css': [
+                        'whitelabel/punch/dev/assets/css/normalize.css',
+                        'whitelabel/punch/dev/assets/css/main.css',
+                        'whitelabel/punch/dev/assets/css/responsive.css',
+                        'whitelabel/punch/dev/assets/css/fonts/foundation-icons.css'
+                    ]
+                }
+            },
+            prodDolce: {
+                files: {
+                    'whitelabel/dolce/www/assets/css/<%= pkg.name %>.min.css': [
+                        'whitelabel/dolce/dev/assets/css/normalize.css',
+                        'whitelabel/dolce/dev/assets/css/main.css',
+                        'whitelabel/dolce/dev/assets/css/responsive.css',
+                        'whitelabel/dolce/dev/assets/css/fonts/foundation-icons.css'
+                    ]
+                }
+            }            
         }
     })
     // Load the plugin that provides the "uglify" task.
@@ -230,18 +354,28 @@ module.exports = function(grunt) {
         'env:prod',
         'preprocess:appjsprod',
         'preprocess:prodindex',
+        'preprocess:prodindexPunch',
+        'preprocess:prodindexDolce',
         'preprocess:cacheman',
+        'preprocess:cachemanPunch',
+        'preprocess:cachemanDolce',
         'concat',
         'uglify',
-        'cssmin'
+        'cssmin:prod',
+        'cssmin:prodPunch',
+        'cssmin:prodDolce',
+        'copy:prodDolce',
+        'copy:prodPunch'
     ]);
     grunt.registerTask('dev', [
         'env:dev',
         'preprocess:devindex',
         'preprocess:devindexSecretlife',
         'preprocess:devindexPunch',
+        'preprocess:devindexDolce',
         'preprocess:appjs',
         'copy:secretlife',
+        'copy:dolce',
         'copy:punch'
     ]);
 

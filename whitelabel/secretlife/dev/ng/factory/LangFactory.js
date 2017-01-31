@@ -68,7 +68,7 @@ angular.module('OEPlayer')
 			settings:{
 				title:'Settings',
 				language:'Language',
-				fadein:'Fade in time (seconds)',
+				fadein:'Fade time (seconds)',
 				fadeout:'Fade out time (seconds)',
 				skip:'Skip fade out time (seconds)',
 				online:'Online check type',

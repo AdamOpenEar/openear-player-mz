@@ -1,0 +1,35 @@
+CACHE MANIFEST
+#Version 3.3.0.4
+
+NETWORK:
+*
+
+CACHE:
+favicon.ico
+
+#JS
+bower_components/angular/angular.min.js
+bower_components/angular-route/angular-route.min.js
+bower_components/moment/min/moment.min.js
+bower_components/angular-moment/angular-moment.min.js
+bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
+
+assets/js/openear-player-v3.min.js?v=1481194885927
+assets/js/templates.js?v=1481194885927
+
+#CSS
+assets/css/openear-player-v3.min.css?v=1481194885927
+
+#Images
+assets/img/logo.png
+
+#fonts
+assets/css/fonts/Montserrat-Light-webfont.eot
+assets/css/fonts/Montserrat-Light-webfont.woff2
+assets/css/fonts/Montserrat-Light-webfont.woff
+assets/css/fonts/Montserrat-Light-webfont.ttf
+assets/css/fonts/Montserrat-Light-webfont.svg
+assets/css/foundation-icons.eot
+assets/css/foundation-icons.woff
+assets/css/foundation-icons.ttf
+assets/css/foundation-icons.svg

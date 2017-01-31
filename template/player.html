@@ -14,7 +14,6 @@
                 <div id="track-title">{{currentTrack.title}}</div>
                 <div id="track-artist">{{currentTrack.artist}}</div>
                 <div id="track-playlist">{{player.venueName}} - {{playlist.name}} {{pushToPlay.status ? ' - Push to play ' : ''}} {{playlist.end ? ' - ends '+playlist.end : ''}}</div>
-                <div ng-if="pushToPlay.status" ng-click="cancelPushToPlay()" id="cancel-ptp">Cancel</div>
             </div>
             <div id="download-progress" class="progress-circle" ng-class="{display:!ready}">
                 <div
@@ -56,6 +55,7 @@
             </div>
 
             <div id="player-controls" ng-class="{display:ready}">
+                <div ng-if="pushToPlay.status" ng-click="cancelPushToPlay()" id="cancel-ptp"><i class="fi-prohibited"></i> Cancel Push to Play</div>
                 <div id="skip-back" class="skip-btn">
                     <i ng-click="swappingTracks || skipBack()" class="fi-previous" ng-disabled="swappingTracks || player.currentIndex < 1"></i>
                 </div>
@@ -66,6 +66,7 @@
                 <div id="skip-forward" class="skip-btn">
                     <i ng-click="swappingTracks || skipForward()" class="fi-next" ng-disabled="swappingTracks"></i>
                 </div>
+                <div id="volume"><i class="fi-volume"></i> {{player.volume == 10 ? 'Max' : player.volume}}</div>
             </div>
         </div>
         <div class="track-timer" id="track-duration" ng-class="{display:ready}">{{timer.duration}}</div>

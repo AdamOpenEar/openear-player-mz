@@ -39,12 +39,12 @@ angular.module('OEPlayer',[
       }, false);
 }])
 .constant('config',{
-    'api_url':'http://localhost/oe-apis/oe-player/v1/public/',
+    'api_url':'https://api.player.openearmusic.com/v1/',
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
-    'log_path':'http://localhost/oe-apis/oe-player/v1/public/log-track',
-    'version':'3.2.10-0.0.2'
+    'log_path':'https://api.player.openearmusic.com/v1/log-track',
+    'version':'3.3.1.0'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;

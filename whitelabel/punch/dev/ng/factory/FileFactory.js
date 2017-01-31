@@ -73,6 +73,16 @@ angular.module('OEPlayer')
 				});
 			return deferred.promise;
 		},
+		getAvailableSpace:function(){
+			var deferred = $q.defer();
+			FileSystem.getAvailableSpace()
+				.then(function(used,left){
+					deferred.resolve(used,left);
+				},function(error){
+					deferred.reject(error);
+				});
+			return deferred.promise;
+		},
 		writeTrack: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
 			var abv = new Uint8Array(data);

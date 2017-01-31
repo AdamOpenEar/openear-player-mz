@@ -41,6 +41,29 @@ angular.module('OEPlayer')
             $location.path( '/player' );
         }
 
+    } else if(localStorage.getItem('loginHash')){
+            HTTPFactory.loginHash({loginHash:localStorage.getItem('loginHash')}).success(function(data){
+                if(data.authToken){
+                    $http.defaults.headers.common.Authentication = data.authToken;
+                    localStorage.setItem('Authentication',data.authToken);
+                    localStorage.setItem('lastLogin',new Date());
+                    localStorage.setItem('venue',data.venue[0].name);
+                    $location.path( '/player' );
+                } else {
+                    localStorage.removeItem('loginHash');
+                    $scope.message = 'Login hash incorrect. Use username and password.';
+                }
+            }).error(function(){
+                if(!localStorage.getItem('lastLogin')){
+                    StatusSrvc.setStatus('ERR-PLY02. Player offline and no record of last login. Please check connection.');
+                } else {
+                    if(!$scope.checkLastLogin){
+                        StatusSrvc.setStatus('Last login over 30 days ago. Please connect to the internet and login.' );
+                    } else {
+                        $location.path('/player');
+                    }
+                }
+            });
     } else if(localStorage.getItem('Authentication')){
         $http.defaults.headers.common.Authentication = localStorage.getItem('Authentication');
         $location.path( '/player' );

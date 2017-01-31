@@ -64,7 +64,7 @@ angular.module('OEPlayer')
     	};
     };
 }])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config',function($scope,SettingsSrvc,FileFactory,LogSrvc,config){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory','$rootScope',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory,$rootScope){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -76,9 +76,13 @@ angular.module('OEPlayer')
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
     $scope.settings.languages = SettingsSrvc.lang;
     $scope.settings.restartTime = SettingsSrvc.restartTime;
+    $scope.settings.fileSize = SettingsSrvc.fileSize;
+    $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
+    $scope.settings.volume = SettingsSrvc.volume;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
+    $scope.volumes = [1,2,3,4,5,6,7,8,9,10];
     $scope.restartTimes = [
         {time:4,display:'4.00am'},
         {time:4.3,display:'4.30am'},
@@ -89,9 +93,41 @@ angular.module('OEPlayer')
         {type:1,name:'Standard'},
         {type:2,name:'Alternative'}
     ];
+    $scope.fileSizes = [
+        {type:1,display:'Small'},
+        {type:2,display:'Standard'}
+    ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
     $scope.version = config.version;
+
+    var formatBytes = function(bytes,decimals) {
+        if(bytes === 0) return '0 Byte';
+        var k = 1024; // or 1024 for binary
+        var dm = decimals + 1 || 3;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    };
+
+    FileFactory.getAvailableSpace()
+        .then(function(res){
+            $scope.available = formatBytes(res[1] - res[0]);
+        },function(err){
+            console.log(err);
+        });
+    $scope.noTracks = 0;
+    FileFactory.readDirectory('')
+        .then(function(data){
+            //loop local files and push to local track array
+            if(data.length > 0){
+                for (var i = data.length - 1; i >= 0; i--) {
+                    if(data[i].name.indexOf('.json') == -1){
+                        $scope.noTracks++;
+                    }
+                }
+            }
+        });
 
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
@@ -100,11 +136,29 @@ angular.module('OEPlayer')
             var c = confirm($scope.lang.settings.changeLang);
             if(c){
                 SettingsSrvc.setSetting(setting,$scope.settings[setting]);
-                location.reload();
+                window.location.reload();
             }
         } else {
             SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         }
+    };
+
+    $scope.saveLoginHash = function(){
+        if($scope.settings.loginHash){
+            var c = confirm('This will restart the player. OK?');
+            if(c){
+                localStorage.removeItem('Authentication');
+                localStorage.setItem('loginHash',$scope.settings.loginHash);
+                window.location.reload();
+            }
+        } else {
+            alert('No hash set');
+        }
+    };
+
+    $scope.clearLoginHash = function(){
+        $scope.settings.loginHash = null;
+        localStorage.removeItem('loginHash');
     };
 
     $scope.deleteLibrary = function(){
@@ -125,6 +179,7 @@ angular.module('OEPlayer')
     $scope.deleteJson = function(){
         var c = confirm($scope.lang.settings.confstored);
         if(c){
+            localStorage.removeItem('backlog');
             FileFactory.readDirectory('')
                 .then(function(data){
                     for (var i = data.length - 1; i >= 0; i--) {
@@ -140,6 +195,36 @@ angular.module('OEPlayer')
         }
     };
 
+    $scope.changeFileSize = function(){
+        var c = confirm('This will delete the library and redownload the tracks. Are you sure?');
+        if(c){
+            SettingsSrvc.setSetting('fileSize',$scope.settings.fileSize);
+            FileFactory.readDirectory('')
+                .then(function(data){
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        FileFactory.deleteFile('',data[i].name)
+                            .then(function(res){
+                                LogSrvc.logSystem(res);
+                            });
+                    }
+                    var dt = {
+                        fileSize:$scope.settings.fileSize
+                    };
+                    HTTPFactory.setSettings(dt)
+                        .success(function(data){
+                            window.location.reload();
+                        })
+                        .error(function(err){
+                            LogSrvc.logError(err);
+                        });
+                });
+        }
+    };
+
+    $scope.changeVolume = function(){
+        SettingsSrvc.setSetting('volume',$scope.settings.volume);
+        $rootScope.$emit('volume-change');
+    };
 
 }])
 .controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope',function($scope,FileFactory,config,PlayerSrvc,$rootScope){

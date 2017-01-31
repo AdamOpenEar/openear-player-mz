@@ -1,5 +1,5 @@
 angular.module('OEPlayer')
-.factory('HTTPFactory',['$http','config','$q',function($http,config,$q){
+.factory('HTTPFactory',['$http','config','$q','SettingsSrvc',function($http,config,$q,SettingsSrvc){
 	
 	return {
 		login:function(data){
@@ -32,6 +32,9 @@ angular.module('OEPlayer')
         getTrackSrc:function(id){
             return $http.get(config.api_url+'track/'+id);
         },
+        getTrackSrcSmall:function(id){
+            return $http.get(config.api_url+'track-small/'+id);
+        },
 		getTrackFile:function(src){
             return $http({
                 type:'GET',
@@ -52,9 +55,14 @@ angular.module('OEPlayer')
         reprocessFile:function(track){
         	return $http.post(config.api_url+'reprocess-file',track);
         },
-        sendError:function(err,venueID){
-            var data = {venueID:venueID,error:err};
-            return $http.post(config.api_url+'error',data);
+        sendError:function(data){
+            return $http.post(config.api_url+'send-error',{error:data});
+        },
+        getSettings:function(){
+            return $http.get(config.api_url+'settings');
+        },
+        setSettings:function(data){
+            return $http.post(config.api_url+'set-settings',data);
         }
 	};
 }])
@@ -65,6 +73,7 @@ angular.module('OEPlayer')
             if(rejection.status === 401){
                 localStorage.removeItem('Authentication');
                 localStorage.removeItem('venue');
+                localStorage.removeItem('loginHash');
             	window.location.reload();
             }
             return $q.reject(rejection);
