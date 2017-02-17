@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.3.0.4'
+    'version':'3.3.1.0'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -244,6 +244,7 @@ angular.module('OEPlayer')
     $scope.settings.fileSize = SettingsSrvc.fileSize;
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
     $scope.settings.volume = SettingsSrvc.volume;
+    $scope.settings.outputDevice = SettingsSrvc.outputDevice;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -265,6 +266,7 @@ angular.module('OEPlayer')
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];
     $scope.version = config.version;
+    $scope.outputDevices = [];
 
     var formatBytes = function(bytes,decimals) {
         if(bytes === 0) return '0 Byte';
@@ -293,6 +295,27 @@ angular.module('OEPlayer')
                 }
             }
         });
+
+    navigator.mediaDevices.getUserMedia({audio:true,video:false})
+        .then(function(){return navigator.mediaDevices.enumerateDevices()})
+        .then(function(devices){
+            for (var i = devices.length - 1; i >= 0; i--) {
+                if(devices[i].kind === 'audiooutput'){
+                    $scope.outputDevices.push(devices[i]);
+                }
+            }
+        })
+        .catch(function(err){
+            alert('Error getting output devices.');
+        });
+
+    $scope.changeOutputDevice = function(){
+        var c = confirm('This will restart the player. OK?');
+        if(c){
+            SettingsSrvc.setSetting('outputDevice',$scope.settings.outputDevice);
+            window.location.reload();
+        }
+    }
 
     $scope.changeSetting = function(setting){
         if(setting == 'crossfadeIn' || setting == 'crossfadeOut' || setting == 'skipCrossfadeOut'){
@@ -2932,7 +2955,7 @@ angular.module('OEPlayer')
 
 	return dictionary[SettingsSrvc.lang];
 }]);;angular.module('OEPlayer')
-.factory('MediaFactory',['$document','$rootScope','PlayerSrvc','$interval','$q','FileFactory','config','LogSrvc',function($document,$rootScope,PlayerSrvc,$interval,$q,FileFactory,config,LogSrvc){
+.factory('MediaFactory',['$document','$rootScope','PlayerSrvc','$interval','$q','FileFactory','config','LogSrvc','SettingsSrvc',function($document,$rootScope,PlayerSrvc,$interval,$q,FileFactory,config,LogSrvc,SettingsSrvc){
 
 	var self = this;
 
@@ -2948,7 +2971,14 @@ angular.module('OEPlayer')
 					self[self.playerName] = {};
 					self[self.playerName].createdMedia = $document[0].createElement('audio');
 					self[self.playerName].createdMedia.src = URL.createObjectURL(track);
-					deferred.resolve();
+					self[self.playerName].createdMedia.setSinkId(SettingsSrvc.outputDevice)
+						.then(function(){
+							deferred.resolve();		
+						})
+						.catch(function(){
+							deferred.resolve();
+						})
+					
 				},function(error){
 					deferred.reject(error);
 					LogSrvc.logError(error);
@@ -3832,7 +3862,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
-		volume:parseInt(localStorage.getItem('volume')) || 10
+		volume:parseInt(localStorage.getItem('volume')) || 10,
+		outputDevice:localStorage.getItem('outputDevice') || 'default'
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

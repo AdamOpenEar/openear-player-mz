@@ -56,6 +56,21 @@ module.exports = function(grunt) {
                 }
 
             },
+            devindexDD : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/double-dutch/dev/index.html',
+                options : {
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Double Dutch | Player | Powered by OpenEar Player'
+                    }
+                }
+
+            },
             devindexPunch : {
 
                 src : 'src/tmpl/index.html',
@@ -122,6 +137,23 @@ module.exports = function(grunt) {
                 }
 
             },
+            prodindexDD : {
+
+                src : 'src/tmpl/index.html',
+                dest : 'whitelabel/double-dutch/www/index.html',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>',
+                        company: 'Dolce | Player'
+                    }
+
+                }
+
+            },
             cacheman :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'www/cache.manifest',
@@ -153,6 +185,20 @@ module.exports = function(grunt) {
             cachemanDolce :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'whitelabel/dolce/www/cache.manifest',
+                options : {
+
+                    context : {
+                        name : '<%= pkg.name %>',
+                        version : '<%= pkg.version %>',
+                        now : now,
+                        ver : '<%= ver %>'
+                    }
+
+                }                
+            },
+            cachemanDD :{
+                src : 'src/tmpl/cache.manifest',
+                dest : 'whitelabel/double-dutch/www/cache.manifest',
                 options : {
 
                     context : {
@@ -268,6 +314,21 @@ module.exports = function(grunt) {
                     }
                 ]
             },
+            DD:{
+                files:[
+                    {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/double-dutch/'},
+                    {expand: true, src: ['dev/ng/**'], dest: 'whitelabel/double-dutch/'},
+                    {
+                        expand: true,
+                        src: [
+                            'dev/assets/css/normalize.css',
+                            'dev/assets/css/responsive.css',
+                            'dev/assets/css/fonts/foundation-icons.css'
+                        ],
+                        dest: 'whitelabel/double-dutch/'
+                    }
+                ]
+            },
             punch:{
                 files:[
                     {expand: true, src: ['dev/bower_components/**'], dest: 'whitelabel/punch/'},
@@ -300,6 +361,16 @@ module.exports = function(grunt) {
                     {expand: true, cwd:'whitelabel/dolce/dev/assets/img',src: ['**'], dest: 'whitelabel/dolce/www/assets/img/'},
                     {expand: true, cwd:'whitelabel/dolce/dev/assets/css',src: ['**'], dest: 'whitelabel/dolce/www/assets/css'},
                     {expand: true, cwd:'whitelabel/dolce/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/dolce/www/assets/css/fonts/'}
+                ]
+            },
+            prodDD:{
+                files:[
+                    {expand: true, src: ['www/bower_components/**'], dest: 'whitelabel/double-dutch/'},
+                    {expand: true, cwd:'www/assets/js/', src: ['**'], dest: 'whitelabel/double-dutch/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/double-dutch/dev/assets/js/', src: ['**'], dest: 'whitelabel/double-dutch/www/assets/js/'},
+                    {expand: true, cwd:'whitelabel/double-dutch/dev/assets/img',src: ['**'], dest: 'whitelabel/double-dutch/www/assets/img/'},
+                    {expand: true, cwd:'whitelabel/double-dutch/dev/assets/css',src: ['**'], dest: 'whitelabel/double-dutch/www/assets/css'},
+                    {expand: true, cwd:'whitelabel/double-dutch/dev/assets/css/fonts',src: ['**'], dest: 'whitelabel/double-dutch/www/assets/css/fonts/'}
                 ]
             }
         },
@@ -337,6 +408,16 @@ module.exports = function(grunt) {
                         'whitelabel/dolce/dev/assets/css/fonts/foundation-icons.css'
                     ]
                 }
+            },
+            prodDD: {
+                files: {
+                    'whitelabel/double-dutch/www/assets/css/<%= pkg.name %>.min.css': [
+                        'whitelabel/double-dutch/dev/assets/css/normalize.css',
+                        'whitelabel/double-dutch/dev/assets/css/main.css',
+                        'whitelabel/double-dutch/dev/assets/css/responsive.css',
+                        'whitelabel/double-dutch/dev/assets/css/fonts/foundation-icons.css'
+                    ]
+                }
             }            
         }
     })
@@ -356,15 +437,19 @@ module.exports = function(grunt) {
         'preprocess:prodindex',
         'preprocess:prodindexPunch',
         'preprocess:prodindexDolce',
+        'preprocess:prodindexDD',
         'preprocess:cacheman',
         'preprocess:cachemanPunch',
         'preprocess:cachemanDolce',
+        'preprocess:cachemanDD',
         'concat',
         'uglify',
         'cssmin:prod',
         'cssmin:prodPunch',
         'cssmin:prodDolce',
+        'cssmin:prodDD',
         'copy:prodDolce',
+        'copy:prodDD',
         'copy:prodPunch'
     ]);
     grunt.registerTask('dev', [
@@ -373,9 +458,11 @@ module.exports = function(grunt) {
         'preprocess:devindexSecretlife',
         'preprocess:devindexPunch',
         'preprocess:devindexDolce',
+        'preprocess:devindexDD',
         'preprocess:appjs',
         'copy:secretlife',
         'copy:dolce',
+        'copy:DD',
         'copy:punch'
     ]);
 
