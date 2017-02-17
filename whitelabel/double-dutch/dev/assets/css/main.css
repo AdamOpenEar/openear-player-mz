@@ -1018,7 +1018,7 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 
 
-#track-progress > div > svg > path{
+#track-progress > div > svg > path, #download-progress > div > svg > path{
     stroke:#adafa7 !important;
 }
 
@@ -1032,6 +1032,10 @@ input.cmn-toggle-round-flat:checked + label:after {
     left: 0;
     width: 100%;
     text-align: center;
+}
+#powered-by img{
+    padding:0;
+    max-width: 66px;
 }
 /* ==========================================================================
    Helper classes
