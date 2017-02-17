@@ -148,7 +148,7 @@ module.exports = function(grunt) {
                         version : '<%= pkg.version %>',
                         now : now,
                         ver : '<%= ver %>',
-                        company: 'Dolce | Player'
+                        company: 'Double Dutch | Player'
                     }
 
                 }
