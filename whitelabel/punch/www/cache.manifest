@@ -14,11 +14,11 @@ bower_components/moment/min/moment.min.js
 bower_components/angular-moment/angular-moment.min.js
 bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
 
-assets/js/openear-player-v3.min.js?v=1487346759243
-assets/js/templates.js?v=1487346759243
+assets/js/openear-player-v3.min.js?v=1487697331231
+assets/js/templates.js?v=1487697331231
 
 #CSS
-assets/css/openear-player-v3.min.css?v=1487346759243
+assets/css/openear-player-v3.min.css?v=1487697331231
 
 #Images
 assets/img/logo.png
