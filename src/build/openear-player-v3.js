@@ -163,6 +163,12 @@ angular.module('OEPlayer',[
     };
 
 }]);
+;angular.module('OEPlayer')
+.controller('MultiCtrl',['$scope','SettingsSrvc',function($scope,SettingsSrvc){
+
+	$scope.title = SettingsSrvc.zoneName;
+	
+}]);
 ;/*jshint -W083 */
 angular.module('OEPlayer')
 .controller('OverlayCtrl',['$scope','$rootScope','OverlaySrvc','$element',function($scope,$rootScope,OverlaySrvc,$element){
@@ -245,6 +251,7 @@ angular.module('OEPlayer')
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
     $scope.settings.volume = SettingsSrvc.volume;
     $scope.settings.outputDevice = SettingsSrvc.outputDevice;
+    $scope.settings.zoneName = SettingsSrvc.zoneName;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -347,6 +354,19 @@ angular.module('OEPlayer')
     $scope.clearLoginHash = function(){
         $scope.settings.loginHash = null;
         localStorage.removeItem('loginHash');
+    };
+
+    $scope.saveZoneName = function(){
+        var c = confirm('This will restart the player. OK?');
+        if(c){
+            localStorage.setItem('zoneName',$scope.settings.zoneName);
+            window.location.reload();
+        }
+    };
+
+    $scope.clearZoneName = function(){
+        $scope.settings.zoneName = null;
+        localStorage.removeItem('zoneName');
     };
 
     $scope.deleteLibrary = function(){
@@ -3864,7 +3884,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
 		volume:parseInt(localStorage.getItem('volume')) || 10,
-		outputDevice:localStorage.getItem('outputDevice') || 'default'
+		outputDevice:localStorage.getItem('outputDevice') || 'default',
+		zoneName:localStorage.getItem('zoneName') || ''
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

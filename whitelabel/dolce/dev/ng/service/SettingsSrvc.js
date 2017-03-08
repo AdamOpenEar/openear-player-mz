@@ -14,7 +14,8 @@ angular.module('OEPlayer')
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
 		volume:parseInt(localStorage.getItem('volume')) || 10,
-		outputDevice:localStorage.getItem('outputDevice') || 'default'
+		outputDevice:localStorage.getItem('outputDevice') || 'default',
+		zoneName:localStorage.getItem('zoneName') || ''
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

@@ -8,7 +8,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title><!-- @echo company--> | v<!-- @echo version --></title>
+        <title ng-controller="MultiCtrl">{{title}} | <!-- @echo company--> | v<!-- @echo version --></title>
         <meta name="description" content="">
 
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -41,6 +41,7 @@
         <script src="ng/controller/LogCtrl.js"></script>
         <script src="ng/controller/LoginCtrl.js"></script>
         <script src="ng/controller/OverlayCtrl.js"></script>
+        <script src="ng/controller/MultiCtrl.js"></script>
         <script src="ng/factory/FileFactory.js"></script>
         <script src="ng/factory/HTTPFactory.js"></script>
         <script src="ng/factory/MediaFactory.js"></script>
