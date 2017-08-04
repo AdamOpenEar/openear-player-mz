@@ -32,7 +32,8 @@ angular.module('OEPlayer')
 			online:true,
 			venueName:localStorage.getItem('venue'),
 			volume:SettingsSrvc.volume,
-			hasSchedule:false
+			hasSchedule:false,
+			isDownloading:false
 		};
 		StatusSrvc.setStatus('Loading '+$scope.player.venueName+'...');
 		
@@ -338,26 +339,27 @@ angular.module('OEPlayer')
 			getTracksOffline();
 		});
 	};
+	var getBlocked = function(){
+		HTTPFactory.getBlocked().success(function(data){
+			writeJSONFiles('blocked',data,getBlocked);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
+		});
+	};
 
 	var getScheduleTime = function(){
 		HTTPFactory.getScheduleTime().success(function(data){
-			writeJSONFiles('schedule-time',data,getBlocked);
+			writeJSONFiles('schedule-time',data,getTracks);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
 		});
 	};
 
-	var getBlocked = function(){
-		HTTPFactory.getBlocked().success(function(data){
-			writeJSONFiles('blocked',data,getTracks);
-		}).error(function(err){
-			LogSrvc.logError(err);
-			getTracksOffline();
-		});
-	};
 
 	var getTracks = function(){
+		StatusSrvc.setStatus('Checking library status.');
 		//local tracks array
 		var tracksLocal = [];
 		//read current library
@@ -499,11 +501,10 @@ angular.module('OEPlayer')
 			});
 	};
 
-	//var downloadTracks = function(){
-	//	for (var i = $scope.unavailableTracks.length - 1; i >= 0; i--) {
-	//		downloadTrack($scope.unavailableTracks[i]);
-	//	}
-	//};
+	var isDownloading = function(isDownloading,msg){
+		socket.send('downloading',{isDownloading:isDownloading,msg:msg});
+		$scope.player.isDownloading = isDownloading;
+	}
 
 	var downloadTrack = function(track){
 		var src = {};
@@ -537,7 +538,6 @@ angular.module('OEPlayer')
 									$scope.playing = true;
 									preparePlaylist(false,true);
 								}
-								$scope.availableTracks.push(track);
 								getNextTrack(track);
 							},function(error){
 								LogSrvc.logError('write download track error');
@@ -596,13 +596,16 @@ angular.module('OEPlayer')
 
 	var getNextTrack = function(track){
 		$scope.unavailableTracks.splice(0,1);
-		StatusSrvc.setStatus('Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable. Controls disabled.');
+		var msg = 'Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable. Controls disabled.'
+		StatusSrvc.setStatus(msg);
 		if($scope.unavailableTracks.length > 0){
+			isDownloading(true,msg);
 			$scope.swappingTracks = true;
 			downloadTrack($scope.unavailableTracks[0]);
 		} else {
 			$scope.swappingTracks = false;
 			StatusSrvc.clearStatus();
+			isDownloading(false,null);
 		}
 	};
 
@@ -798,6 +801,7 @@ angular.module('OEPlayer')
 		$scope.energy.increment = energy + 1;
 		$scope.energy.decrement = energy - 1;
 		fillEnergyPlaylist(energy,true);
+		removeBlockedTracks($scope.playlist);
 		shuffleArray($scope.playlist.tracks);
 	};
 
@@ -1175,12 +1179,12 @@ angular.module('OEPlayer')
 
 	$scope.skipForward = function(){
 
+		$scope.swappingTracks = true;
 		//stop timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//add to last played
 		addToLastPlayed($scope.currentTrack);
-		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
@@ -1189,6 +1193,7 @@ angular.module('OEPlayer')
 	};
 
 	$scope.skipBack = function(){
+		$scope.swappingTracks = true;
 		//add to last played
 		//stop timer
 		$interval.cancel(player[$scope.currentTrack.playerName].timer);
@@ -1196,7 +1201,6 @@ angular.module('OEPlayer')
 		//change index
 		$scope.player.currentIndex = $scope.player.currentIndex - 2;
 		addToLastPlayed($scope.currentTrack);
-		$scope.swappingTracks = true;
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
@@ -1278,6 +1282,7 @@ angular.module('OEPlayer')
 				};
 				$scope.playlist = angular.copy(PlayerSrvc.playlist);
 				$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
+				removeBlockedTracks($scope.playlist);
 				shuffleArray($scope.playlist.tracks);
 				$scope.player.currentIndex = -1;
 				prepareNextTrack($scope.currentTrack.playerName);
@@ -1400,6 +1405,7 @@ angular.module('OEPlayer')
 				$scope.player.currentIndex = 0;
 				$scope.playlist = angular.copy(PlayerSrvc.playlist);
 				$scope.playlist.end = $scope.pushToPlay.end;
+				removeBlockedTracks($scope.playlist);
 				shuffleArray($scope.playlist.tracks);
 			} else {
 				preparePlaylist(true);
