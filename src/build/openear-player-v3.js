@@ -1001,7 +1001,7 @@ angular.module('OEPlayer')
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
-			writeJSONFiles('schedule',data,getScheduleTime);
+			writeJSONFiles('schedule',data,getBlocked);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
@@ -1009,13 +1009,12 @@ angular.module('OEPlayer')
 	};
 	var getBlocked = function(){
 		HTTPFactory.getBlocked().success(function(data){
-			writeJSONFiles('blocked',data,getBlocked);
+			writeJSONFiles('blocked',data,getScheduleTime);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
 		});
 	};
-
 	var getScheduleTime = function(){
 		HTTPFactory.getScheduleTime().success(function(data){
 			writeJSONFiles('schedule-time',data,getTracks);
@@ -1024,7 +1023,6 @@ angular.module('OEPlayer')
 			getTracksOffline();
 		});
 	};
-
 
 	var getTracks = function(){
 		StatusSrvc.setStatus('Checking library status.');
