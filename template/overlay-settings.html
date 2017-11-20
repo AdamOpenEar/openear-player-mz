@@ -68,6 +68,12 @@
 			<button ng-click="clearLoginHash()">Clear</button>
 		</div>
 		<div class="settings-group">
+			<label>Zone name</label>
+			<input ng-model="settings.zoneName"/>
+			<button ng-click="saveZoneName()">Save</button>
+			<button ng-click="clearZoneName()">Clear</button>
+		</div>
+		<div class="settings-group">
 			<label>Available space</label>
 			<div>{{available}}</div>
 		</div>

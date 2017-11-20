@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.3.3'
+    'version':'3.3.2 MULTI'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -163,6 +163,12 @@ angular.module('OEPlayer',[
     };
 
 }]);
+;angular.module('OEPlayer')
+.controller('MultiCtrl',['$scope','SettingsSrvc',function($scope,SettingsSrvc){
+
+	$scope.title = SettingsSrvc.zoneName;
+	
+}]);
 ;/*jshint -W083 */
 angular.module('OEPlayer')
 .controller('OverlayCtrl',['$scope','$rootScope','OverlaySrvc','$element',function($scope,$rootScope,OverlaySrvc,$element){
@@ -245,6 +251,7 @@ angular.module('OEPlayer')
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
     $scope.settings.volume = SettingsSrvc.volume;
     $scope.settings.outputDevice = SettingsSrvc.outputDevice;
+    $scope.settings.zoneName = SettingsSrvc.zoneName;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -347,6 +354,19 @@ angular.module('OEPlayer')
     $scope.clearLoginHash = function(){
         $scope.settings.loginHash = null;
         localStorage.removeItem('loginHash');
+    };
+
+    $scope.saveZoneName = function(){
+        var c = confirm('This will restart the player. OK?');
+        if(c){
+            localStorage.setItem('zoneName',$scope.settings.zoneName);
+            window.location.reload();
+        }
+    };
+
+    $scope.clearZoneName = function(){
+        $scope.settings.zoneName = null;
+        localStorage.removeItem('zoneName');
     };
 
     $scope.deleteLibrary = function(){
@@ -1001,15 +1021,7 @@ angular.module('OEPlayer')
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
-			writeJSONFiles('schedule',data,getBlocked);
-		}).error(function(err){
-			LogSrvc.logError(err);
-			getTracksOffline();
-		});
-	};
-	var getBlocked = function(){
-		HTTPFactory.getBlocked().success(function(data){
-			writeJSONFiles('blocked',data,getScheduleTime);
+			writeJSONFiles('schedule',data,getScheduleTime);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
@@ -1017,7 +1029,16 @@ angular.module('OEPlayer')
 	};
 	var getScheduleTime = function(){
 		HTTPFactory.getScheduleTime().success(function(data){
-			writeJSONFiles('schedule-time',data,getTracks);
+			writeJSONFiles('schedule-time',data,getBlocked);
+		}).error(function(err){
+			LogSrvc.logError(err);
+			getTracksOffline();
+		});
+	};
+
+	var getBlocked = function(){
+		HTTPFactory.getBlocked().success(function(data){
+			writeJSONFiles('blocked',data,getTracks);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
@@ -1025,7 +1046,6 @@ angular.module('OEPlayer')
 	};
 
 	var getTracks = function(){
-		StatusSrvc.setStatus('Checking library status.');
 		//local tracks array
 		var tracksLocal = [];
 		//read current library
@@ -2461,67 +2481,6 @@ angular.module('OEPlayer')
 }]);;angular.module('OEPlayer')
 .factory('FileFactory',['FileSystem','$q',function(FileSystem,$q){
 
-	var seq = [165,150,151,86];
-	var swapIn = function(abv) {
-		var data = abv;
-		if(!checkSequence(abv)) {
-			data = swap(abv);
-			var seqData = [];
-			for(var i = 0; i < data.length; i++) {
-				seqData[i] =   data[i];
-			}
-			for(var j = 0; j < seq.length; j++) {
-				seqData[data.length + j] = seq[j];
-			}
-			data = new Uint8Array(seqData);
-		}
-		return data;
-	};
-	var swapOut = function(abv,dir,filename) {
-		var data = abv;
-		if(checkSequence(abv)) {
-			var noSeqData = [];
-			for(var i = 0; i < data.length - 4; i++) {
-				noSeqData[i] = data[i];
-			}
-			data = new Uint8Array(noSeqData);
-			data = swap(data);
-		} else {
-			FileSystem.readAsArrayBuffer(dir,filename.toString())
-				.then(function(result){
-					var abv = new Uint8Array(result);
-					abv = swapIn(abv);
-					var blob = new Blob([abv], {type: 'audio/mpeg'});
-					FileSystem.writeFile(dir,filename.toString(),blob,true)
-						.then(function(result){
-							console.log('encrypted');
-						},function(error){
-							console.log(error);
-						});
-				},function(error){
-					console.log(error);
-				});
-		}
-		return data;
-	};
-	var swap = function(abv) {
-		for(var i = 0; i < abv.length; i+=2) {
-			if(i+1 > abv.length) break;
-	    	var temp = abv[i];
-	    	abv[i] = abv[i + 1];
-	    	abv[i + 1] = temp;
-	    }
-	    return abv;	
-	};
-	var checkSequence = function(abv) {
-		for(var i = 0; i < seq.length; i++) {
-			if(abv[(abv.length - 4) + i] != seq[i]){
-				return false;
-			}
-		}
-		return true;
-	};
-
 	return {
 		init:function(){
 			var deferred = $q.defer();
@@ -2545,9 +2504,7 @@ angular.module('OEPlayer')
 		},
 		writeTrack: function(dir,filename,data,blnReplace){
 			var deferred = $q.defer();
-			var abv = new Uint8Array(data);
-			abv = swapIn(abv);
-			var blob = new Blob([abv], {type: 'audio/mpeg'});
+			var blob = new Blob([data], {type: 'audio/mpeg'});
 			FileSystem.writeFile(dir,filename.toString(),blob,blnReplace)
 				.then(function(result){
 					deferred.resolve(result);
@@ -2592,9 +2549,7 @@ angular.module('OEPlayer')
 			var deferred = $q.defer();
 			FileSystem.readAsArrayBuffer(dir,filename.toString())
 				.then(function(result){
-					var abv = new Uint8Array(result);
-					abv = swapOut(abv,dir,filename);
-					var blob = new Blob([(abv)], {type: 'audio/mpeg'});
+					var blob = new Blob([(result)], {type: 'audio/mpeg'});
 					deferred.resolve(blob);
 				},function(error){
 					deferred.reject(error);
@@ -2632,7 +2587,8 @@ angular.module('OEPlayer')
 			return deferred.promise;	
 		}
 	};
-}]);;angular.module('OEPlayer')
+}]);
+;angular.module('OEPlayer')
 .factory('HTTPFactory',['$http','config','$q','SettingsSrvc',function($http,config,$q,SettingsSrvc){
 	
 	return {
@@ -3867,7 +3823,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
 		volume:parseInt(localStorage.getItem('volume')) || 10,
-		outputDevice:localStorage.getItem('outputDevice') || 'default'
+		outputDevice:localStorage.getItem('outputDevice') || 'default',
+		zoneName:localStorage.getItem('zoneName') || ''
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

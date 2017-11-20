@@ -20,6 +20,7 @@ ng/controller/PlayerCtrl.js
 ng/controller/LogCtrl.js
 ng/controller/LoginCtrl.js
 ng/controller/OverlayCtrl.js
+ng/controller/MultiCtrl.js
 ng/factory/FileFactory.js
 ng/factory/HTTPFactory.js
 ng/factory/MediaFactory.js
