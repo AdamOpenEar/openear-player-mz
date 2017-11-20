@@ -15,7 +15,8 @@ angular.module('OEPlayer')
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
 		volume:parseInt(localStorage.getItem('volume')) || 10,
 		outputDevice:localStorage.getItem('outputDevice') || 'default',
-		zoneName:localStorage.getItem('zoneName') || ''
+		zoneName:localStorage.getItem('zoneName') || '',
+		muteOnNoSchedule:parseInt(localStorage.getItem('muteOnNoSchedule')) || 2
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

@@ -61,6 +61,10 @@
 			<label>Volume</label>
 			<select ng-model="settings.volume" ng-options="volume for volume in volumes" ng-change="changeVolume()"></select>
 		</div>
+        <div class="settings-group">
+            <label>Mute on no schedule</label>
+            <input type="checkbox" ng-model="settings.muteOnNoSchedule" ng-true-value="1" ng-false-value="2" ng-change="changeSetting('muteOnNoSchedule')">
+        </div>
 		<div class="settings-group">
 			<label>Login hash</label>
 			<input ng-model="settings.loginHash"/>

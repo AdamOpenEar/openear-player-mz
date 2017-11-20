@@ -44,7 +44,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.3.2 MULTI'
+    'version':'3.4.1 MULTI'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -159,7 +159,7 @@ angular.module('OEPlayer',[
         var today = new Date();
         var timeDiff = Math.abs(today.getTime() - lastLogin.getTime());
         var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        return diffDays > 90 ? false : true;
+        return diffDays > 360 ? false : true;
     };
 
 }]);
@@ -252,6 +252,7 @@ angular.module('OEPlayer')
     $scope.settings.volume = SettingsSrvc.volume;
     $scope.settings.outputDevice = SettingsSrvc.outputDevice;
     $scope.settings.zoneName = SettingsSrvc.zoneName;
+    $scope.settings.muteOnNoSchedule = SettingsSrvc.muteOnNoSchedule;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -1022,11 +1023,84 @@ angular.module('OEPlayer')
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
 			writeJSONFiles('schedule',data,getScheduleTime);
+			//check if schedule is announcement
+			var now = new moment();
+			for (var i = data.playlists.length - 1; i >= 0; i--) {
+				if(data.playlists[i].announcement === 1 && (data.playlists[i].day == (now.weekday() === 0 ? 6 : now.weekday() - 1))){
+					checkAnnounce(data.playlists[i]);
+				}
+			}
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
 		});
 	};
+
+	var checkAnnounce = function(playlist){
+
+		var arrPlaylistStart = playlist.start.split(':');
+		var now = new Date();
+		//get ms until announcement
+		var msToAnnonce = new Date(
+			now.getFullYear(),
+			now.getMonth(),
+			now.getDate(), 
+			arrPlaylistStart[0], 
+			arrPlaylistStart[1], 
+			arrPlaylistStart[2], 
+			0) - now;
+		//if after now
+		if(msToAnnonce > 0){
+			//get announcement track
+			getPlaylistTracks(playlist)
+				.then(function(data){
+					startAnnounceTimer(msToAnnonce,data);
+				},function(err){
+					console.log(err);
+				});
+		}
+
+	}
+
+	var startAnnounceTimer = function(ms,tracks){
+	    var announceTimer = function(){
+	    	var timer = $timeout(function(){
+	    		//start announcement timer
+	    		if(!$scope.swappingTracks){
+					//load track
+		    		$timeout.cancel(timer);
+    				timer = undefined;
+					playAnnouncement(tracks[0]);
+				} else {
+					var recheck = $timeout(function(){
+						if(!$scope.swappingTracks){
+							$timeout.cancel(recheck);
+							recheck = undefined;
+							//load track
+							playAnnouncement(tracks[0]);
+						} else {
+							$timeout.cancel(recheck);
+							recheck();
+						}
+					},11000);
+				}
+	    	},ms);
+	    };
+    	announceTimer();
+	}
+
+	var playAnnouncement = function(track){
+		//stop timer
+		$interval.cancel(player[$scope.currentTrack.playerName].timer);
+		player[$scope.currentTrack.playerName].timer = undefined;
+		//add to last played
+		addToLastPlayed($scope.currentTrack);
+		$scope.swappingTracks = true;
+		//fade out
+		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',true).then(function(){
+			loadTrack($scope.currentTrack.playerName,track);
+		});
+	}
 	var getScheduleTime = function(){
 		HTTPFactory.getScheduleTime().success(function(data){
 			writeJSONFiles('schedule-time',data,getBlocked);
@@ -1380,6 +1454,9 @@ angular.module('OEPlayer')
 					$scope.playlist.name = 'Music Library';
 					$scope.playlist.tracks = $scope.availableTracks;
 					removeBlockedTracks($scope.playlist);
+					if(SettingsSrvc.muteOnNoSchedule == 1){
+						SettingsSrvc.volume = 0;
+					}
 					if(!downloading){
 						shuffleArray($scope.playlist.tracks);
 					}
@@ -1393,7 +1470,13 @@ angular.module('OEPlayer')
 					for (var i = 0; i < schedule.playlists.length; i++) {
 						if(checkPlaylistStart(schedule.playlists[i])){
 							//set playlist
-							foundPlaylist = i;							
+							foundPlaylist = i;
+							//set volume if set
+							if(schedule.playlists[i].volume !== null){
+								SettingsSrvc.volume = schedule.playlists[i].volume;
+							} else {
+								SettingsSrvc.volume = localStorage.getItem('volume') || 10;
+							}
 							break;
 						}
 					}
@@ -1463,6 +1546,9 @@ angular.module('OEPlayer')
 						socket.send('currentPlaylist',{name:'Music Library'});
 						$scope.playlist.tracks = $scope.availableTracks;
 						removeBlockedTracks($scope.playlist);
+						if(SettingsSrvc.muteOnNoSchedule == 1){
+							SettingsSrvc.volume = 0;
+						}
 						if(!downloading){
 							shuffleArray($scope.playlist.tracks);
 						}
@@ -2933,7 +3019,10 @@ angular.module('OEPlayer')
 					self[self.playerName].createdMedia.src = URL.createObjectURL(track);
 					self[self.playerName].createdMedia.setSinkId(SettingsSrvc.outputDevice)
 						.then(function(){
-							deferred.resolve();		
+							//LogSrvc.logError(err);
+							//self[self.playerName].createdMedia.setSinkId('default');
+							//SettingsSrvc.setSetting('outputDevice','default');
+							deferred.resolve();
 						})
 						.catch(function(){
 							deferred.resolve();
@@ -2952,7 +3041,7 @@ angular.module('OEPlayer')
 			return !self[self.playerName].createdMedia.paused;
 		},
 		setVolume:function(vol,playerName){
-			self[playerName].createdMedia.volume = vol;
+			self[playerName].createdMedia.volume = parseFloat(vol);
 		},
 		getCurrentPosition:function(playerName){
 			return self[playerName].createdMedia.currentTime;
@@ -3824,7 +3913,8 @@ document.addEventListener('DOMContentLoaded', function onDeviceReady() {
 		errors:parseFloat(localStorage.getItem('errors'))|| 1,
 		volume:parseInt(localStorage.getItem('volume')) || 10,
 		outputDevice:localStorage.getItem('outputDevice') || 'default',
-		zoneName:localStorage.getItem('zoneName') || ''
+		zoneName:localStorage.getItem('zoneName') || '',
+		muteOnNoSchedule:parseInt(localStorage.getItem('muteOnNoSchedule')) || 2
 	};
 
 	SettingsSrvc.setSetting = function(setting,value){

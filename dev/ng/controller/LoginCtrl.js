@@ -103,7 +103,7 @@ angular.module('OEPlayer')
         var today = new Date();
         var timeDiff = Math.abs(today.getTime() - lastLogin.getTime());
         var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        return diffDays > 90 ? false : true;
+        return diffDays > 360 ? false : true;
     };
 
 }]);

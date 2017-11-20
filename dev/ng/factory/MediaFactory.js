@@ -20,8 +20,11 @@ angular.module('OEPlayer')
 							deferred.resolve();		
 						})
 						.catch(function(){
+							LogSrvc.logError(err);
+							self[self.playerName].createdMedia.setSinkId('default');
+							SettingsSrvc.setSetting('outputDevice','default');
 							deferred.resolve();
-						})
+						});
 					
 				},function(error){
 					deferred.reject(error);
@@ -36,7 +39,7 @@ angular.module('OEPlayer')
 			return !self[self.playerName].createdMedia.paused;
 		},
 		setVolume:function(vol,playerName){
-			self[playerName].createdMedia.volume = vol;
+			self[playerName].createdMedia.volume = parseFloat(vol);
 		},
 		getCurrentPosition:function(playerName){
 			return self[playerName].createdMedia.currentTime;

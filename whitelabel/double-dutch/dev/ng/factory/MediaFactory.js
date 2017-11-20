@@ -17,7 +17,10 @@ angular.module('OEPlayer')
 					self[self.playerName].createdMedia.src = URL.createObjectURL(track);
 					self[self.playerName].createdMedia.setSinkId(SettingsSrvc.outputDevice)
 						.then(function(){
-							deferred.resolve();		
+							//LogSrvc.logError(err);
+							//self[self.playerName].createdMedia.setSinkId('default');
+							//SettingsSrvc.setSetting('outputDevice','default');
+							deferred.resolve();
 						})
 						.catch(function(){
 							deferred.resolve();
@@ -36,7 +39,7 @@ angular.module('OEPlayer')
 			return !self[self.playerName].createdMedia.paused;
 		},
 		setVolume:function(vol,playerName){
-			self[playerName].createdMedia.volume = vol;
+			self[playerName].createdMedia.volume = parseFloat(vol);
 		},
 		getCurrentPosition:function(playerName){
 			return self[playerName].createdMedia.currentTime;

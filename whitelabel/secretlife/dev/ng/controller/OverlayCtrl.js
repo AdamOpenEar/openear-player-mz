@@ -81,6 +81,7 @@ angular.module('OEPlayer')
     $scope.settings.volume = SettingsSrvc.volume;
     $scope.settings.outputDevice = SettingsSrvc.outputDevice;
     $scope.settings.zoneName = SettingsSrvc.zoneName;
+    $scope.settings.muteOnNoSchedule = SettingsSrvc.muteOnNoSchedule;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];

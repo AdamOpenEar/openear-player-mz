@@ -80,6 +80,8 @@ angular.module('OEPlayer')
     $scope.settings.loginHash = localStorage.getItem('loginHash') || null;
     $scope.settings.volume = SettingsSrvc.volume;
     $scope.settings.outputDevice = SettingsSrvc.outputDevice;
+    $scope.settings.zoneName = SettingsSrvc.zoneName;
+    $scope.settings.muteOnNoSchedule = SettingsSrvc.muteOnNoSchedule;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
     $scope.pushPlayLengths = [1,2,3];
@@ -182,6 +184,19 @@ angular.module('OEPlayer')
     $scope.clearLoginHash = function(){
         $scope.settings.loginHash = null;
         localStorage.removeItem('loginHash');
+    };
+
+    $scope.saveZoneName = function(){
+        var c = confirm('This will restart the player. OK?');
+        if(c){
+            localStorage.setItem('zoneName',$scope.settings.zoneName);
+            window.location.reload();
+        }
+    };
+
+    $scope.clearZoneName = function(){
+        $scope.settings.zoneName = null;
+        localStorage.removeItem('zoneName');
     };
 
     $scope.deleteLibrary = function(){
