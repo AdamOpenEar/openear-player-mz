@@ -1,6 +1,6 @@
 {
   "name": "openear-player-v4",
-  "version": "4.0.1 MULTI",
+  "version": "4.0.2 MULTI",
   "description": "",
   "main": "index.js",
   "dependencies": {

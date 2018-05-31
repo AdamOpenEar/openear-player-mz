@@ -835,7 +835,7 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 .settings-group select{
     color: #fff;
-    background-color: transparent;
+    background-color: #273c4a;
     border: 1px solid #45c08d;
 }
 .settings-group button{
@@ -852,6 +852,12 @@ input.cmn-toggle-round-flat:checked + label:after {
 }
 .settings-group div{
     display: inline-block;
+}
+.settings-group input{
+  color: #fff;
+  background-color: #273c4a;
+  border:none;
+  outline:none;
 }
 /* ===== login =====*/
 .login-form{
