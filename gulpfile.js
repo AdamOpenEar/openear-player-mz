@@ -82,8 +82,7 @@ gulp.task('lint',function(){
 });
 
 gulp.task('template', function () {
-  return gulp.src('template/*.html')
+  return gulp.src('dev/ng/template/*.html')
     .pipe(templateCache({standalone:true}))
-    .pipe(gulp.dest('dev/assets/js/'))
     .pipe(gulp.dest('www/assets/js/'));
 });

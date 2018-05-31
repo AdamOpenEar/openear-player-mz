@@ -66,6 +66,7 @@ angular.module('OEPlayer')
             });
     } else if(localStorage.getItem('Authentication')){
         $http.defaults.headers.common.Authentication = localStorage.getItem('Authentication');
+        HTTPFactory.setVersionNumber();
         $location.path( '/player' );
     } 
 

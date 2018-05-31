@@ -3,12 +3,15 @@ angular.module('OEPlayer')
 	var dictionary = {
 		English:{
 			menu:{
-				playlists:'push to play',
+				playlists:'playlists',
 				queue:'queue',
 				schedule:'schedule',
+				lastPlayed:'last played',
 				settings:'settings',
 				restart:'restart',
 				logout:'logout',
+        help:'FAQ',
+        lock:'Lock',
 				conflogout:'Are you sure you want to logoff?'
 			},
 			player:{
@@ -27,10 +30,11 @@ angular.module('OEPlayer')
 
 			},
 			playlists:{
-				title:'Push to Play',
+				title:'Playlists',
 				sub:{
 					ptp:'Playlists',
-					time:'Time Based'
+					time:'Time Based',
+          library:'From your library'
 				},
 				table:{
 					title:'Title',
@@ -41,6 +45,16 @@ angular.module('OEPlayer')
 			},
 			queue:{
 				title:'Queue',
+				table:{
+					title:'Title',
+					album:'Album',
+					artist:'Artist',
+					block:'Block',
+					energy:'Energy'
+				}
+			},
+			lastPlayed:{
+				title:'Last Played',
 				table:{
 					title:'Title',
 					album:'Album',
@@ -75,19 +89,24 @@ angular.module('OEPlayer')
 				animations:'Animations',
 				pushtoplay:'Push to play time (hours)',
 				energy:'Energy slider minimum playlist length',
+				energyTime:'Time to run energy slider (hours)',
 				delstored:'Delete Stored Data',
 				dellib:'Delete Library',
 				conflibdel:'Are you sure you want to delete the library?',
 				confstored:'Are you sure you want to delete stored data?',
 				changeLang:'Changing language will require a restart. Are you sure?',
 				restart:'24hr restart time'
-			}
+			},
+      help:{
+        title:'FAQ'
+      }
 		},
 		Portuguese:{
 			menu:{
 				playlists:'playlists',
 				queue:'fila',
 				schedule:'cronograma',
+				lastPlayed:'last played',
 				settings:'configurações',
 				restart:'reiniciar',
 				logout:'sair',
@@ -127,6 +146,16 @@ angular.module('OEPlayer')
 					energy:'Energia'
 				}
 			},
+			lastPlayed:{
+				title:'Last Played',
+				table:{
+					title:'Title',
+					album:'Album',
+					artist:'Artist',
+					block:'Block',
+					energy:'Energy'
+				}
+			},
 			schedule:{
 				title:'Cronograma',
 				sub:{
@@ -153,6 +182,7 @@ angular.module('OEPlayer')
 				animations:'Animações',
 				pushtoplay:'Começa a tocar as (horas)',
 				energy:'Tamanho mínimo da playlists do Slider de Energia',
+				energyTime:'Time to run energy slider (hours)',
 				delstored:'Excluir os dados armazenados',
 				dellib:'excluir Biblioteca',
 				conflibdel:'Tem certeza de que deseja excluir a biblioteca ?',
@@ -166,6 +196,7 @@ angular.module('OEPlayer')
 				playlists:'listas de reproducción',
 				queue:'en espera',
 				schedule:'horario',
+				lastPlayed:'last played',
 				settings:'preferencias',
 				restart:'reiniciar',
 				logout:'cerrar sesión',
@@ -205,6 +236,16 @@ angular.module('OEPlayer')
 					energy:'Energía'
 				}
 			},
+			lastPlayed:{
+				title:'Last Played',
+				table:{
+					title:'Title',
+					album:'Album',
+					artist:'Artist',
+					block:'Block',
+					energy:'Energy'
+				}
+			},
 			schedule:{
 				title:'Horario',
 				sub:{
@@ -231,6 +272,7 @@ angular.module('OEPlayer')
 				animations:'Animaciones',
 				pushtoplay:'Oprimir para tiempo de reproducción (horas)',
 				energy:'Energy slider minimum playlist length',
+				energyTime:'Time to run energy slider (hours)',
 				delstored:'Borrar Datos Almacenados',
 				dellib:'Borrar Biblioteca',
 				conflibdel:'¿Está usted seguro que desea borrar la biblioteca?',

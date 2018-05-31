@@ -1,15 +1,16 @@
 /*jshint -W083 */
 angular.module('OEPlayer')
 
-.controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http','MediaFactory','LangFactory','SocketFactory',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http,MediaFactory,LangFactory,SocketFactory){
+.controller('PlayerCtrl',['$scope','FileFactory','LogSrvc','HTTPFactory','config','StatusSrvc','$element','$rootScope','OverlaySrvc','PlayerSrvc','SettingsSrvc','$q','$timeout','$location','$interval','$http','MediaFactory','LangFactory','SocketFactory','ActionSrvc',function($scope,FileFactory,LogSrvc,HTTPFactory,config,StatusSrvc,$element,$rootScope,OverlaySrvc,PlayerSrvc,SettingsSrvc,$q,$timeout,$location,$interval,$http,MediaFactory,LangFactory,SocketFactory,ActionSrvc){
 	
 	$scope.lang = LangFactory;
 
 	$scope.menu = [
 		{name:'playlists',display:$scope.lang.menu.playlists,icon:'folder'},
-		{name:'queue',display:$scope.lang.menu.queue,icon:'list-thumbnails'},
 		{name:'schedule',display:$scope.lang.menu.schedule,icon:'calendar'},
-		{name:'settings',display:$scope.lang.menu.settings,icon:'widget'}
+		{name:'queue',display:$scope.lang.menu.queue,icon:'calendar'},
+    {name:'settings',display:$scope.lang.menu.settings,icon:'widget'},
+		{name:'help',display:$scope.lang.menu.help,icon:'widget'}
 	];
 
 	var player;
@@ -19,6 +20,8 @@ angular.module('OEPlayer')
 	$scope.playbackErr = 0;
 
 	var init = function(){
+
+    HTTPFactory.setVersionNumber();
 
 		player = {};
 
@@ -33,7 +36,8 @@ angular.module('OEPlayer')
 			venueName:localStorage.getItem('venue'),
 			volume:SettingsSrvc.volume,
 			hasSchedule:false,
-			isDownloading:false
+			isDownloading:false,
+      lock:false
 		};
 		StatusSrvc.setStatus('Loading '+$scope.player.venueName+'...');
 		
@@ -54,7 +58,8 @@ angular.module('OEPlayer')
 		};
 		$scope.energy = {
 			status:false,
-			level:5
+			level:5,
+			timer:null
 		};
 		$scope.player.online = $rootScope.online;
 
@@ -64,7 +69,7 @@ angular.module('OEPlayer')
 			min:arrRestartTime.length > 1?parseInt(arrRestartTime[1])*10:0
 		};
 
-	    var mtStart = function(){
+    var mtStart = function(){
 			var nowToday = new Date();
 	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, restartTime.hour, restartTime.min, 0, 0) - nowToday;
 	    	if (millisTillFourAM < 0) {
@@ -84,15 +89,13 @@ angular.module('OEPlayer')
 		mtStart();
 		//sockets
 		if(!$scope.initialising){
-			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
-			//socket = new SocketFactory('ws://localhost:5000');
+			socket = new SocketFactory(config.socket);
 		}
 		$scope.$on('socket:open',function(event,data){
 			socket.send('playerInit',{volume:SettingsSrvc.volume});
 		});
 		$scope.$on('socket:closed',function(event,data){
-			//socket = new SocketFactory('ws://localhost:5000');
-			socket = new SocketFactory('wss://openear-ws.herokuapp.com');
+			socket = new SocketFactory(config.socket);
 		});
 		$scope.$on('socket:message',function(event,data){
 			var auth = localStorage.getItem('Authentication');
@@ -127,38 +130,14 @@ angular.module('OEPlayer')
 							LogSrvc.logSystem('man app - restart');
 						}
 						break;
-					case 'pushToPlayID':
+					case 'pushToPlay':
 						if(!$scope.swappingTracks){
 							LogSrvc.logSystem('man app - pushToPlay');
-							var playlistID = data.data;
-							//cancel running timer
-							$interval.cancel(player[$scope.currentTrack.playerName].timer);
-							player[$scope.currentTrack.playerName].timer = undefined;
-							//wait
-							crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',true)
-								.then(function(){
-									$scope.pushToPlay = {
-										status:true,
-										end:getEndTime(SettingsSrvc.pushToPlayTime)
-									};
-									FileFactory.readJSON(config.local_path,'playlists.json')
-										.then(function(data){
-											var playlists = JSON.parse(data);
-											for (var i = playlists.length - 1; i >= 0; i--) {
-												if(playlists[i].id == playlistID){
-													LogSrvc.logSystem('push-to-play man');
-													$scope.playlist = playlists[i];
-													$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
-													socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:true});
-													shuffleArray($scope.playlist.tracks);
-													$scope.player.currentIndex = 0;
-													prepareNextTrack($scope.currentTrack.playerName);
-													startPtpTimer();
-												}
-											}
-										});
-									
-								});//hours to milliseconds, cancel push to play
+							var playlist = {
+                tracks:data.data.tracks,
+                name:data.data.name
+							}
+							PlayerSrvc.pushToPlay(playlist);
 						}
 						break;
 					case 'cancelPushToPlay':
@@ -171,6 +150,12 @@ angular.module('OEPlayer')
 						SettingsSrvc.setSetting('volume',data.data);
 						changeVolume(data.data);
 						break;
+					case 'energyMan':
+						$scope.energy = data.data;
+						if($scope.energy.status){
+							energisePlaylist();
+						}
+						break;
 				}
 			} else {
 				LogSrvc.logSystem('Not authenticated');
@@ -180,6 +165,7 @@ angular.module('OEPlayer')
 		FileFactory.init()
 			.then(function(res){
 				LogSrvc.logSystem(res);
+				$scope.openOverlay('playlists');
 				getSetttings();
 			},function(error){
 				LogSrvc.logError('error initialising');
@@ -244,17 +230,18 @@ angular.module('OEPlayer')
 	var processBacklog = function(){
 
 		var backlog = JSON.parse(localStorage.getItem('backlog'));
-		if(backlog){
-			HTTPFactory.logTrack({logs:backlog}).success(function(){
-				localStorage.removeItem('backlog');
-				getPlaylists();
-			}).error(function(err){
-				LogSrvc.logError('err processing backlog');
-				getTracksOffline();
+		if(backlog && backlog.length > 0){
+			angular.forEach(backlog,function(log){
+				HTTPFactory.logTrack({logs:[log]}).success(function(){
+					LogSrvc.logSystem('Backlog '+log+' logged');
+				}).error(function(err){
+					LogSrvc.logError('err processing backlog');
+				});
 			});
-		} else {
-			getPlaylists();
+
+			localStorage.removeItem('backlog');
 		}
+		getPlaylists();
 	};
 
 	var writeJSONFiles = function(file,data,callback){
@@ -285,8 +272,8 @@ angular.module('OEPlayer')
 
 	var getPlaylists = function(){
 		HTTPFactory.getPlaylists().success(function(data){
-			if(data.length > 0){
-				writeJSONFiles('playlists',data,getTracksOnline);
+			if(data.playlists.length > 0){
+				writeJSONFiles('playlists',data,setPushToPlay);
 			} else {
 				StatusSrvc.setStatus('No playlists. Please add some playlists to continue.');
 			}
@@ -296,11 +283,17 @@ angular.module('OEPlayer')
 		});
 	};
 
+	var setPushToPlay = function(){
+		$rootScope.$emit('playlist:ready');
+		getTracksOnline();
+	}
+
 	var getPlaylistFromId = function(id){
 
 		FileFactory.readJSON(config.local_path,'playlists.json')
 			.then(function(data){
-				var playlists = JSON.parse(data);
+				var data = JSON.parse(data);
+				var playlists = data.playlists;
 				for (var i = playlists.length - 1; i >= 0; i--) {
 					if(playlists[i].id == id){
 						return playlists[i];
@@ -333,7 +326,7 @@ angular.module('OEPlayer')
 
 	var getSchedule = function(){
 		HTTPFactory.getSchedule().success(function(data){
-			writeJSONFiles('schedule',data,getScheduleTime);
+			writeJSONFiles('schedule',data,getBlocked);
 			//check if schedule is announcement
 			var now = new moment();
 			for (var i = data.playlists.length - 1; i >= 0; i--) {
@@ -412,18 +405,17 @@ angular.module('OEPlayer')
 			loadTrack($scope.currentTrack.playerName,track);
 		});
 	}
-	var getScheduleTime = function(){
-		HTTPFactory.getScheduleTime().success(function(data){
-			writeJSONFiles('schedule-time',data,getBlocked);
+	var getBlocked = function(){
+		HTTPFactory.getBlocked().success(function(data){
+			writeJSONFiles('blocked',data,getScheduleTime);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
 		});
 	};
-
-	var getBlocked = function(){
-		HTTPFactory.getBlocked().success(function(data){
-			writeJSONFiles('blocked',data,getTracks);
+	var getScheduleTime = function(){
+		HTTPFactory.getScheduleTime().success(function(data){
+			writeJSONFiles('schedule-time',data,getTracks);
 		}).error(function(err){
 			LogSrvc.logError(err);
 			getTracksOffline();
@@ -431,6 +423,8 @@ angular.module('OEPlayer')
 	};
 
 	var getTracks = function(){
+		StatusSrvc.setStatus('Checking library status.');
+		ActionSrvc.setAction('player initialised','');
 		//local tracks array
 		var tracksLocal = [];
 		//read current library
@@ -599,6 +593,7 @@ angular.module('OEPlayer')
 						LogSrvc.logSystem('download complete');
 						FileFactory.writeTrack(config.local_path,track.id+'.mp3',data,true)
 							.then(function(res){
+								ActionSrvc.setAction('just downloaded',track.title)
 								LogSrvc.logSystem('write track complete');
 								$scope.availableTracks.push(track);
 								//if all downloaded
@@ -670,7 +665,8 @@ angular.module('OEPlayer')
 		var msg = 'Remaining: '+$scope.unavailableTracks.length+' of '+$scope.tracksNeeded+' tracks. Playback may be unstable. Controls disabled.'
 		StatusSrvc.setStatus(msg);
 		if($scope.unavailableTracks.length > 0){
-			isDownloading(true,msg);
+			$scope.player.downloadProgress = parseInt(100 - ($scope.unavailableTracks.length/$scope.tracksNeeded)*100);
+      isDownloading(true,'Download '+$scope.player.downloadProgress+'% complete');
 			$scope.swappingTracks = true;
 			downloadTrack($scope.unavailableTracks[0]);
 		} else {
@@ -718,7 +714,8 @@ angular.module('OEPlayer')
 		var deferred = $q.defer();
 		FileFactory.readJSON(config.local_path,'playlists.json')
 			.then(function(data){
-				var playlists = JSON.parse(data);
+				var data = JSON.parse(data);
+				var playlists = data.playlists;
 				for (var i = 0; i < playlists.length; i++) {
 					if(playlists[i].id == playlist.playlist_id){
 						deferred.resolve(playlists[i].tracks);
@@ -761,6 +758,7 @@ angular.module('OEPlayer')
 					$scope.player.hasSchedule = false;
 					$rootScope.ready = true;
 					LogSrvc.logSystem('no schedule - music library');
+					ActionSrvc.setAction('started playing from','the music library');
 					socket.send('currentPlaylist',{name:'Music Library'});
 					$scope.playlist.name = 'Music Library';
 					$scope.playlist.tracks = $scope.availableTracks;
@@ -799,6 +797,7 @@ angular.module('OEPlayer')
 							.then(function(data){
 								$scope.playlist = schedule.playlists[i].playlist;
 								socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:$scope.pushToPlay.status});
+								ActionSrvc.setAction('started playing from the schedule with',$scope.playlist.name);
 								$scope.playlist.tracks = data;
 								removeBlockedTracks($scope.playlist);
 								if(downloading){
@@ -853,6 +852,7 @@ angular.module('OEPlayer')
 					//if we didn't find a playlist, go to library
 					} else {
 						LogSrvc.logSystem('no playlist - music library');
+						ActionSrvc.setAction('started playing from','the music library');
 						$scope.playlist.name = 'Music Library';
 						socket.send('currentPlaylist',{name:'Music Library'});
 						$scope.playlist.tracks = $scope.availableTracks;
@@ -875,35 +875,10 @@ angular.module('OEPlayer')
 			});
 	};
 
-	var energisePlaylist = function(){
-
-		$scope.playlist.name = 'Energy set at '+$scope.energy.level;
-		$scope.player.currentIndex = 0;
-		$scope.playlist.tracks = [];
-		var energy = parseInt($scope.energy.level);
-		$scope.energy.increment = energy + 1;
-		$scope.energy.decrement = energy - 1;
-		fillEnergyPlaylist(energy,true);
-		removeBlockedTracks($scope.playlist);
-		shuffleArray($scope.playlist.tracks);
-	};
-
-	var fillEnergyPlaylist = function(energy,direction){
-
-		for (var i = 0; i < $scope.availableTracks.length; i++) {
-			if($scope.availableTracks[i].energy == energy){
-				$scope.playlist.tracks.push($scope.availableTracks[i]);
-			}
-		}
-		if($scope.playlist.tracks.length < SettingsSrvc.minEnergyPlaylist){
-			if($scope.energy.increment > 10){
-				direction = false;
-			} else if($scope.energy.decrement < 0){
-				direction = true;
-			}
-			fillEnergyPlaylist(direction ? $scope.energy.increment++ : $scope.energy.decrement--,!direction);
-		}
-	};
+	var setPlaylistName = function(name){
+		$scope.playlist.name = name;
+		socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:$scope.pushToPlay.status});
+	}
 
 	var checkPtpSchedule = function(playlist){
 		
@@ -996,11 +971,10 @@ angular.module('OEPlayer')
 	};
 
 	var loadTrack = function(playerName,track){
-
 		try{
 			//sockets
 			socket.send('currentTrack',{title:track.title,artist:track.artist});
-
+			//update queue
 			$scope.initialising = false;
 			LogSrvc.logSystem('playing '+track.title+' id='+track.id+' player name '+playerName);
 			$scope.currentTrack = track;
@@ -1160,7 +1134,7 @@ angular.module('OEPlayer')
 	var addToLastPlayed = function(track){
 		track.time = getTime();
 		socket.send('lastPlayed',track);
-		if($scope.player.lastPlayed.length > 25){
+		if($scope.player.lastPlayed.length > 50){
 			$scope.player.lastPlayed.splice($scope.player.lastPlayed.length - 1,1);
 			$scope.player.lastPlayed.unshift(track);
 		} else {
@@ -1268,6 +1242,8 @@ angular.module('OEPlayer')
 		player[$scope.currentTrack.playerName].timer = undefined;
 		//add to last played
 		addToLastPlayed($scope.currentTrack);
+    //record skip
+    ActionSrvc.setAction('just skipped',$scope.currentTrack.title);
 		//fade out
 		crossfade($scope.currentTrack.playerName, SettingsSrvc.crossfadeIn,'out',false).then(function(){
 			prepareNextTrack($scope.currentTrack.playerName);
@@ -1303,11 +1279,11 @@ angular.module('OEPlayer')
 	$scope.$on('$destroy', unbindVolume);
 
 	//LAST TRACK OVERLAY
-	$scope.openLastTracks = function(element){
+	$scope.openQueue = function(element){
 		if($scope.lastTracksOpen){
-			$element.removeClass('active-last-played');
+			$element.removeClass('active-queue');
 		} else {
-			$element.addClass('active-last-played');
+			$element.addClass('active-queue');
 		}
 		$scope.lastTracksOpen = !$scope.lastTracksOpen;
 	};
@@ -1320,17 +1296,16 @@ angular.module('OEPlayer')
 			case 'queue':
 				data = $scope.playlist.tracks;
 				break;
+			case 'lastPlayed':
+				data = $scope.player.lastPlayed;
+				break;
 		}
 		
 		for (var i = $scope.menu.length - 1; i >= 0; i--) {
+			$scope.menu[i].active = false;
 			if($scope.menu[i].name == template && !$scope.menu[i].active){
 				$scope.menu[i].active = true;
 				OverlaySrvc.open(template,data);
-			} else if($scope.menu[i].name == template && $scope.menu[i].active){
-				$scope.menu[i].active = false;
-				OverlaySrvc.close();
-			} else {
-				$scope.menu[i].active = false;
 			}
 		}
 	};
@@ -1346,8 +1321,19 @@ angular.module('OEPlayer')
 		}
 	});
 
+	var unbindQueueNext = $rootScope.$on('queue:update',function(){
+		var index = $scope.playlist.tracks.findIndex(function(elem){
+			return elem.id === QueueSrvc.track.id;
+		});
+		if(index > -1){
+			$scope.playlist.tracks.splice(index,1);
+			$scope.playlist.tracks.splice((QueueSrvc.queuePosition-1)+$scope.player.currentIndex,0,QueueSrvc.track);
+		}
+	});
+
 	$scope.$on('$destroy', unbindOpen);
 	$scope.$on('$destroy', unbindClose);
+	$scope.$on('$destroy', unbindQueueNext);
 
 	//push to play
 	var unbindPushToPlay = $rootScope.$on('push-to-play',function(){
@@ -1365,15 +1351,22 @@ angular.module('OEPlayer')
 				};
 				$scope.playlist = angular.copy(PlayerSrvc.playlist);
 				$scope.playlist.end = getEndTime(SettingsSrvc.pushToPlayTime);
+				socket.send('currentPlaylist',{name:$scope.playlist.name,ends:$scope.playlist.end,pushToPlay:$scope.pushToPlay.status});
+        ActionSrvc.setAction('just push to played',$scope.playlist.name);
 				removeBlockedTracks($scope.playlist);
 				shuffleArray($scope.playlist.tracks);
 				$scope.player.currentIndex = -1;
+				//set tracks for queue
 				prepareNextTrack($scope.currentTrack.playerName);
 				startPtpTimer();
 			});//hours to milliseconds, cancel push to play
 	});
 	var startPtpTimer = function(){
 		var time = SettingsSrvc.pushToPlayTime*3600000;
+    //cancel energy slider if running
+    if($scope.energy.status){
+      cancelEnergyTimer()
+    }
 		//set timeout for push to play
 		var startTimer = function(){
 			$scope.pushToPlay.timer = $timeout(function(){
@@ -1390,6 +1383,7 @@ angular.module('OEPlayer')
 		$timeout.cancel($scope.pushToPlay.timer);
 		$scope.pushToPlay.timer = undefined;
 		LogSrvc.logSystem('push-to-play timer end');
+    ActionSrvc.setAction('just cancelled','push to play');
 	};
 	$scope.$on('$destroy', unbindPushToPlay);
 
@@ -1415,6 +1409,7 @@ angular.module('OEPlayer')
 
 				$scope.playlist = $scope.pushToPlaySchedule.schedule[$scope.pushToPlaySchedule.playlistIndex];
 				$scope.playlist.playlist_id = $scope.playlist.id;
+
 				getPlaylistTracks($scope.playlist)
 					.then(function(tracks){
 						$scope.playlist.tracks = tracks;
@@ -1481,30 +1476,94 @@ angular.module('OEPlayer')
 	//energise
 	$scope.energise = function(){
 		$scope.energy.status = !$scope.energy.status;
+		//sockets
+		socket.send('energyPl',{level:$scope.energy.level,status:$scope.energy.status});
+    if($scope.pushToPlay.status){
+      $scope.cancelPushToPlay();
+    }
 		if($scope.energy.status){
 			energisePlaylist();
+      ActionSrvc.setAction('just started the energy slider','at level '+$scope.energy.level);
 		}else {
-			if($scope.pushToPlay.status){
-				$scope.player.currentIndex = 0;
-				$scope.playlist = angular.copy(PlayerSrvc.playlist);
-				$scope.playlist.end = $scope.pushToPlay.end;
-				removeBlockedTracks($scope.playlist);
-				shuffleArray($scope.playlist.tracks);
-			} else {
-				preparePlaylist(true);
-			}
+      if($scope.energy.timer){
+        cancelEnergyTimer();
+      }
+			preparePlaylist(true);
 		}
 	};
 
+	var startEnergyTimer = function(){
+		var time = SettingsSrvc.energyTime*3600000;
+		//set timeout for push to play
+		var startTimer = function(){
+			$scope.energy.timer = $timeout(function(){
+				$scope.energy.status = false;
+				$timeout.cancel($scope.energy.timer);
+				$scope.energy.timer = undefined;
+        socket.send('energyPl',{level:$scope.energy.level,status:$scope.energy.status});
+				preparePlaylist(true);
+				LogSrvc.logSystem('energy timer end');
+			},time);
+		};
+		startTimer();
+	}
+
+	var cancelEnergyTimer = function(){
+		$scope.energy.status = false;
+		$timeout.cancel($scope.energy.timer);
+		$scope.energy.timer = undefined;
+    socket.send('energyPl',{level:$scope.energy.level,status:$scope.energy.status});
+		LogSrvc.logSystem('energy timer end');
+	}
+
 	$scope.changeEnergy = function(){
 		$timeout(function(){
+			//sockets
+			socket.send('energyPl',{level:$scope.energy.level,status:$scope.energy.status});
 			energisePlaylist();
 		},1000);
+	};
+
+	var energisePlaylist = function(){
+
+		$scope.playlist.name = 'Energy set at '+$scope.energy.level;
+		$scope.playlist.end = getEndTime(SettingsSrvc.energyTime);
+		$scope.player.currentIndex = 0;
+		$scope.playlist.tracks = [];
+		var energy = parseInt($scope.energy.level);
+		$scope.energy.increment = energy + 1;
+		$scope.energy.decrement = energy - 1;
+		fillEnergyPlaylist(energy,true);
+		removeBlockedTracks($scope.playlist);
+		shuffleArray($scope.playlist.tracks);
+		startEnergyTimer();
+	};
+
+	var fillEnergyPlaylist = function(energy,direction){
+
+		for (var i = 0; i < $scope.availableTracks.length; i++) {
+			if($scope.availableTracks[i].energy == energy){
+				$scope.playlist.tracks.push($scope.availableTracks[i]);
+			}
+		}
+		if($scope.playlist.tracks.length < SettingsSrvc.minEnergyPlaylist){
+			if($scope.energy.increment > 10){
+				direction = false;
+			} else if($scope.energy.decrement < 0){
+				direction = true;
+			}
+			fillEnergyPlaylist(direction ? $scope.energy.increment++ : $scope.energy.decrement--,!direction);
+		}
 	};
 	//block track
 	$scope.blockTrack = function(track){
 		var c = confirm('Are you sure you want to block this track?');
 		if(c){
+      //loop current playlist and remove
+      var index = $scope.playlist.tracks.indexOf(track)
+      if(index > -1){
+        $scope.playlist.tracks.splice(index,1);
+      }
 			//set blocked on local storage if offline - sent on init
 			HTTPFactory.blockTrack(track.id).success(function(){
 				track.blocked = true;
@@ -1515,16 +1574,23 @@ angular.module('OEPlayer')
 			});
 		}
 	};
+  //lock display
+  $scope.lock = function(){
+    $scope.player.lock = true;
+  }
+
+  $scope.unlock = function(){
+    $scope.player.lock = false;
+  }
 	//logoff
 	$scope.logOff = function(){
 		var c = confirm($scope.lang.menu.conflogout);
 		if(c){
-			player[$scope.currentTrack.playerName].pause($scope.currentTrack.playerName);
 			$http.defaults.headers.common.Authentication = '';
 			localStorage.removeItem('Authentication');
 			localStorage.removeItem('venue');
 			socket.endConnection();
-			$location.path('/login');
+			window.location.reload();
 		}
 	};
 	//global stop playback

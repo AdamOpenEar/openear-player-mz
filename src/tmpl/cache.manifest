@@ -15,21 +15,20 @@ bower_components/moment/min/moment.min.js
 bower_components/angular-moment/angular-moment.min.js
 bower_components/angular-svg-round-progressbar/build/roundProgress.min.js
 
-assets/js/openear-player-v3.min.js?v=<!-- @echo now -->
+assets/js/openear-player-v4.min.js?v=<!-- @echo now -->
 assets/js/templates.js?v=<!-- @echo now -->
 
 #CSS
-assets/css/openear-player-v3.min.css?v=<!-- @echo now -->
+assets/css/openear-player-v4.min.css?v=<!-- @echo now -->
 
 #Images
 assets/img/logo.png
 
 #fonts
-assets/css/fonts/Montserrat-Light-webfont.eot
-assets/css/fonts/Montserrat-Light-webfont.woff2
-assets/css/fonts/Montserrat-Light-webfont.woff
-assets/css/fonts/Montserrat-Light-webfont.ttf
-assets/css/fonts/Montserrat-Light-webfont.svg
+assets/css/fonts/GT-Walsheim-Light.eot
+assets/css/fonts/GT-Walsheim-Light.eot
+assets/css/fonts/GT-Walsheim-Light.woff
+assets/css/fonts/GT-Walsheim-Light.ttf
 assets/css/foundation-icons.eot
 assets/css/foundation-icons.woff
 assets/css/foundation-icons.ttf

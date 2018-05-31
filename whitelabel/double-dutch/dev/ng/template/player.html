@@ -1,0 +1,107 @@
+<div ng-controller="PlayerCtrl" id="app-wrapper">
+    <div id="menu" ng-class="{display:ready}">
+        <img src="assets/img/logo.png">
+        <a 
+            ng-repeat="item in menu track by $index"
+            ng-click="swappingTracks || openOverlay(item.name)"
+            ng-class="{active:item.active}"
+            ng-disabled="swappingTracks">
+                {{item.display}}
+        </a>
+        <div class="menu-bottom">
+          <!--<a ng-click="lock()">{{lang.menu.lock}}</a>-->
+          <a ng-click="swappingTracks || restart()" ng-disabled="swappingTracks">{{lang.menu.restart}}</a>
+          <a ng-click="logOff()">{{lang.menu.logout}}</a>
+        </div>
+    </div>
+    <div id="overlay" ng-class="{active:overlayActive}" ng-controller="OverlayCtrl">
+        <div ng-include="overlayTemplate" class="overlay-wrapper clearfix"></div>
+    </div>
+    <div id="main">
+        <div id="blur-wrapper">
+            <div id="system-messages">
+                <p>{{status.status}}</p>
+            </div>
+            <div id="track-info" ng-class="{display:ready}">
+                <div id="track-title">{{currentTrack.title}}</div>
+                <div id="track-artist">{{currentTrack.artist}}</div>
+                <div id="track-playlist">{{player.venueName}} - {{playlist.name}} {{pushToPlay.status ? ' - Push to play ' : ''}} {{playlist.end ? ' - ends '+playlist.end : ''}}</div>
+            </div>
+            <div id="online-status">
+                <span ng-disabled="!player.online">{{lang.player.online}}</span>
+                <span ng-disabled="player.online">{{lang.player.offline}}</span>
+            </div>
+
+            <div id="player-controls" ng-class="{display:ready}" ng-if="!player.isDownloading">
+                <div ng-if="pushToPlay.status" ng-click="cancelPushToPlay()" id="cancel-ptp"><i class="fi-prohibited"></i> return to default schedule</div>
+                <div id="skip-back" class="skip-btn">
+                    <i ng-click="swappingTracks || skipBack()" class="fi-previous" ng-disabled="swappingTracks || player.currentIndex < 1"></i>
+                </div>
+                <div id="play-pause">
+                    <i class="fi-play" ng-class="{display:currentTrack.isPaused}" ng-click="swappingTracks || playPause()" ng-disabled="swappingTracks"></i>
+                    <i class="fi-pause" ng-class="{display:!currentTrack.isPaused}" ng-click="swappingTracks || playPause()" ng-disabled="swappingTracks"></i>
+                </div>
+                <div id="skip-forward" class="skip-btn">
+                    <i ng-click="swappingTracks || skipForward()" class="fi-next" ng-disabled="swappingTracks"></i>
+                </div>
+                <div id="volume"><i class="fi-volume"></i> {{player.volume == 10 ? 'Max' : player.volume}}</div>
+            </div>
+            <div id="download-progress" ng-if="player.isDownloading">
+                Download {{ player.downloadProgress }}% complete
+            </div>
+        </div>
+        <div id="scrubber-wrapper">
+            <div id="scrubber" style="width:{{(timer.elapsedSec/timer.durationSec) * 100}}%"></div>
+            <div class="track-timer" id="track-duration" ng-class="{display:ready}">{{timer.duration}}</div>
+            <div class="track-timer" id="track-elapsed" ng-class="{display:ready}">{{timer.elapsed}}</div>
+        </div>
+        <div id="last-played">
+            <h2>Last played <a ng-click="openQueue()" id="open-queue">expand <span class="glyphicon glyphicon-chevron-up"></span></a></h2>
+            <div class="oeplayer-table-wrapper">
+                <table class="oeplayer-table" ng-if="player.lastPlayed.length > 0">
+                    <thead>
+                        <tr>
+                            <th>{{lang.player.lastplayed.table.title}}</th>
+                            <th>{{lang.player.lastplayed.table.artist}}</th>
+                            <th>{{lang.player.lastplayed.table.energy}}</th>
+                            <th>{{lang.player.lastplayed.table.block}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="track in player.lastPlayed track by $index">
+                            <td>{{track.title}}</td>
+                            <td>{{track.artist}}</td>
+                            <td>
+                                <div class="energy energy-{{track.energy}}">
+                                    {{track.energy}}<span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+                                </div>
+                            </td>
+                            <td class="icon"><a ng-click="blockTrack(track)"><i class="fi-prohibited" ng-disabled="track.blocked"></i></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5 ng-if="player.lastPlayed.length === 0">No tracks played yet.</h5>
+            </div>
+        </div>
+    </div>
+    <div id="energy-slider" ng-class="{display:ready}">
+        <h2>Energy <br/>Slider</h2>
+        <div class="switch">
+            <input type="checkbox" id="energy_checkbox" ng-value="energy.status" ng-click="energise()" class="cmn-toggle cmn-toggle-round-flat" ng-disabled="swappingTracks" ng-checked="energy.status">
+            <label for="energy_checkbox"></label>
+        </div>
+        <div id="energy-slider-wrapper">
+            <input type="range" ng-model="energy.level" min="1" max="10" ng-disabled="!energy.status" ng-mouseup="changeEnergy()" ng-touchend="changeEnergy()">
+        </div>
+    </div>
+    <div id="display" ng-if="player.lock">
+      <div id="track-info-lock">
+          <div id="track-title">{{currentTrack.title}}</div>
+          <div id="track-artist">{{currentTrack.artist}}</div>
+          <div id="track-playlist">{{player.venueName}} - {{playlist.name}} {{pushToPlay.status ? ' - Push to play ' : ''}} {{playlist.end ? ' - ends '+playlist.end : ''}}</div>
+      </div>
+      <div id="lock-controls">
+        <a ng-click="unlock()">Unlock</a>
+      </div>
+    </div>
+</div>

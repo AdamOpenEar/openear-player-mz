@@ -1,0 +1,41 @@
+<div 
+style="height:{{height}}px;top:{{offset}}px" 
+class="schedule-box energy-{{schedule.playlist.avg_energy}}" 
+ng-class="{active:active,'controls-left':dayIndex == 6}"
+>
+<p>{{schedule.playlist.name}}</p>
+	<div class="schedule-controls" style="height:{{height}}px;">
+
+		<div class="schedule-edit-controls">
+			<a class="schedule-move-down" ng-click="moveDown($event)">
+				<span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+			</a>
+			<div class="schedule-duration">
+				<a ng-click="increaseLength($event)">
+					<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+				</a>
+				<span>{{duration}}hrs</span>
+				<a ng-click="decreaseLength($event)">
+					<span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span>
+				</a>
+				
+			</div>
+			<span class="triangle"></span>
+			<div class="schedule-save">
+				<a ng-click="save($event)">
+					<span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+				</a>
+				<a ng-click="cancel($event)">
+					<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+				</a>
+				<a ng-click="delete($event)" class="schedule-delete">
+					<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+				</a>
+			</div>
+
+			<a class="schedule-move-up" ng-click="moveUp($event)">
+				<span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+			</a>
+		</div>
+	</div>
+</div>

@@ -17,14 +17,14 @@ angular.module('OEPlayer')
 					self[self.playerName].createdMedia.src = URL.createObjectURL(track);
 					self[self.playerName].createdMedia.setSinkId(SettingsSrvc.outputDevice)
 						.then(function(){
-							//LogSrvc.logError(err);
-							//self[self.playerName].createdMedia.setSinkId('default');
-							//SettingsSrvc.setSetting('outputDevice','default');
-							deferred.resolve();
+							deferred.resolve();		
 						})
 						.catch(function(){
+							LogSrvc.logError(err);
+							self[self.playerName].createdMedia.setSinkId('default');
+							SettingsSrvc.setSetting('outputDevice','default');
 							deferred.resolve();
-						})
+						});
 					
 				},function(error){
 					deferred.reject(error);

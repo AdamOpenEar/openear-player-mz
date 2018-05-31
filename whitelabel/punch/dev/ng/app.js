@@ -1,18 +1,16 @@
 angular.module('OEPlayer',[
     'ngRoute',
     'angular-svg-round-progress',
-    'angularMoment',
-    'templates'
+    'angularMoment'
 ])
 .config(['$httpProvider','$routeProvider',function($httpProvider,$routeProvider) {
 
     $routeProvider.when('/login', {
-        templateUrl: 'login.html',
+        templateUrl: 'ng/template/login.html',
         controller: 'LoginCtrl'
     }).when('/player',{
-        templateUrl:'player.html'
+        templateUrl:'ng/template/player.html'
     }).otherwise('/login');
-
     $httpProvider.interceptors.push("HttpErrorInterceptorModule");
 
 }])
@@ -39,12 +37,14 @@ angular.module('OEPlayer',[
       }, false);
 }])
 .constant('config',{
-    'api_url':'http://localhost/oe-apis/oe-player/v1/public/',
+    'api_url':'http://localhost/oe-apis/oe-player/v2/public/',
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
-    'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.4.1 MULTI'
+    'log_path':'http://localhost/oe-apis/oe-player/v2/public/log-track',
+    'version':'4.0.0 MULTI',
+    'template':'ng/template/',
+    'socket':'ws://localhost:5000'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;

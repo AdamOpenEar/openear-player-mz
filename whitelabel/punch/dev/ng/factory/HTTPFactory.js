@@ -58,12 +58,24 @@ angular.module('OEPlayer')
         sendError:function(data){
             return $http.post(config.api_url+'send-error',{error:data});
         },
-        getSettings:function(){
-            return $http.get(config.api_url+'settings');
-        },
-        setSettings:function(data){
-            return $http.post(config.api_url+'set-settings',data);
-        }
+    sendLog:function(data){
+      return $http.post(config.api_url+'send-log',{log:data})
+    },
+    sendAction:function(data){
+      return $http.post(config.api_url+'send-action',data)
+    },
+    getSettings:function(){
+      return $http.get(config.api_url+'settings');
+    },
+    setSettings:function(data){
+      return $http.post(config.api_url+'set-settings',data);
+    },
+    getPlaylistMeta:function(id){
+      return $http.get(config.api_url+'playlist-meta/'+id);
+    },
+    setVersionNumber:function(){
+      return $http.put(config.api_url+'version/5');
+    }
 	};
 }])
 .factory("HttpErrorInterceptorModule", ['$q', '$location','$rootScope',function($q,$location,$rootScope){

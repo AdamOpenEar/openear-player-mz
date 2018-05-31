@@ -1,0 +1,32 @@
+<div class="schedule-wrapper clearfix" ng-controller="OverlayScheduleCtrl">
+
+	<div class="overlay-header">
+		<h1>Today's Schedule</h1>
+	</div>
+
+	<!--<div id="schedule-controls">
+		<a ng-click="changeDay('back')" class="control control-back">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+		</a>
+		<div class="date">{{today}}</div>
+		<a ng-click="changeDay('forward')" class="control control-forward">
+			<span class="glyphicon glyphicon-chevron-right"></span>
+		</a>
+	</div>-->
+	<div id="schedule-container">
+		<div id="schedule-times">
+			<div ng-repeat="(indexTime,time) in times track by $index">
+				<div>{{time | makeTime}}</div>
+			</div>
+		</div>
+		<div ng-repeat="schedule in schedules track by $index" class="schedule">
+			<div class="energy energy-{{schedule.meta.energy}}-bk" style="height:{{schedule.height}}px;top:{{schedule.offset}}px">
+				<div class="playlist-name">
+					{{schedule.meta.energy}}<span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+					{{schedule.playlist.display_name ? schedule.playlist.display_name : schedule.playlist.name}}
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>

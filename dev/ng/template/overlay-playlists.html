@@ -1,0 +1,27 @@
+<div ng-controller="OverlayPlaylistCtrl">
+    <div ng-controller="OverlayLibraryPlaylistsCtrl" class="ptp-wrapper">
+        <h1 class="ptp-header">{{lang.playlists.title}}</h1>
+        <div ng-repeat="playlist in playlists">
+            <div class="library-playlist">
+                <a ng-click="swappingTracks || playPlaylist(playlist)" ng-disabled="swappingTracks"><i class="fi-play"></i></a>
+                <div class="library-playlist-info">{{playlist.display_name ? playlist.display_name : playlist.name}}</div>
+                <div class="library-playlist-tracks">{{playlist.tracks.length}} tracks</div>
+            </div>
+        </div>
+        <h1 class="ptp-header">From your library</h1>
+        <div>
+            <div class="library-playlist" ng-if="new.length > 0">
+                <a ng-click="swappingTracks || playPlaylist(new,'new')" ng-disabled="swappingTracks"><i class="fi-play"></i></a>
+                <div class="library-playlist-info">New tracks</div>
+                <div class="library-playlist-tracks">{{new.length}} tracks</div>
+            </div>
+        </div>
+        <div ng-repeat="genre in genres.keys">
+            <div class="library-playlist">
+                <a ng-click="swappingTracks || playPlaylist(genres[genre],'genre',genre)" ng-disabled="swappingTracks"><i class="fi-play"></i></a>
+                <div class="library-playlist-info">{{genre}}</div>
+                <div class="library-playlist-tracks">{{genres[genre].length}} tracks</div>
+            </div>
+        </div>
+    </div>
+</div>

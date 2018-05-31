@@ -1,10 +1,10 @@
 /*jshint -W083 */
 angular.module('OEPlayer')
-.controller('OverlayCtrl',['$scope','$rootScope','OverlaySrvc','$element',function($scope,$rootScope,OverlaySrvc,$element){
+.controller('OverlayCtrl',['$scope','$rootScope','OverlaySrvc','$element','config',function($scope,$rootScope,OverlaySrvc,$element,config){
 	
 	var unbindOpen = $rootScope.$on('open-overlay',function(){
 		$scope.overlayTemplate = null;
-		$scope.overlayTemplate = 'overlay-'+OverlaySrvc.type+'.html';
+		$scope.overlayTemplate = config.template+'overlay-'+OverlaySrvc.type+'.html';
 		$element.addClass('active');
 	});
 
@@ -23,10 +23,98 @@ angular.module('OEPlayer')
 	$scope.$on('$destroy', unbindClose);
 
 }])
-.controller('OverlayQueueCtrl',['OverlaySrvc','$scope',function(OverlaySrvc,$scope){
+.controller('OverlayHelpCtrl',['$scope',function($scope){
+  $scope.faqs = [
+    {q:'How do I change my playlists?',a:'To add or remove playlists, log into your business admin account.'},
+    {q:'If I block a track, will it be blocked forever?',a:'Yes. The track will be blocked on this player always.'},
+    {q:'How do I change my schedule?',a:'To change your schedule, log into your business admin account.'},
+    {q:'How does the Energy Slider work?',a:'All tracks on Open Ear are tagged with an energy level. The Energy Slider allows you to set an energy level for a specific period of time.'},
+    {q:'Why am I asked for microphone access?',a:'This is so the player can access all your output devices, like additional sound cards.'},
+    {q:'How do I change fade out time?',a:'In settings, you can change the fade time to between 2-10 seconds.'},
+    {q:'How do I get updates?',a:'Open Ear updates 10% of your library every month automatically. Alternatively, you can add and change playlists using your business account.'}
+  ]
+}])
+.controller('OverlayQueueCtrl',['OverlaySrvc','$scope','QueueSrvc','$rootScope','HTTPFactory',function(OverlaySrvc,$scope,QueueSrvc,$rootScope,HTTPFactory){
 
-    $scope.tracks = OverlaySrvc.data;
 
+    var setQueue = function(){
+        $scope.tracks = [];
+        $scope.tracks = angular.copy(QueueSrvc.tracks);
+        if(QueueSrvc.currIndex > 0){
+            for (var i = 0; i < QueueSrvc.currIndex; i++) {
+                var track = $scope.tracks.shift();
+                $scope.tracks.push(track);
+            }
+        }
+    }
+
+    var nextTrack = function(){
+        var track = $scope.tracks.shift();
+        $scope.tracks.push(track);
+        if($scope.tracks[0].queued){
+            QueueSrvc.queuePosition--;
+        }
+    }
+    $scope.init = function(){
+        setQueue();
+    }
+
+    $scope.init();
+
+    $scope.queueTrack = function(index){
+        var track = $scope.tracks[index];
+        $scope.tracks.splice(index,1);
+        $scope.tracks.splice(QueueSrvc.queuePosition,0,track);
+        QueueSrvc.updateQueue(angular.copy(track));
+        track.queued = true;
+    }
+
+    $rootScope.$on('queue:set',function(){
+        setQueue();
+    });
+
+    $rootScope.$on('queue:nexttrack',function(){
+        nextTrack();
+    });
+
+    //block track
+    $scope.blockTrack = function(track){
+        var c = confirm('Are you sure you want to block this track?');
+        if(c){
+            //set blocked on local storage if offline - sent on init
+            HTTPFactory.blockTrack(track.id).success(function(){
+                track.blocked = true;
+            }).error(function(){
+                var blocked = JSON.parse(localStorage.getItem('blocked'));
+                blocked.push(track.id);
+                localStorage.setItem(blocked);
+            });
+        }
+    };
+
+}])
+.controller('OverlayLastPlayedCtrl',['$scope','OverlaySrvc',function($scope,OverlaySrvc){
+
+    var init = function(){
+        $scope.tracks = OverlaySrvc.data;
+    }
+
+    init();
+
+    //block track
+    $scope.blockTrack = function(track){
+        var c = confirm('Are you sure you want to block this track?');
+        if(c){
+            //set blocked on local storage if offline - sent on init
+            HTTPFactory.blockTrack(track.id).success(function(){
+                track.blocked = true;
+            }).error(function(){
+                var blocked = JSON.parse(localStorage.getItem('blocked'));
+                blocked.push(track.id);
+                localStorage.setItem(blocked);
+            });
+        }
+    };
 }])
 .controller('OverlayBlockedCtrl',['FileFactory','$scope','config',function(FileFactory,$scope,config){
 
@@ -36,11 +124,11 @@ angular.module('OEPlayer')
         });
 
 }])
-.controller('OverlayPlaylistCtrl',['$scope',function($scope){
+.controller('OverlayPlaylistCtrl',['$scope','config',function($scope,config){
 
     $scope.selectedView = {
         name:'ptp',
-        url:'playlists-ptp.html'
+        url:config.template+'playlists-ptp.html'
     };
 
     $scope.selectView = function(name,url){
@@ -50,21 +138,7 @@ angular.module('OEPlayer')
         };
     };
 }])
-.controller('OverlayScheduleCtrl',['$scope',function($scope){
-
-    $scope.selectedView = {
-    	name:'template',
-    	url:'schedule-template.html'
-    };
-
-    $scope.selectView = function(name,url){
-    	$scope.selectedView = {
-    		name:name,
-    		url:url
-    	};
-    };
-}])
-.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory','$rootScope',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory,$rootScope){
+.controller('OverlaySettingsCtrl',['$scope','SettingsSrvc','FileFactory','LogSrvc','config','HTTPFactory','$rootScope','$timeout','ActionSrvc',function($scope,SettingsSrvc,FileFactory,LogSrvc,config,HTTPFactory,$rootScope,$timeout,ActionSrvc){
 
     $scope.settings = {};
     $scope.settings.crossfadeIn = SettingsSrvc.crossfadeIn/100;
@@ -74,6 +148,7 @@ angular.module('OEPlayer')
     $scope.settings.animations = SettingsSrvc.animations;
     $scope.settings.pushToPlayTime = SettingsSrvc.pushToPlayTime;
     $scope.settings.minEnergyPlaylist = SettingsSrvc.minEnergyPlaylist;
+    $scope.settings.energyTime = SettingsSrvc.energyTime;
     $scope.settings.languages = SettingsSrvc.lang;
     $scope.settings.restartTime = SettingsSrvc.restartTime;
     $scope.settings.fileSize = SettingsSrvc.fileSize;
@@ -84,7 +159,8 @@ angular.module('OEPlayer')
     $scope.settings.muteOnNoSchedule = SettingsSrvc.muteOnNoSchedule;
 
     $scope.cfTimes = [2,3,4,5,6,7,8,9,10];
-    $scope.pushPlayLengths = [1,2,3];
+    $scope.pushPlayLengths = [1,2,3,4,5];
+    $scope.energyLengths = [1,2,3,4,5];
     $scope.volumes = [1,2,3,4,5,6,7,8,9,10];
     $scope.restartTimes = [
         {time:4,display:'4.00am'},
@@ -132,19 +208,22 @@ angular.module('OEPlayer')
                 }
             }
         });
-
-    navigator.mediaDevices.getUserMedia({audio:true,video:false})
-        .then(function(){return navigator.mediaDevices.enumerateDevices()})
-        .then(function(devices){
-            for (var i = devices.length - 1; i >= 0; i--) {
-                if(devices[i].kind === 'audiooutput'){
-                    $scope.outputDevices.push(devices[i]);
+    var timeout = $timeout(function(){
+        navigator.mediaDevices.getUserMedia({audio:true,video:false})
+            .then(function(){return navigator.mediaDevices.enumerateDevices()})
+            .then(function(devices){
+                for (var i = devices.length - 1; i >= 0; i--) {
+                    if(devices[i].kind === 'audiooutput'){
+                        $scope.outputDevices.push(devices[i]);
+                    }
                 }
-            }
-        })
-        .catch(function(err){
-            alert('Error getting output devices.');
-        });
+            })
+            .catch(function(err){
+                alert('Error getting output devices.');
+            });
+        $timeout.cancel(timeout);
+        timeout = undefined;
+    },1000);
 
     $scope.changeOutputDevice = function(){
         var c = confirm('This will restart the player. OK?');
@@ -163,6 +242,9 @@ angular.module('OEPlayer')
                 SettingsSrvc.setSetting(setting,$scope.settings[setting]);
                 window.location.reload();
             }
+        } else if(setting == 'volume'){
+          ActionSrvc.setAction('changed volume to',$scope.settings[setting]);
+          SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         } else {
             SettingsSrvc.setSetting(setting,$scope.settings[setting]);
         }
@@ -265,19 +347,44 @@ angular.module('OEPlayer')
     };
 
 }])
-.controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope',function($scope,FileFactory,config,PlayerSrvc,$rootScope){
+.controller('OverlayLibraryPlaylistsCtrl',['$scope','FileFactory','config','PlayerSrvc','$rootScope','ActionSrvc',function($scope,FileFactory,config,PlayerSrvc,$rootScope,ActionSrvc){
 
     $scope.init = function(){
         FileFactory.readJSON(config.local_path,'playlists.json')
             .then(function(data){
-                $scope.playlists = JSON.parse(data);
+                var data = JSON.parse(data);
+                $scope.playlists = data.playlists;
+                $scope.new = data.new;
+                $scope.genres = data.genres;
             });
     };
+
+    $rootScope.$on('playlist:ready',function(){
+        $scope.init();  
+    });
+
     $scope.init();
 
-    $scope.playPlaylist = function(playlist){
-        PlayerSrvc.pushToPlay(playlist);
-        $scope.closeOverlay();
+    $scope.playPlaylist = function(playlist,type,name){
+
+        if(type === 'genre'){
+            var pl = {
+                tracks:playlist,
+                name:name
+            }
+            PlayerSrvc.pushToPlay(pl);
+            ActionSrvc.setAction('started push to play with',name);
+        } else if(type === 'new'){
+            var pl = {
+                tracks:playlist,
+                name:'New tracks'
+            }
+            PlayerSrvc.pushToPlay(pl);
+            ActionSrvc.setAction('started push to play with',pl.name);
+        } else {
+            PlayerSrvc.pushToPlay(playlist);
+            ActionSrvc.setAction('started push to play with',playlist.name);
+        }
     };
 
 }])
@@ -295,6 +402,95 @@ angular.module('OEPlayer')
         PlayerSrvc.ptpSchedule($scope.playlists);
         $scope.closeOverlay();
     };
+
+}])
+.controller('OverlayScheduleCtrl',['$scope','config','FileFactory','HTTPFactory',function($scope,config,FileFactory,HTTPFactory){
+
+
+    var init = function(){
+        $scope.schedules = [];
+        $scope.today = moment().format('YYYY MM DD');
+        FileFactory.readJSON(config.local_path,'schedule.json')
+            .then(function(data){
+                var schedule = JSON.parse(data);
+                if(schedule.code === 0){
+                    //display 'no scheudle'
+                } else {
+                    //find todays schedule
+                    angular.forEach(schedule.playlists,function(playlist){
+                        if(checkPlaylistStart(playlist)){
+                            setScheduleVars(playlist);
+                            HTTPFactory.getPlaylistMeta(playlist.playlist_id)
+                                .success(function(meta){
+                                    playlist.meta = meta;
+                                },function(err){
+
+                                })
+                            $scope.schedules.push(playlist);
+                        }
+                    });
+                }
+            },function(error){
+                LogSrvc.logSystem(error);
+            });
+    };
+
+    var setScheduleVars = function(schedule){
+
+            var start = new Date(schedule.start_time*1000);
+            var end = new Date(schedule.end_time*1000);
+
+            var diff = end - start;
+            var oneHour = 1000*60*60;
+            var diffHours = diff/oneHour;
+            
+            //if midnight overlap
+            if(schedule.midnight_overlap == 1){
+                var toMidnight = 24 - start.getHours();
+                schedule.height = ((toMidnight + parseInt(end.getHours())) * 60 + parseInt(end.getMinutes()))/2;
+            } else {
+                schedule.height = (diffHours.toFixed(2) * 30);
+            }
+            //offset in minutes - 30px = 1 hour
+            schedule.offset = ((parseInt(start.getHours()) * 60) + parseInt(start.getMinutes()))/2;
+            //if time is midnight to 3am
+            if(start.getHours() >= 0 && start.getHours() < 4){
+                schedule.offset += 20*30;
+                schedule.offset += 30*4;
+            }
+            //offset for 4am start
+            schedule.offset = schedule.offset - (30*4);
+
+            //display time
+            schedule.duration = (schedule.height/30);
+    }
+
+
+    var checkPlaylistStart = function(playlist){
+        //if playlist is for today
+        var now = moment();
+        if(playlist.day == (now.weekday() === 0 ? 6 : now.weekday() - 1)){
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    //create times
+    $scope.times = [];
+    var st = 4;
+    var nd = 23;
+    for (var i = st; i <= nd; i++) {
+        $scope.times.push(i);
+    }
+    $scope.times.push('00');
+    var stm = 1;
+    var ndm = 4;
+    for (var j = stm; j <= ndm; j++) {
+        $scope.times.push(j);
+    }
+
+    init();
 
 }])
 .controller('OverlayScheduleTemplateCtrl',['HTTPFactory','$scope','LogSrvc','FileFactory','config',function(HTTPFactory,$scope,LogSrvc,FileFactory,config){

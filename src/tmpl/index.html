@@ -8,7 +8,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title ng-controller="MultiCtrl">{{title}} | <!-- @echo company--> | v<!-- @echo version --></title>
+        <title><!-- @echo company--> | v<!-- @echo version --></title>
         <meta name="description" content="">
 
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -36,7 +36,6 @@
         <script src="bower_components/angular-svg-round-progressbar/build/roundProgress.min.js"></script>
         <!-- @if NODE_ENV == 'DEVELOPMENT' -->
         <script src="ng/app.js"></script>
-        <script src="assets/js/templates.js"></script>
         <script src="ng/controller/PlayerCtrl.js"></script>
         <script src="ng/controller/LogCtrl.js"></script>
         <script src="ng/controller/LoginCtrl.js"></script>
@@ -53,6 +52,8 @@
         <script src="ng/service/PlayerSrvc.js"></script>
         <script src="ng/service/OverlaySrvc.js"></script>
         <script src="ng/service/SettingsSrvc.js"></script>
+        <script src="ng/service/QueueSrvc.js"></script>
+        <script src="ng/service/ActionSrvc.js"></script>
         <script src="ng/directive/ScheduleDirective.js"></script>
         <!-- @endif -->
         <!-- @if NODE_ENV == 'PRODUCTION' -->

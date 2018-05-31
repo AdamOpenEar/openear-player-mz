@@ -1,0 +1,12 @@
+<div ng-controller="OverlayHelpCtrl">
+	<div class="overlay-header">
+        <h1>{{lang.help.title}}</h1>
+    </div>
+	<div class="faq-wrapper">
+    <div class="faq" ng-repeat="faq in faqs">
+      <p>Q: {{faq.q}}</p>
+      <p>A: {{faq.a}}</p>
+    </div>
+      
+  </div>
+</div>

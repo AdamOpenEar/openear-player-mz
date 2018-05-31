@@ -9,6 +9,7 @@ angular.module('OEPlayer')
 		animations:localStorage.getItem('animations')|| 2,
 		pushToPlayTime:parseInt(localStorage.getItem('pushToPlayTime'))|| 1,
 		minEnergyPlaylist:parseInt(localStorage.getItem('minEnergyPlaylist')) || 50,
+		energyTime:parseInt(localStorage.getItem('energyTime'))|| 1,
 		lang:localStorage.getItem('languages') || 'English',
 		restartTime:parseFloat(localStorage.getItem('restartTime')) || 4,
 		fileSize:parseFloat(localStorage.getItem('fileSize')) || 2,
