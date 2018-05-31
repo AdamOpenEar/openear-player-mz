@@ -12,7 +12,6 @@ angular.module('OEPlayer',[
     }).when('/player',{
         templateUrl:'player.html'
     }).otherwise('/login');
-
     $httpProvider.interceptors.push("HttpErrorInterceptorModule");
 
 }])
@@ -39,12 +38,14 @@ angular.module('OEPlayer',[
       }, false);
 }])
 .constant('config',{
-    'api_url':'https://api.player.openearmusic.com/v1/',
+    'api_url':'https://api.player.openearmusic.com/v2/',
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
-    'log_path':'https://api.player.openearmusic.com/v1/log-track',
-    'version':'3.4.1 MULTI'
+    'log_path':'https://api.player.openearmusic.com/v2/log-track',
+    'version':'4.0.0 MULTI',
+    'template':'',
+    'socket':'wss://openear-ws-v2.herokuapp.com'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
