@@ -43,7 +43,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v2/log-track',
-    'version':'4.0.0 MULTI',
+    'version':'4.0.1 MULTI',
     'template':'',
     'socket':'wss://openear-ws-v2.herokuapp.com'
 })
