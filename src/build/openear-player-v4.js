@@ -43,7 +43,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v2/log-track',
-    'version':'4.0.2 MULTI',
+    'version':'4.0.3 MULTI',
     'template':'',
     'socket':'wss://openear-ws-v2.herokuapp.com'
 })
@@ -3341,7 +3341,7 @@ angular.module('OEPlayer')
 						.then(function(){
 							deferred.resolve();		
 						})
-						.catch(function(){
+						.catch(function(err){
 							LogSrvc.logError(err);
 							self[self.playerName].createdMedia.setSinkId('default');
 							SettingsSrvc.setSetting('outputDevice','default');

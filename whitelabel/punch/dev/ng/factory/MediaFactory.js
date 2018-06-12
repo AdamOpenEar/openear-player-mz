@@ -19,7 +19,7 @@ angular.module('OEPlayer')
 						.then(function(){
 							deferred.resolve();		
 						})
-						.catch(function(){
+						.catch(function(err){
 							LogSrvc.logError(err);
 							self[self.playerName].createdMedia.setSinkId('default');
 							SettingsSrvc.setSetting('outputDevice','default');
