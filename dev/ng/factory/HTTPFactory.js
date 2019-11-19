@@ -6,7 +6,7 @@ angular.module('OEPlayer')
 			return $http.post(config.api_url+'login',data);
 		},
         loginHash:function(data){
-            return $http.post(config.api_url+'login-hash',data);
+            return $http.post(config.api_url+'login-hash-multi',data);
         },
 		getPlaylists:function(){
 			return $http.get(config.api_url+'playlists');
@@ -74,7 +74,7 @@ angular.module('OEPlayer')
       return $http.get(config.api_url+'playlist-meta/'+id);
     },
     setVersionNumber:function(){
-      return $http.put(config.api_url+'version/5');
+      return $http.put(config.api_url+'version/6');
     }
 	};
 }])
