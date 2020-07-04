@@ -1,13 +1,14 @@
 {
   "name": "openear-player-v4",
-  "version": "4.0.3 MULTI",
+  "version": "4.1.0 MULTI",
   "description": "",
   "main": "index.js",
   "dependencies": {
     "async": "^2.0.0-rc.2",
-    "express": "^4.13.4",
+    "express": "^4.17.1",
     "gzippo": "^0.2.0",
-    "morgan": "^1.7.0"
+    "jshint": "^2.10.3",
+    "morgan": "^1.9.1"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -18,8 +19,7 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-env": "^0.4.4",
     "grunt-ng-annotate": "^2.0.1",
-    "grunt-preprocess": "^5.1.0",
-    "jshint": "2.9.1"
+    "grunt-preprocess": "^5.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

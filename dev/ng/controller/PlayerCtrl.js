@@ -827,11 +827,16 @@ angular.module('OEPlayer')
 										getPlaylistTracks(schedule.playlists[foundPlaylist].interleave)
 											.then(function(data){
 												var interleave = shuffleArray(data);
+												var index = 0;
 												i=0;
 												angular.forEach($scope.playlist.tracks,function(track){
 													if(i%schedule.playlists[foundPlaylist].interleave.ratio === 0){
-														$scope.playlist.tracks.splice(i,0,interleave[0]);
-														interleave.splice(0,1);
+														$scope.playlist.tracks.splice(i,0,interleave[index]);
+														if(index >= interleave.length - 1){
+															index = 0;
+														} else {
+															index++;
+														}
 													}
 													i++;
 												});

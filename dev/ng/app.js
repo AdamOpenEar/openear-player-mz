@@ -42,9 +42,9 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'http://localhost/oe-apis/oe-player/v2/public/log-track',
-    'version':'4.0.4 MULTI',
+    'version':'4.1.0 MULTI',
     'template':'ng/template/',
-    'socket':'wss://openear-ws-v3.herokuapp.com'
+    'socket':'wss://ws.player.openearmusic.com'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
