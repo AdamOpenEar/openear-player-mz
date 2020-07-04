@@ -74,7 +74,7 @@ angular.module('OEPlayer')
       return $http.get(config.api_url+'playlist-meta/'+id);
     },
     setVersionNumber:function(){
-      return $http.put(config.api_url+'version/6');
+      return $http.put(config.api_url+'version/7');
     }
 	};
 }])
