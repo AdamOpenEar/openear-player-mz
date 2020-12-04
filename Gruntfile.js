@@ -26,66 +26,6 @@ module.exports = function(grunt) {
                     }
                 }
             },
-            devindexSecretlife : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/secretlife/dev/index.html',
-                options : {
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Secret Life - Powered by OpenEar Player'
-                    }
-                }
-
-            },
-            devindexDolce : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/dolce/dev/index.html',
-                options : {
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Dolce | Player | Powered by OpenEar Player'
-                    }
-                }
-
-            },
-            devindexDD : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/double-dutch/dev/index.html',
-                options : {
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Double Dutch | Player | Powered by OpenEar Player'
-                    }
-                }
-
-            },
-            devindexPunch : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/punch/dev/index.html',
-                options : {
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Punch Taverns - Powered by OpenEar Player'
-                    }
-                }
-
-            },
             prodindex : {
 
                 src : 'src/tmpl/index.html',
@@ -103,102 +43,9 @@ module.exports = function(grunt) {
                 }
 
             },
-            prodindexPunch : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/punch/www/index.html',
-                options : {
-
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Punch Taverns - Powered by OpenEar Player'
-                    }
-
-                }
-
-            },
-            prodindexDolce : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/dolce/www/index.html',
-                options : {
-
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Dolce | Player'
-                    }
-
-                }
-
-            },
-            prodindexDD : {
-
-                src : 'src/tmpl/index.html',
-                dest : 'whitelabel/double-dutch/www/index.html',
-                options : {
-
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>',
-                        company: 'Double Dutch | Player'
-                    }
-
-                }
-
-            },
             cacheman :{
                 src : 'src/tmpl/cache.manifest',
                 dest : 'www/cache.manifest',
-                options : {
-
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>'
-                    }
-
-                }                
-            },
-            cachemanPunch :{
-                src : 'src/tmpl/cache.manifest',
-                dest : 'whitelabel/punch/www/cache.manifest',
-                options : {
-
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>'
-                    }
-
-                }                
-            },
-            cachemanDolce :{
-                src : 'src/tmpl/cache.manifest',
-                dest : 'whitelabel/dolce/www/cache.manifest',
-                options : {
-
-                    context : {
-                        name : '<%= pkg.name %>',
-                        version : '<%= pkg.version %>',
-                        now : now,
-                        ver : '<%= ver %>'
-                    }
-
-                }                
-            },
-            cachemanDD :{
-                src : 'src/tmpl/cache.manifest',
-                dest : 'whitelabel/double-dutch/www/cache.manifest',
                 options : {
 
                     context : {
@@ -435,35 +282,35 @@ module.exports = function(grunt) {
         'env:prod',
         'preprocess:appjsprod',
         'preprocess:prodindex',
-        'preprocess:prodindexPunch',
-        'preprocess:prodindexDolce',
-        'preprocess:prodindexDD',
+        //'preprocess:prodindexPunch',
+        //'preprocess:prodindexDolce',
+        //'preprocess:prodindexDD',
         'preprocess:cacheman',
-        'preprocess:cachemanPunch',
-        'preprocess:cachemanDolce',
-        'preprocess:cachemanDD',
+        //'preprocess:cachemanPunch',
+        //'preprocess:cachemanDolce',
+        //'preprocess:cachemanDD',
         'concat',
         'uglify',
         'cssmin:prod',
-        'cssmin:prodPunch',
-        'cssmin:prodDolce',
-        'cssmin:prodDD',
-        'copy:prodDolce',
-        'copy:prodDD',
-        'copy:prodPunch'
+        //'cssmin:prodPunch',
+        //'cssmin:prodDolce',
+        //'cssmin:prodDD',
+        //'copy:prodDolce',
+        //'copy:prodDD',
+        //'copy:prodPunch'
     ]);
     grunt.registerTask('dev', [
         'env:dev',
         'preprocess:devindex',
-        'preprocess:devindexSecretlife',
-        'preprocess:devindexPunch',
-        'preprocess:devindexDolce',
-        'preprocess:devindexDD',
-        'preprocess:appjs',
-        'copy:secretlife',
-        'copy:dolce',
-        'copy:DD',
-        'copy:punch'
+        //'preprocess:devindexSecretlife',
+        //'preprocess:devindexPunch',
+        //'preprocess:devindexDolce',
+        //'preprocess:devindexDD',
+        'preprocess:appjs'
+        //'copy:secretlife',
+        //'copy:dolce',
+        //'copy:DD',
+        //'copy:punch'
     ]);
 
 };
