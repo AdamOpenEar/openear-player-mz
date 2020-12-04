@@ -43,9 +43,9 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'https://api.player.openearmusic.com/v2/log-track',
-    'version':'4.0.3 MULTI',
+    'version':'4.2.0 MULTI',
     'template':'',
-    'socket':'wss://openear-ws-v2.herokuapp.com'
+    'socket':'wss://ws.player.openearmusic.com'
 })
 .controller('AppCtrl',['config','$scope',function(config,$scope){
     $scope.version = config.version;
@@ -957,22 +957,38 @@ angular.module('OEPlayer')
 			min:arrRestartTime.length > 1?parseInt(arrRestartTime[1])*10:0
 		};
 
-    var mtStart = function(){
+		var mtStart = function(){
 			var nowToday = new Date();
-	    	var millisTillFourAM = new Date(nowToday.getFullYear(), nowToday.getMonth(), nowToday.getDate() + 1, restartTime.hour, restartTime.min, 0, 0) - nowToday;
-	    	if (millisTillFourAM < 0) {
-	    	     millisTillFourAM += 86400000; // it's after midnight, try 10am tomorrow.
-	    	}
-		    var mtTimerStart = function(){
-		    	var mtTimer = $timeout(function(){
-		    		$timeout.cancel(mtTimer);
-		    		mtTimer = undefined;
-		    		LogSrvc.logSystem(restartTime.hour+':'+restartTime.min+'am restart');
-		    		window.location.reload();
-		    	},millisTillFourAM);
-		    };
-	    	mtTimerStart();
+			var msToRestart = new Date(
+				nowToday.getFullYear(),
+				nowToday.getMonth(),
+				getStartDay(nowToday),
+				getRandomInt(3,5),
+				getRandomInt(0,59),
+				getRandomInt(0,59),
+				0
+			) - nowToday;
+			
+			LogSrvc.logSystem(new Date(msToRestart + nowToday.getTime()).toString()+' restart');
+		
+			var mtTimerStart = function(){
+				var mtTimer = $timeout(function(){
+					$timeout.cancel(mtTimer);
+					mtTimer = undefined;
+					window.location.reload();
+				},msToRestart);
+			};
+			mtTimerStart();
 		};
+		
+		var getRandomInt = function(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		
+		var getStartDay = function(nowToday){
+			//if 3am or later, restart the next day
+			return nowToday.getHours() < 3 && nowToday.getMinutes() > 1 ? nowToday.getDate() : nowToday.getDate() + 1;
+		}
 		//start restart timer
 		mtStart();
 		//sockets
@@ -1715,14 +1731,21 @@ angular.module('OEPlayer')
 										getPlaylistTracks(schedule.playlists[foundPlaylist].interleave)
 											.then(function(data){
 												var interleave = shuffleArray(data);
-												i=0;
-												angular.forEach($scope.playlist.tracks,function(track){
-													if(i%schedule.playlists[foundPlaylist].interleave.ratio === 0){
-														$scope.playlist.tracks.splice(i,0,interleave[0]);
-														interleave.splice(0,1);
+												var interleaveIndex = 0;
+												var tracks = $scope.playlist.tracks.map(function(track,index){
+													if(index%schedule.playlists[foundPlaylist].interleave.ratio === 0){
+														var interleaveTrack =  interleave[interleaveIndex];
+														if(interleaveIndex >= interleave.length - 1){
+															interleaveIndex = 0;
+														} else {
+															interleaveIndex++;
+														}
+														return interleaveTrack
+													} else {
+														return track
 													}
-													i++;
 												});
+												$scope.playlist.tracks = tracks;
 												$scope.playlist.name += ' WITH '+schedule.playlists[foundPlaylist].interleave.playlist.name+' - 1 in '+schedule.playlists[foundPlaylist].interleave.ratio+' Interleave';
 												loadTrack($scope.currentTrack.playerName,$scope.playlist.tracks[$scope.player.currentIndex]);
 											},function(error){
@@ -2947,7 +2970,7 @@ angular.module('OEPlayer')
 			return $http.post(config.api_url+'login',data);
 		},
         loginHash:function(data){
-            return $http.post(config.api_url+'login-hash',data);
+            return $http.post(config.api_url+'login-hash-multi',data);
         },
 		getPlaylists:function(){
 			return $http.get(config.api_url+'playlists');
@@ -3015,7 +3038,7 @@ angular.module('OEPlayer')
       return $http.get(config.api_url+'playlist-meta/'+id);
     },
     setVersionNumber:function(){
-      return $http.put(config.api_url+'version/5');
+      return $http.put(config.api_url+'version/7');
     }
 	};
 }])

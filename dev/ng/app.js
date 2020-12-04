@@ -42,7 +42,7 @@ angular.module('OEPlayer',[
     'local_path':'/',
     'file_extention':'.mp3',
     'log_path':'http://localhost/oe-apis/oe-player/v2/public/log-track',
-    'version':'4.1.1 MULTI',
+    'version':'4.2.0 MULTI',
     'template':'ng/template/',
     'socket':'wss://ws.player.openearmusic.com'
 })

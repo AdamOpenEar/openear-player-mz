@@ -65,7 +65,7 @@ angular.module('OEPlayer',[
     'log_path':'http://localhost/oe-apis/oe-player/v2/public/log-track',
     'version':'/* @echo version */',
     'template':'ng/template/',
-    'socket':'wss://openear-ws-v3.herokuapp.com'
+    'socket':'wss://ws.player.openearmusic.com'
 })
 /* @endif */
 /* @if NODE_ENV == 'PRODUCTION' */
@@ -77,7 +77,7 @@ angular.module('OEPlayer',[
     'log_path':'https://api.player.openearmusic.com/v2/log-track',
     'version':'/* @echo version */',
     'template':'',
-    'socket':'wss://openear-ws-v3.herokuapp.com'
+    'socket':'wss://ws.player.openearmusic.com'
 })
 /* @endif */
 .controller('AppCtrl',['config','$scope',function(config,$scope){
