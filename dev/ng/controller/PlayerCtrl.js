@@ -18,6 +18,7 @@ angular.module('OEPlayer')
 	var pushToPlayTimer;
 	$scope.initialising = false;
 	$scope.playbackErr = 0;
+	$scope.version = config.version;
 
 	var init = function(){
 

@@ -12,6 +12,7 @@
           <!--<a ng-click="lock()">{{lang.menu.lock}}</a>-->
           <a ng-click="swappingTracks || restart()" ng-disabled="swappingTracks">{{lang.menu.restart}}</a>
           <a ng-click="logOff()">{{lang.menu.logout}}</a>
+          <div class="menu-bottom-version">version {{version}}</div>
         </div>
     </div>
     <div id="overlay" ng-class="{active:overlayActive}" ng-controller="OverlayCtrl">

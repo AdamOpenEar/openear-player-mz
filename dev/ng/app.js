@@ -37,12 +37,12 @@ angular.module('OEPlayer',[
       }, false);
 }])
 .constant('config',{
-    'api_url':'http://localhost/oe-apis/oe-player/v2/public/',
+    'api_url':'https://api.player.openearmusic.com/v2/',
     'module_dir':'ng',
     'local_path':'/',
     'file_extention':'.mp3',
-    'log_path':'http://localhost/oe-apis/oe-player/v2/public/log-track',
-    'version':'4.2.0 MULTI',
+    'log_path':'https://api.player.openearmusic.com/v2/log-track',
+    'version':'4.3.0 MULTI',
     'template':'ng/template/',
     'socket':'wss://ws.player.openearmusic.com'
 })

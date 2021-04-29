@@ -185,6 +185,10 @@ body {
     bottom:5%;
     position: absolute;
 }
+.menu-bottom-version{
+  margin-top: 12px;
+  font-size: 12px;
+}
 #main{
     height:100%;
     width:47%;
