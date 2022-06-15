@@ -1,7 +1,7 @@
 self.addEventListener('install', function(event) {
 
   // Perform install steps
-	const CACHE_NAME = 'openear-player-sw-v1.28';
+	const CACHE_NAME = 'openear-player-sw-v1.29';
 	const BASE_URL = 'https://multi.openearmusic.com/v4/';
 	console.log('[SERVICE WORKER] install');
 	var urlsToCache = [
