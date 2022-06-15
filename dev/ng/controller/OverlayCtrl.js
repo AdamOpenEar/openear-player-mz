@@ -174,7 +174,8 @@ angular.module('OEPlayer')
     ];
     $scope.fileSizes = [
         {type:1,display:'Small'},
-        {type:2,display:'Standard'}
+        {type:2,display:'Standard'},
+        {type:3,display:'Stereo'}
     ];
     $scope.minEnergyPlaylist = [30,40,50,60,70,80,90];
     $scope.languages = ['English','Spanish','Portuguese'];

@@ -34,6 +34,9 @@ angular.module('OEPlayer')
         },
         getTrackSrcSmall:function(id){
             return $http.get(config.api_url+'track-small/'+id);
+    },
+    getTrackSrcStereo:function(id){
+      return $http.get(config.api_url+'track-stereo/'+id);
         },
 		getTrackFile:function(src){
             return $http({
