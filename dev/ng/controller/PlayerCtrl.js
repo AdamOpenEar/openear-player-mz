@@ -345,10 +345,12 @@ angular.module('OEPlayer')
 		HTTPFactory.getSchedule().success(function(data){
 			writeJSONFiles('schedule',data,getBlocked);
 			//check if schedule is announcement
-			var now = new moment();
-			for (var i = data.playlists.length - 1; i >= 0; i--) {
-				if(data.playlists[i].announcement === 1 && (data.playlists[i].day == (now.weekday() === 0 ? 6 : now.weekday() - 1))){
-					checkAnnounce(data.playlists[i]);
+			if(data.playlists){
+				var now = new moment();
+				for (var i = data.playlists.length - 1; i >= 0; i--) {
+					if(data.playlists[i].announcement === 1 && (data.playlists[i].day == (now.weekday() === 0 ? 6 : now.weekday() - 1))){
+						checkAnnounce(data.playlists[i]);
+					}
 				}
 			}
 		}).error(function(err){

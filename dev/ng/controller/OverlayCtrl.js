@@ -193,6 +193,7 @@ angular.module('OEPlayer')
 
     FileFactory.getAvailableSpace()
         .then(function(res){
+            console.log('[AVAILABLE SPACE]',res)
             $scope.available = formatBytes(res[1] - res[0]);
         },function(err){
             console.log(err);

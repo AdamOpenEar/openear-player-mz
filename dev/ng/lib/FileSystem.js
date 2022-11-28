@@ -26,8 +26,9 @@ angular.module('OEPlayer')
             LogSrvc.logSystem('Starting file system');
             var q = $q.defer();
             navigator.webkitPersistentStorage.requestQuota(
-                10*1024*1024*1024,
+                10*1024*1024*1024*3,
                 function( grantedBytes ) {
+                    console.log('[GRANTED SPACE]',grantedBytes)
                     this.availableSpace = grantedBytes;
                     window.webkitRequestFileSystem(
                         window.PERSISTENT, 

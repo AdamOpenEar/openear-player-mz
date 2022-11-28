@@ -1,2 +1,4 @@
-.DS_Store
+npm.DS_Store
 /dev/bower_components/.DS_Store
+node_modules
+.DS_Store
