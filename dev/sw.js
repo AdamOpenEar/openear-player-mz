@@ -2,7 +2,7 @@ self.addEventListener('install', function(event) {
 
   // Perform install steps
 	const CACHE_NAME = 'openear-player-sw-v1.33';
-	const BASE_URL = 'https://oe-jukebox/';
+	const BASE_URL = 'https://oe-jukebox.netlify.app/';
 	console.log('[SERVICE WORKER] install');
 	var urlsToCache = [
 		BASE_URL,
