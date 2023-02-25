@@ -16,12 +16,8 @@
         <a ng-click="swappingTracks || blockTrack(track)" ng-disabled="swappingTracks" class="block">
             <i class="fi-prohibited"></i>
         </a>
-        <!--<div class="track-actions">
-            <span class="glyphicon glyphicon-volume-up" aria-hidden="true" ng-if="$index === 0"></span>
-            <a ng-click="swappingTracks || queueTrack($index)"  ng-disabled="swappingTracks" class="queue-track">
-                <span class="glyphicon glyphicon-arrow-up" aria-hidden="true" ng-if="!track.queued && $index !== 0"></span>
-                <span class="glyphicon glyphicon-ok" aria-hidden="true" ng-if="track.queued && $index !== 0"></span>
-            </a>
-        </div>-->
+        <div class="track-actions">
+            <span ng-if="track.queued">queued</span>
+        </div>
     </div>
 </div>

@@ -5,18 +5,18 @@ angular.module('OEPlayer')
 		login:function(data){
 			return $http.post(config.api_url+'login',data);
 		},
-        loginHash:function(data){
-            return $http.post(config.api_url+'login-hash-multi',data);
-        },
+    loginHash:function(data){
+        return $http.post(config.api_url+'login-hash-multi',data);
+    },
 		getPlaylists:function(){
 			return $http.get(config.api_url+'playlists');
 		},
 		getTracks:function(){
 			return $http.get(config.api_url+'tracks');
 		},
-        getSchedule:function(){
-            return $http.get(config.api_url+'schedule');
-        },
+    getSchedule:function(){
+        return $http.get(config.api_url+'schedule');
+    },
 		getScheduleTime:function(){
 			return $http.get(config.api_url+'schedule-time');
 		},
@@ -29,38 +29,38 @@ angular.module('OEPlayer')
 		getBlocked:function(){
 			return $http.get(config.api_url+'blocked-tracks');
 		},
-        getTrackSrc:function(id){
-            return $http.get(config.api_url+'track/'+id);
-        },
-        getTrackSrcSmall:function(id){
-            return $http.get(config.api_url+'track-small/'+id);
+    getTrackSrc:function(id){
+        return $http.get(config.api_url+'track/'+id);
+    },
+    getTrackSrcSmall:function(id){
+        return $http.get(config.api_url+'track-small/'+id);
     },
     getTrackSrcStereo:function(id){
       return $http.get(config.api_url+'track-stereo/'+id);
         },
 		getTrackFile:function(src){
-            return $http({
-                type:'GET',
-                url:src,
-                responseType: "arraybuffer",
-                headers:{'Authentication':undefined}
-            });
-        },
-        getScheduleTemplate:function(){
-        	return $http.get(config.api_url+'schedule-template');
-        },
-        getVenueCalendar:function(date){
-        	return $http.get(config.api_url+'schedule-calendar/'+date);
-        },
-        checkOnline:function(){
-        	return $http.head(config.api_url+'playlists');
-        },
-        reprocessFile:function(track){
-        	return $http.post(config.api_url+'reprocess-file',track);
-        },
-        sendError:function(data){
-            return $http.post(config.api_url+'send-error',{error:data});
-        },
+      return $http({
+        type:'GET',
+        url:src,
+        responseType: "arraybuffer",
+        headers:{'Authentication':undefined}
+      });
+    },
+    getScheduleTemplate:function(){
+      return $http.get(config.api_url+'schedule-template');
+    },
+    getVenueCalendar:function(date){
+      return $http.get(config.api_url+'schedule-calendar/'+date);
+    },
+    checkOnline:function(){
+      return $http.head(config.api_url+'playlists');
+    },
+    reprocessFile:function(track){
+      return $http.post(config.api_url+'reprocess-file',track);
+    },
+    sendError:function(data){
+        return $http.post(config.api_url+'send-error',{error:data});
+    },
     sendLog:function(data){
       return $http.post(config.api_url+'send-log',{log:data})
     },

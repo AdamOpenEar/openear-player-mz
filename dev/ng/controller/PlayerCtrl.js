@@ -63,6 +63,7 @@ angular.module('OEPlayer')
 			timer:null
 		};
 		$scope.player.online = $rootScope.online;
+		$scope.currQueueIndex = 1;
 
 		var arrRestartTime = SettingsSrvc.restartTime.toString().split('.');
 		var restartTime = {
@@ -123,6 +124,9 @@ angular.module('OEPlayer')
 							socket.send('ready',null);
 						}
 						break;
+					case 'queueTrack':
+						queueTrack(data.data)
+						break
 					case 'skipForward':
 						if(!$scope.swappingTracks){
 							$scope.skipForward();
@@ -207,6 +211,36 @@ angular.module('OEPlayer')
 	$scope.$watch('online', function(newStatus) {
 		$scope.player.online = newStatus;
 	});
+
+	//JUKEBOX
+	var queueTrack = (track) => {
+		let queuedTrack = $scope.availableTracks.find(_track => _track.id === track.id);
+		queuedTrack.queued = true;
+		$scope.playlist.tracks.splice($scope.player.currentIndex + $scope.currQueueIndex,0,queuedTrack);
+		$scope.currQueueIndex++;
+		setQueueWS();
+		//console.log(_track)
+	}
+
+	var setQueueWS = () => {
+		const queue = $scope.playlist.tracks.map((track)=>{
+			const _track = {
+				id:track.id,
+				title:track.title,
+				artist:track.artist,
+				album:track.album,
+				energy:track.energy
+			}
+			return _track
+		});
+		socket.send('currentQueue',queue.slice($scope.player.currentIndex + 1,$scope.player.currentIndex + 50));
+	}
+
+	var updateQueueIndex = () => {
+		if($scope.currQueueIndex > 1){
+			$scope.currQueueIndex--;
+		}
+	}
 
 	var getSetttings = function(){
 		HTTPFactory.getSettings()
@@ -998,6 +1032,11 @@ angular.module('OEPlayer')
 		try{
 			//sockets
 			socket.send('currentTrack',{title:track.title,artist:track.artist});
+			//jukebox
+			setQueueWS();
+			if(track.queued){
+				updateQueueIndex();
+			}
 			//update queue
 			$scope.initialising = false;
 			LogSrvc.logSystem('playing '+track.title+' id='+track.id+' player name '+playerName);
